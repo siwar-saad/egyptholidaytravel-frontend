@@ -1,0 +1,103 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 18px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 999;
+
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+
+.navbar-logo {
+  width: 70px;   
+  height: 70px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
+}
+/* LINKS */
+.nav-links a {
+  color: #000; /* ✅ noir */
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.nav-links a:hover {
+  color: #935426; /* accent */
+}
+
+/* ICON */
+.nav-icons a {
+  color: #000; /* ✅ noir */
+}
+
+.navbar-left {
+  font-size: 28px;
+  font-weight: 700;
+  color: black;
+  cursor: pointer;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nav-link-btn {
+  background: transparent;
+  border: none;
+  color: black;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.nav-link-btn:hover {
+  opacity: 0.8;
+}
+
+.navbar-user {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  font-size: 16px;
+}
+
+.navbar-user:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 18px 20px;
+  }
+
+  .navbar-left {
+    font-size: 20px;
+  }
+
+  .navbar-links {
+    gap: 10px;
+  }
+
+  .nav-link-btn {
+    font-size: 14px;
+  }
+}
