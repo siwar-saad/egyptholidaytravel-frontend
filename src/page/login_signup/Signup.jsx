@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import "./Login.css";
 
+
 import pyramid from "../../assets/image/pyramid.webp";
 import passport from "../../assets/image/passport.webp";
 import visa from "../../assets/image/visa.webp";
@@ -11,6 +12,7 @@ import Navbar from "../../components/navbar";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,7 +34,7 @@ export default function Signup() {
         phone,
       });
 
-      alert("Account created ✅");
+      setShowSuccess(true);
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.error || "Signup failed ❌");
@@ -102,6 +104,28 @@ export default function Signup() {
           </div>
         </div>
       </div>
+      {showSuccess && (
+  <div className="success-popup-overlay">
+    <div className="success-popup">
+      <div className="success-icon">✓</div>
+
+      <h2>Account Created</h2>
+
+      <p>
+        Your Egypt Holiday account has been created successfully.
+      </p>
+
+      <button
+        onClick={() => {
+          setShowSuccess(false);
+          navigate("/profile");
+        }}
+      >
+        Continue
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

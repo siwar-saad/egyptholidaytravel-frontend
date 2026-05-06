@@ -277,49 +277,118 @@ th {
   margin-bottom: 10px;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1100px) {
-  .admin-stats {
-    grid-template-columns: repeat(2, 1fr);
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 992px) {
+  .message-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 
-  .admin-content {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 850px) {
-  .admin-page {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-sidebar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .admin-sidebar nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .admin-sidebar a {
-    flex: 1 1 45%;
-    text-align: center;
-  }
-}
-
-@media (max-width: 500px) {
-  .admin-main {
+  .message-card {
     padding: 20px;
   }
 
-  .admin-stats {
-    grid-template-columns: 1fr;
+  .client-message {
+    padding: 12px;
   }
 
-  .admin-top h1 {
+  .message-card textarea {
+    min-height: 100px;
+    font-size: 14px;
+  }
+
+  .main-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-page-content {
+    padding: 18px;
+  }
+
+  .admin-page-content h1 {
     font-size: 28px;
+  }
+
+  .messages-list {
+    gap: 16px;
+  }
+
+  .message-card {
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .message-head h3 {
+    font-size: 18px;
+  }
+
+  .message-head p {
+    font-size: 13px;
+  }
+
+  .client-message p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .message-card textarea {
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .msg-status {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-page-content {
+    padding: 14px;
+  }
+
+  .admin-page-content h1 {
+    font-size: 24px;
+  }
+
+  .message-card {
+    padding: 15px;
+    border-radius: 16px;
+  }
+
+  .message-head {
+    gap: 8px;
+  }
+
+  .message-head h3 {
+    font-size: 16px;
+  }
+
+  .message-head p {
+    font-size: 12px;
+  }
+
+  .client-message {
+    padding: 10px;
+  }
+
+  .client-message p {
+    font-size: 13px;
+  }
+
+  .message-card textarea {
+    min-height: 90px;
+    font-size: 13px;
+  }
+
+  .main-btn {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 14px;
   }
 }

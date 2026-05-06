@@ -14,7 +14,7 @@ import Reservations from "./page/admin/Reservations";
 import Clients from "./page/admin/Clients";
 import Payments from "./page/admin/Payments";
 import Messages from "./page/admin/Messages";
-import Settings from "./page/admin/Settings";
+import Profile from "./page/admin/Profile";
 import Signup from "./page/login_signup/Signup";
 import ForgotPassword from "./page/login_signup/ForgotPassword";
 import ResetPassword from "./page/login_signup/ResetPassword";
@@ -39,7 +39,7 @@ function App() {
         <Route path="/admin/clients" element={<Clients />} />
         <Route path="/admin/payments" element={<Payments />} />
         <Route path="/admin/messages" element={<Messages />} />
-        <Route path="/admin/settings" element={<Settings />} />
+        <Route path="/admin/Profile" element={<Profile />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

@@ -16,7 +16,6 @@ export default function Navbar() {
       </div>
 
       <nav className="navbar-links">
-
         <button className="nav-link-btn" onClick={() => navigate("/")}>
           Home
         </button>
@@ -25,9 +24,9 @@ export default function Navbar() {
           Flights
         </button>
 
-        <Link to="/packages" className="nav-link">
+        <button className="nav-link-btn" onClick={() => navigate("/packages")}>
           Packages
-        </Link>
+        </button>
 
         <button className="nav-link-btn" onClick={() => navigate("/#info")}>
           Hotels

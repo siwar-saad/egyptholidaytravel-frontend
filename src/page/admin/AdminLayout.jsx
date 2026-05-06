@@ -12,7 +12,7 @@ export default function AdminLayout({ children }) {
     { name: "Clients", path: "/admin/clients" },
     { name: "Payments", path: "/admin/payments" },
     { name: "Messages", path: "/admin/messages" },
-    { name: "Settings", path: "/admin/settings" },
+    { name: "Profile", path: "/admin/profile" },
   ];
 
   return (
