@@ -11,7 +11,6 @@ import {
   FaCog,
   FaSignOutAlt,
   FaPlus,
-  FaFileExport,
 } from "react-icons/fa";
 
 import Navbar from "../../components/navbar";
@@ -20,66 +19,69 @@ import "./Admin.css";
 export default function Admin() {
   const navigate = useNavigate();
 
+  const defaultCover =
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+
   const [activeTab, setActiveTab] = useState("dashboard");
   const [adminSuccess, setAdminSuccess] = useState("");
+  const [showPackageForm, setShowPackageForm] = useState(false);
+
+  const [newPackage, setNewPackage] = useState({
+    name: "",
+    programme: "",
+    price: "",
+    pdf: "Missing",
+    image: "",
+  });
 
   const [bookings, setBookings] = useState([
+    { name: "Sarah M.", trip: "Hurghada", date: "2026-06-15", status: "Confirmed" },
+    { name: "Ahmed K.", trip: "Turkey Trip", date: "2026-07-22", status: "Pending" },
+  ]);
+
+  const [packages, setPackages] = useState([
     {
-      name: "Sarah M.",
-      trip: "Hurghada",
-      date: "2026-06-15",
-      status: "Confirmed",
+      name: "Hurghada",
+      programme: "5 days / 4 nights including hotel, transfers, and sea activities.",
+      price: "$580",
+      pdf: "Uploaded",
+      image: "",
     },
     {
-      name: "Ahmed K.",
-      trip: "Turkey Trip",
-      date: "2026-07-22",
-      status: "Pending",
+      name: "Turkey Trip",
+      programme: "7 days including Istanbul city tour, hotel stay, and transfers.",
+      price: "$750",
+      pdf: "Uploaded",
+      image: "",
+    },
+    {
+      name: "Cairo",
+      programme: "Cairo city tour including pyramids, museum, and Nile dinner.",
+      price: "$450",
+      pdf: "Missing",
+      image: "",
     },
   ]);
 
   const [payments, setPayments] = useState([
-    {
-      invoice: "Hurghada Invoice",
-      client: "Siwar Saad",
-      amount: "$580",
-      status: "Paid",
-    },
-    {
-      invoice: "Turkey Trip Invoice",
-      client: "Ahmed Khaled",
-      amount: "$750",
-      status: "Not Paid",
-    },
+    { invoice: "Hurghada Invoice", client: "Siwar Saad", amount: "$580", status: "Paid" },
+    { invoice: "Turkey Trip Invoice", client: "Ahmed Khaled", amount: "$750", status: "Not Paid" },
   ]);
 
   const [messages, setMessages] = useState(
     JSON.parse(localStorage.getItem("clientMessages")) || []
   );
 
-  const stats = [
-    { title: "Packages", value: "14", icon: "📦" },
-    { title: "Reservations", value: bookings.length, icon: "🧾" },
-    { title: "Clients", value: "320", icon: "👥" },
-    { title: "Messages", value: messages.length, icon: "💬" },
-  ];
-
-  const packages = [
-    { name: "Hurghada", price: "$580", pdf: "Uploaded" },
-    { name: "Turkey Trip", price: "$750", pdf: "Uploaded" },
-  ];
-
   const clients = [
-    {
-      name: "Siwar Saad",
-      email: "siwar@email.com",
-      phone: "+20 109 999 9234",
-    },
-    {
-      name: "Ahmed Khaled",
-      email: "ahmed@email.com",
-      phone: "+20 100 222 3344",
-    },
+    { name: "Siwar Saad", email: "siwar@email.com", phone: "+20 109 999 9234" },
+    { name: "Ahmed Khaled", email: "ahmed@email.com", phone: "+20 100 222 3344" },
+  ];
+
+  const stats = [
+    { title: "Packages", value: packages.length, icon: "📦" },
+    { title: "Reservations", value: bookings.length, icon: "🧾" },
+    { title: "Clients", value: clients.length, icon: "👥" },
+    { title: "Messages", value: messages.length, icon: "💬" },
   ];
 
   const handleLogout = () => {
@@ -91,6 +93,54 @@ export default function Admin() {
     const updated = [...bookings];
     updated[index][field] = value;
     setBookings(updated);
+  };
+
+  const updatePackageStatus = (index, value) => {
+    const updated = [...packages];
+    updated[index].pdf = value;
+    setPackages(updated);
+  };
+
+  const handlePackageImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setNewPackage({
+        ...newPackage,
+        image: reader.result,
+      });
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const addPackage = () => {
+    if (
+      !newPackage.name.trim() ||
+      !newPackage.programme.trim() ||
+      !newPackage.price.trim()
+    ) {
+      setAdminSuccess("Please fill in the package name, programme and price.");
+      setTimeout(() => setAdminSuccess(""), 3500);
+      return;
+    }
+
+    setPackages([newPackage, ...packages]);
+
+    setNewPackage({
+      name: "",
+      programme: "",
+      price: "",
+      pdf: "Missing",
+      image: "",
+    });
+
+    setShowPackageForm(false);
+    setAdminSuccess("New package has been added successfully.");
+    setTimeout(() => setAdminSuccess(""), 3500);
   };
 
   const updatePayment = (index, value) => {
@@ -107,14 +157,10 @@ export default function Admin() {
 
   const sendReply = () => {
     localStorage.setItem("clientMessages", JSON.stringify(messages));
-
     setAdminSuccess(
       "Your reply has been sent successfully. The client can now view your response."
     );
-
-    setTimeout(() => {
-      setAdminSuccess("");
-    }, 4000);
+    setTimeout(() => setAdminSuccess(""), 4000);
   };
 
   return (
@@ -136,52 +182,31 @@ export default function Admin() {
             </div>
 
             <nav className="admin-nav">
-              <button
-                className={activeTab === "dashboard" ? "active" : ""}
-                onClick={() => setActiveTab("dashboard")}
-              >
+              <button className={activeTab === "dashboard" ? "active" : ""} onClick={() => setActiveTab("dashboard")}>
                 <FaHome /> Dashboard
               </button>
 
-              <button
-                className={activeTab === "packages" ? "active" : ""}
-                onClick={() => setActiveTab("packages")}
-              >
+              <button className={activeTab === "packages" ? "active" : ""} onClick={() => setActiveTab("packages")}>
                 <FaBoxOpen /> Packages
               </button>
 
-              <button
-                className={activeTab === "reservations" ? "active" : ""}
-                onClick={() => setActiveTab("reservations")}
-              >
+              <button className={activeTab === "reservations" ? "active" : ""} onClick={() => setActiveTab("reservations")}>
                 <FaCalendarCheck /> Reservations
               </button>
 
-              <button
-                className={activeTab === "clients" ? "active" : ""}
-                onClick={() => setActiveTab("clients")}
-              >
+              <button className={activeTab === "clients" ? "active" : ""} onClick={() => setActiveTab("clients")}>
                 <FaUsers /> Clients
               </button>
 
-              <button
-                className={activeTab === "payments" ? "active" : ""}
-                onClick={() => setActiveTab("payments")}
-              >
+              <button className={activeTab === "payments" ? "active" : ""} onClick={() => setActiveTab("payments")}>
                 <FaCreditCard /> Payments
               </button>
 
-              <button
-                className={activeTab === "messages" ? "active" : ""}
-                onClick={() => setActiveTab("messages")}
-              >
+              <button className={activeTab === "messages" ? "active" : ""} onClick={() => setActiveTab("messages")}>
                 <FaEnvelope /> Messages
               </button>
 
-              <button
-                className={activeTab === "settings" ? "active" : ""}
-                onClick={() => setActiveTab("settings")}
-              >
+              <button className={activeTab === "settings" ? "active" : ""} onClick={() => setActiveTab("settings")}>
                 <FaCog /> Settings
               </button>
             </nav>
@@ -207,49 +232,88 @@ export default function Admin() {
                 {activeTab === "settings" && "Settings"}
               </h1>
             </div>
-
-            <div className="admin-actions">
-              <button className="outline-btn">
-                <FaFileExport /> Export
-              </button>
-
-              <button>
-                <FaPlus /> Add New
-              </button>
-            </div>
           </header>
 
-          {activeTab === "dashboard" && (
-            <>
-              <section className="admin-stats">
-                {stats.map((item, index) => (
-                  <div className="admin-stat-card" key={index}>
-                    <div>
-                      <p>{item.title}</p>
-                      <h3>{item.value}</h3>
-                    </div>
+          {adminSuccess && <div className="success-alert">✅ {adminSuccess}</div>}
 
-                    <span>{item.icon}</span>
+          {activeTab === "dashboard" && (
+            <section className="admin-stats">
+              {stats.map((item, index) => (
+                <div className="admin-stat-card" key={index}>
+                  <div>
+                    <p>{item.title}</p>
+                    <h3>{item.value}</h3>
                   </div>
-                ))}
-              </section>
-            </>
+
+                  <span>{item.icon}</span>
+                </div>
+              ))}
+            </section>
           )}
 
           {activeTab === "packages" && (
             <section className="admin-panel">
-              <h2>Packages</h2>
-
-              {packages.map((item, index) => (
-                <div className="package-row" key={index}>
-                  <div>
-                    <h4>{item.name}</h4>
-                    <p>{item.price}</p>
-                  </div>
-
-                  <span className="pdf-ok">{item.pdf}</span>
+              <div className="panel-head">
+                <div>
+                  <h2>Packages</h2>
+                  <p>Manage your travel packages, programme and PDF status.</p>
                 </div>
-              ))}
+
+                <button onClick={() => setShowPackageForm(true)}>
+                  <FaPlus /> Add New Package
+                </button>
+              </div>
+
+              <div className="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Cover</th>
+                      <th>Package</th>
+                      <th>Programme</th>
+                      <th>Price</th>
+                      <th>PDF Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {packages.map((item, index) => (
+                      <tr key={index}>
+                        <td>
+                          <img
+                            src={item.image || defaultCover}
+                            alt={item.name}
+                            className="package-cover"
+                          />
+                        </td>
+
+                        <td>{item.name}</td>
+
+                        <td className="programme-cell">
+                          {item.programme || "No programme added"}
+                        </td>
+
+                        <td>{item.price}</td>
+
+                        <td>
+                          <select
+                            className={`package-select ${
+                              item.pdf === "Uploaded" ? "uploaded" : "missing"
+                            }`}
+                            value={item.pdf}
+                            onChange={(e) =>
+                              updatePackageStatus(index, e.target.value)
+                            }
+                          >
+                            <option value="Uploaded">Uploaded</option>
+                            <option value="Missing">Missing</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           )}
 
@@ -372,12 +436,6 @@ export default function Admin() {
             <section className="admin-panel">
               <h2>Messages</h2>
 
-              {adminSuccess && (
-                <div className="success-alert">
-                  ✅ {adminSuccess}
-                </div>
-              )}
-
               {messages.length === 0 && (
                 <p className="empty-msg">No client messages yet.</p>
               )}
@@ -398,14 +456,10 @@ export default function Admin() {
                   <textarea
                     placeholder="Write a professional reply..."
                     value={item.reply}
-                    onChange={(e) =>
-                      updateReply(index, e.target.value)
-                    }
+                    onChange={(e) => updateReply(index, e.target.value)}
                   />
 
-                  <button onClick={sendReply}>
-                    Send Reply
-                  </button>
+                  <button onClick={sendReply}>Send Reply</button>
                 </div>
               ))}
             </section>
@@ -424,6 +478,93 @@ export default function Admin() {
           )}
         </main>
       </div>
+
+      {showPackageForm && (
+        <div className="package-popup-overlay">
+          <div className="package-popup">
+            <div className="package-popup-head">
+              <div>
+                <h2>Add New Package</h2>
+                <p>Create a complete travel package for your clients.</p>
+              </div>
+
+              <button
+                className="close-package-popup"
+                onClick={() => setShowPackageForm(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="package-popup-form">
+              <input
+                type="text"
+                placeholder="Package name"
+                value={newPackage.name}
+                onChange={(e) =>
+                  setNewPackage({ ...newPackage, name: e.target.value })
+                }
+              />
+
+              <textarea
+                placeholder="Write the full programme here..."
+                value={newPackage.programme}
+                onChange={(e) =>
+                  setNewPackage({ ...newPackage, programme: e.target.value })
+                }
+              />
+
+              <div className="image-upload-box">
+                <label>Package Cover Image</label>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePackageImage}
+                />
+
+                {newPackage.image && (
+                  <img
+                    src={newPackage.image}
+                    alt="preview"
+                    className="package-preview-image"
+                  />
+                )}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Price"
+                value={newPackage.price}
+                onChange={(e) =>
+                  setNewPackage({ ...newPackage, price: e.target.value })
+                }
+              />
+
+              <select
+                value={newPackage.pdf}
+                onChange={(e) =>
+                  setNewPackage({ ...newPackage, pdf: e.target.value })
+                }
+              >
+                <option value="Uploaded">Uploaded</option>
+                <option value="Missing">Missing</option>
+              </select>
+
+              <div className="package-popup-actions">
+                <button onClick={addPackage}>Save Package</button>
+
+                <button
+                  className="cancel-package-btn"
+                  onClick={() => setShowPackageForm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
