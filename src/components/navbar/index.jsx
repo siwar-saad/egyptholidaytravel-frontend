@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 export default function Navbar() {
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   return (
     <header className="navbar">
       <div className="navbar-left">
@@ -32,13 +34,20 @@ export default function Navbar() {
           Hotels
         </button>
 
-        <button
-          className="navbar-user"
-          aria-label="User account"
-          onClick={() => navigate("/login")}
-        >
-          <FaUser />
-        </button>
+        {user ? (
+          <button className="profile-btn" onClick={() => navigate("/profile")}>
+            <FaUser />
+            <span>{user.name}</span>
+          </button>
+        ) : (
+          <button
+            className="navbar-user"
+            aria-label="User account"
+            onClick={() => navigate("/login")}
+          >
+            <FaUser />
+          </button>
+        )}
       </nav>
     </header>
   );

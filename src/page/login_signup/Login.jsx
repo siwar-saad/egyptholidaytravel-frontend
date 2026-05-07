@@ -10,53 +10,62 @@ export default function Login() {
   const navigate = useNavigate();
 
   return (
-  <div>
-    <Navbar />
+    <div>
+      <Navbar />
 
-    <div className="auth-page">
-      <div className="auth-card">
-        {/* LEFT SIDE */}
-        <div className="auth-left">
-          <div className="auth-shape"></div>
+      <div className="auth-page">
+        <div className="auth-card">
+          {/* LEFT SIDE */}
+          <div className="auth-left">
+            <div className="auth-shape"></div>
 
-          <img src={logoImg} alt="logo" className="auth-brand-image" />
+            <img src={logoImg} alt="logo" className="auth-brand-image" />
 
-          <img src={pyramid} className="auth-icon icon-pyramid" />
-          <img src={passport} className="auth-icon icon-passport" />
-          <img src={visa} className="auth-icon icon-visa" />
-        </div>
+            <img src={pyramid} className="auth-icon icon-pyramid" />
+            <img src={passport} className="auth-icon icon-passport" />
+            <img src={visa} className="auth-icon icon-visa" />
+          </div>
 
-        {/* RIGHT SIDE */}
-        <div className="auth-right">
-          <h2>Log In</h2>
+          {/* RIGHT SIDE */}
+          <div className="auth-right">
+            <h2>Log In</h2>
 
-          <form
-            className="auth-form"
-            onSubmit={(e) => {
-              e.preventDefault();
-              navigate("/");
-            }}
-          >
-            <input type="email" placeholder="Email" required />
-            <input type="password" placeholder="Password" required />
+            <form
+              className="auth-form"
+              onSubmit={(e) => {
+                e.preventDefault();
 
-            <span
-              className="forgot-password"
-              onClick={() => navigate("/forgot-password")}
+                localStorage.setItem(
+                  "user",
+                  JSON.stringify({
+                    name: "Siwar",
+                    email: "siwar@gmail.com",
+                  }),
+                );
+
+                navigate("/");
+              }}
             >
-              Forgot Password?
-            </span>
+              <input type="email" placeholder="Email" required />
+              <input type="password" placeholder="Password" required />
 
-            <button type="submit">Log In</button>
+              <span
+                className="forgot-password"
+                onClick={() => navigate("/forgot-password")}
+              >
+                Forgot Password?
+              </span>
 
-            <p className="auth-switch">
-              Don’t have an account?{" "}
-              <span onClick={() => navigate("/signup")}>Sign up</span>
-            </p>
-          </form>
+              <button type="submit">Log In</button>
+
+              <p className="auth-switch">
+                Don’t have an account?{" "}
+                <span onClick={() => navigate("/signup")}>Sign up</span>
+              </p>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }

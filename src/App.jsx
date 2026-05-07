@@ -9,12 +9,6 @@ import Activities from "./page/Activities";
 import Food from "./page/Food";
 import Packages from "./page/Packages";
 import Admin from "./page/admin/Admin";
-import AdminPackages from "./page/admin/Packages";
-import Reservations from "./page/admin/Reservations";
-import Clients from "./page/admin/Clients";
-import Payments from "./page/admin/Payments";
-import Messages from "./page/admin/Messages";
-import Profile from "./page/admin/Profile";
 import Signup from "./page/login_signup/Signup";
 import ForgotPassword from "./page/login_signup/ForgotPassword";
 import ResetPassword from "./page/login_signup/ResetPassword";
@@ -34,12 +28,6 @@ function App() {
         <Route path="/food" element={<Food />} />
         <Route path="/packages" element={<Packages />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/packages" element={<AdminPackages />} />
-        <Route path="/admin/reservations" element={<Reservations />} />
-        <Route path="/admin/clients" element={<Clients />} />
-        <Route path="/admin/payments" element={<Payments />} />
-        <Route path="/admin/messages" element={<Messages />} />
-        <Route path="/admin/Profile" element={<Profile />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
