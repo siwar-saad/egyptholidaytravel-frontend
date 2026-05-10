@@ -1,0 +1,523 @@
+.hotels-page {
+  min-height: 100vh;
+  background: #f3dfc1;
+  color: #2a2117;
+  padding-bottom: 90px;
+  overflow-x: hidden;
+}
+
+/* HERO */
+
+.hotels-hero {
+  height: 430px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  color: white;
+  padding: 110px 20px 20px;
+}
+
+.hotels-hero span {
+  color: #f3c27a;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.hotels-hero h1 {
+  font-size: 76px;
+  font-family: Georgia, "Times New Roman", serif;
+  margin-bottom: 22px;
+  line-height: 1;
+}
+
+.hotels-hero p {
+  max-width: 760px;
+  font-size: 17px;
+  line-height: 1.7;
+  font-weight: 600;
+}
+
+/* SECTION */
+
+.hotel-section {
+  width: 88%;
+  margin: 90px auto 0;
+}
+
+.hotel-section-head {
+  text-align: center;
+  margin-bottom: 42px;
+}
+
+.hotel-section-head span {
+  color: #935426;
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hotel-section-head h2 {
+  font-size: 46px;
+  margin: 12px 0;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.hotel-section-head p {
+  color: #6b5848;
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: auto;
+}
+
+/* GRID */
+
+.hotels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* CARD */
+
+.hotel-cover-card {
+  height: 390px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 20px 45px rgba(42, 33, 23, 0.18);
+}
+
+.hotel-cover-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: 0.6s;
+}
+
+.hotel-cover-card:hover img {
+  transform: scale(1.02);
+}
+
+.hotel-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(42, 33, 23, 0.92),
+    rgba(42, 33, 23, 0.12)
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 28px;
+  color: white;
+}
+
+.hotel-cover-overlay span {
+  color: #f3c27a;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.hotel-cover-overlay h3 {
+  font-size: 30px;
+  line-height: 1.2;
+  margin-bottom: 18px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.hotel-cover-overlay button {
+  width: fit-content;
+  border: none;
+  background: #935426;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.hotel-cover-overlay button:hover {
+  background: #6f4320;
+  transform: translateY(-2px);
+}
+
+/* MODAL */
+
+.hotel-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 14, 9, 0.72);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.hotel-modal-box {
+  width: 980px;
+  max-width: 96%;
+  max-height: 90vh;
+  background: #fff8ec;
+  border-radius: 32px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 48% 52%;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+/* CLOSE */
+
+.close-modal {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  color: #2a2117;
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  transition: 0.3s;
+}
+
+.close-modal:hover {
+  background: #935426;
+  color: white;
+}
+
+/* BIG IMAGE */
+
+.modal-img {
+  height: 100%;
+  min-height: 560px;
+  background: #f5ede2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.modal-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 24px;
+}
+
+/* CONTENT */
+
+.modal-content {
+  padding: 38px;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.modal-city {
+  display: inline-block;
+  background: rgba(147, 84, 38, 0.12);
+  color: #935426;
+  padding: 9px 18px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 18px;
+}
+
+.modal-content h2 {
+  font-size: 34px;
+  font-family: Georgia, "Times New Roman", serif;
+  margin-bottom: 18px;
+  color: #2a2117;
+}
+
+/* GALLERY */
+
+.hotel-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 20px 0 24px;
+}
+
+.hotel-gallery img {
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+  border: 3px solid transparent;
+}
+
+.hotel-gallery img:hover {
+  transform: translateY(-2px);
+  border-color: #935426;
+}
+
+.active-thumb {
+  border-color: #935426 !important;
+  transform: scale(1.03);
+}
+
+/* INFO */
+
+.modal-info {
+  background: #f1e4d3;
+  padding: 18px;
+  border-radius: 20px;
+  margin-bottom: 22px;
+}
+
+.modal-info p {
+  margin: 10px 0;
+  font-size: 15px;
+  color: #4e3c2d;
+  line-height: 1.5;
+}
+
+/* PRICES */
+
+.modal-prices {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.modal-prices h4 {
+  color: #935426;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.price-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(147, 84, 38, 0.15);
+}
+
+.price-line:last-child {
+  border-bottom: none;
+}
+
+.price-line span {
+  color: #5d4a3a;
+  font-size: 15px;
+}
+
+.price-line b {
+  color: #2a2117;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+/* BUTTON */
+
+.book-btn {
+  width: 100%;
+  border: none;
+  background: #935426;
+  color: white;
+  padding: 15px;
+  border-radius: 18px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.book-btn:hover {
+  background: #6f4320;
+  transform: translateY(-2px);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
+  .hotels-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hotels-hero h1 {
+    font-size: 62px;
+  }
+}
+
+@media (max-width: 992px) {
+  .hotel-modal-box {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .modal-img {
+    min-height: 320px;
+  }
+
+  .modal-content {
+    max-height: none;
+  }
+
+  .hotel-gallery {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .hotels-hero {
+    height: 390px;
+  }
+
+  .hotels-hero h1 {
+    font-size: 54px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hotels-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hotel-section {
+    width: 92%;
+  }
+
+  .hotel-cover-card {
+    height: 340px;
+  }
+
+  .hotel-section-head h2 {
+    font-size: 36px;
+  }
+
+  .hotel-section-head p {
+    font-size: 15px;
+  }
+
+  .modal-content {
+    padding: 28px;
+  }
+
+  .modal-content h2 {
+    font-size: 28px;
+  }
+
+  .hotel-gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .hotel-gallery img {
+    height: 82px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hotels-hero {
+    height: 340px;
+    padding-top: 120px;
+  }
+
+  .hotels-hero span {
+    font-size: 13px;
+  }
+
+  .hotels-hero h1 {
+    font-size: 38px;
+  }
+
+  .hotels-hero p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .hotel-section {
+    margin-top: 70px;
+  }
+
+  .hotel-section-head h2 {
+    font-size: 30px;
+  }
+
+  .hotel-cover-card {
+    height: 300px;
+    border-radius: 24px;
+  }
+
+  .hotel-cover-overlay {
+    padding: 22px;
+  }
+
+  .hotel-cover-overlay h3 {
+    font-size: 24px;
+  }
+
+  .hotel-cover-overlay button {
+    width: 100%;
+  }
+
+  .hotel-modal {
+    padding: 12px;
+  }
+
+  .hotel-modal-box {
+    border-radius: 24px;
+    max-height: 94vh;
+  }
+
+  .modal-img {
+    min-height: 230px;
+  }
+
+  .modal-content {
+    padding: 22px;
+  }
+
+  .modal-content h2 {
+    font-size: 24px;
+  }
+
+  .hotel-gallery {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .hotel-gallery img {
+    height: 75px;
+  }
+
+  .modal-info p,
+  .price-line span,
+  .price-line b {
+    font-size: 14px;
+  }
+
+  .book-btn {
+    font-size: 14px;
+    padding: 14px;
+  }
+
+  .close-modal {
+    width: 40px;
+    height: 40px;
+    font-size: 26px;
+  }
+}

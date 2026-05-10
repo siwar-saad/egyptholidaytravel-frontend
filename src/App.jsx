@@ -13,6 +13,7 @@ import Signup from "./page/login_signup/Signup";
 import ForgotPassword from "./page/login_signup/ForgotPassword";
 import ResetPassword from "./page/login_signup/ResetPassword";
 import UserProfile from "./page/client/profile/UserProfile";
+import Hotels from "./page/hotel/Hotels";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/profile" element={<UserProfile />} />
+        <Route path="/hotels" element={<Hotels />} />
       </Routes>
     </BrowserRouter>
   );

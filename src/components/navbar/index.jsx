@@ -30,7 +30,7 @@ export default function Navbar() {
           Packages
         </button>
 
-        <button className="nav-link-btn" onClick={() => navigate("/#info")}>
+        <button className="nav-link-btn" onClick={() => navigate("/hotels")}>
           Hotels
         </button>
 
