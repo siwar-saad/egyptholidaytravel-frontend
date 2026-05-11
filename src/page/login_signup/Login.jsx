@@ -1,13 +1,41 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import "./Login.css";
+
 import logoImg from "../../assets/image/login.png";
 import pyramid from "../../assets/image/pyramid.webp";
 import passport from "../../assets/image/passport.webp";
 import visa from "../../assets/image/visa.webp";
+
 import Navbar from "../../components/navbar";
+import api from "../../api";
 
 export default function Login() {
   const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      navigate("/");
+    } catch (error) {
+      setError(error.response?.data?.error || "Login failed");
+    }
+  };
 
   return (
     <div>
@@ -15,39 +43,40 @@ export default function Login() {
 
       <div className="auth-page">
         <div className="auth-card">
-          {/* LEFT SIDE */}
           <div className="auth-left">
             <div className="auth-shape"></div>
 
             <img src={logoImg} alt="logo" className="auth-brand-image" />
-
-            <img src={pyramid} className="auth-icon icon-pyramid" />
-            <img src={passport} className="auth-icon icon-passport" />
-            <img src={visa} className="auth-icon icon-visa" />
+            <img src={pyramid} alt="" className="auth-icon icon-pyramid" />
+            <img src={passport} alt="" className="auth-icon icon-passport" />
+            <img src={visa} alt="" className="auth-icon icon-visa" />
           </div>
 
-          {/* RIGHT SIDE */}
           <div className="auth-right">
             <h2>Log In</h2>
 
-            <form
-              className="auth-form"
-              onSubmit={(e) => {
-                e.preventDefault();
+            <form className="auth-form" onSubmit={handleSubmit}>
+              {error && (
+                <p style={{ color: "red", marginBottom: "10px", fontSize: "14px" }}>
+                  {error}
+                </p>
+              )}
 
-                localStorage.setItem(
-                  "user",
-                  JSON.stringify({
-                    name: "Siwar",
-                    email: "siwar@gmail.com",
-                  }),
-                );
+              <input
+                type="email"
+                placeholder="Email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
 
-                navigate("/");
-              }}
-            >
-              <input type="email" placeholder="Email" required />
-              <input type="password" placeholder="Password" required />
+              <input
+                type="password"
+                placeholder="Password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
               <span
                 className="forgot-password"
