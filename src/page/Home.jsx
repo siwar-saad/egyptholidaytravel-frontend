@@ -23,6 +23,7 @@ import customer3 from "../assets/image/lara.png";
 export default function Home() {
   const [showButton, setShowButton] = useState(false);
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const destinations = [
     { name: "Cairo", desc: "Explore Egypt", img: cairoCover },

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import "./Login.css";
 
-
 import pyramid from "../../assets/image/pyramid.webp";
 import passport from "../../assets/image/passport.webp";
 import visa from "../../assets/image/visa.webp";
@@ -12,30 +11,65 @@ import Navbar from "../../components/navbar";
 
 export default function Signup() {
   const navigate = useNavigate();
+
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+
   const [error, setError] = useState("");
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
     setError("");
 
     try {
-      await API.post("/auth/signup", {
-        firstName: name,
-        lastName: "User",
+      const response = await API.post("/auth/signup", {
+        firstName,
+        lastName,
         email,
         password,
         confirmPassword: password,
         phone,
       });
 
-      setShowSuccess(true);
-      navigate("/login");
+      if (response.data.success) {
+        localStorage.setItem("token", response.data.token);
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            id: response.data.user.id,
+            name:
+              response.data.user.name ||
+              `${response.data.user.firstName || ""} ${response.data.user.lastName || ""
+              }`.trim(),
+
+            email: response.data.user.email,
+
+            phone: response.data.user.phone || "",
+
+            city: response.data.user.city || "Mansoura",
+
+            country: response.data.user.country || "Egypt",
+
+            avatar: response.data.user.avatar || "",
+
+            role: response.data.user.role || "user",
+          })
+        );
+
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          navigate("/profile");
+        }, 1000);
+      }
     } catch (err) {
       setError(err.response?.data?.error || "Signup failed ❌");
     }
@@ -50,10 +84,29 @@ export default function Signup() {
           <div className="auth-left">
             <div className="auth-shape"></div>
 
-            <img src={login} alt="Egypt Holiday" className="auth-brand-image" />
-            <img src={pyramid} className="auth-icon icon-pyramid" alt="pyramid" />
-            <img src={passport} className="auth-icon icon-passport" alt="passport" />
-            <img src={visa} className="auth-icon icon-visa" alt="visa" />
+            <img
+              src={login}
+              alt="Egypt Holiday"
+              className="auth-brand-image"
+            />
+
+            <img
+              src={pyramid}
+              className="auth-icon icon-pyramid"
+              alt="pyramid"
+            />
+
+            <img
+              src={passport}
+              className="auth-icon icon-passport"
+              alt="passport"
+            />
+
+            <img
+              src={visa}
+              className="auth-icon icon-visa"
+              alt="visa"
+            />
           </div>
 
           <div className="auth-right">
@@ -62,10 +115,18 @@ export default function Signup() {
             <form className="auth-form" onSubmit={handleSignup}>
               <input
                 type="text"
-                placeholder="Name"
+                placeholder="First Name"
                 required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Last Name"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
               />
 
               <input
@@ -85,7 +146,7 @@ export default function Signup() {
               />
 
               <input
-                type="number"
+                type="tel"
                 placeholder="Phone"
                 required
                 value={phone}
@@ -98,34 +159,37 @@ export default function Signup() {
 
               <p className="auth-switch">
                 Already have an account?{" "}
-                <span onClick={() => navigate("/login")}>Log in</span>
+                <span onClick={() => navigate("/login")}>
+                  Log in
+                </span>
               </p>
             </form>
           </div>
         </div>
       </div>
+
       {showSuccess && (
-  <div className="success-popup-overlay">
-    <div className="success-popup">
-      <div className="success-icon">✓</div>
+        <div className="success-popup-overlay">
+          <div className="success-popup">
+            <div className="success-icon">✓</div>
 
-      <h2>Account Created</h2>
+            <h2>Account Created</h2>
 
-      <p>
-        Your Egypt Holiday account has been created successfully.
-      </p>
+            <p>
+              Your Egypt Holiday account has been created successfully.
+            </p>
 
-      <button
-        onClick={() => {
-          setShowSuccess(false);
-          navigate("/profile");
-        }}
-      >
-        Continue
-      </button>
-    </div>
-  </div>
-)}
+            <button
+              onClick={() => {
+                setShowSuccess(false);
+                navigate("/profile");
+              }}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

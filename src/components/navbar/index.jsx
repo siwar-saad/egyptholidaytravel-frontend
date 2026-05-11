@@ -22,33 +22,48 @@ export default function Navbar() {
           Home
         </button>
 
-        <button className="nav-link-btn" onClick={() => navigate("/#Flights")}>
+        <button
+          className="nav-link-btn"
+          onClick={() => navigate("/#Flights")}
+        >
           Flights
         </button>
 
-        <button className="nav-link-btn" onClick={() => navigate("/packages")}>
+        <button
+          className="nav-link-btn"
+          onClick={() => navigate("/packages")}
+        >
           Packages
         </button>
 
-        <button className="nav-link-btn" onClick={() => navigate("/hotels")}>
+        <button
+          className="nav-link-btn"
+          onClick={() => navigate("/#info")}
+        >
           Hotels
         </button>
 
         {user ? (
-          <button className="profile-btn" onClick={() => navigate("/profile")}>
+          <button
+            className="profile-btn"
+            onClick={() => navigate(user.role === "admin" ? "/admin" : "/profile")}
+          >
             <FaUser />
             <span>{user.name}</span>
           </button>
         ) : (
           <button
             className="navbar-user"
-            aria-label="User account"
             onClick={() => navigate("/login")}
           >
             <FaUser />
           </button>
         )}
-      </nav>
-    </header>
+        
+         
+        
+      
+    </nav>
+    </header >
   );
 }
