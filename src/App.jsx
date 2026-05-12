@@ -39,6 +39,7 @@ function App() {
         <Route path="/activities" element={<Activities />} />
         <Route path="/food" element={<Food />} />
         <Route path="/packages" element={<Packages />} />
+        <Route path="/hotels" element={<Hotels />} />
 
         {/* PRIVATE ROUTES */}
         <Route

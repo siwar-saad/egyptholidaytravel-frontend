@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   FaPlane,
   FaHome,
@@ -18,38 +17,25 @@ import API from "../../api";
 import "./Admin.css";
 
 export default function Admin() {
-  const navigate = useNavigate();
-
   const defaultCover =
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
-
-  /* =========================
-     STATES
-  ========================= */
 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [adminSuccess, setAdminSuccess] = useState("");
   const [showPackageForm, setShowPackageForm] = useState(false);
 
-  const [settingsPopup, setSettingsPopup] = useState(null);
-
-  const [agencyInfo, setAgencyInfo] = useState({
-    name: "Egypt Holiday Travel",
-    email: "info@egyptholidaytravel.com",
-    address: "Cairo, Egypt",
+  const [dashboard, setDashboard] = useState({
+    packages: 0,
+    reservations: 0,
+    clients: 0,
+    messages: 0,
   });
 
-  const [adminPassword, setAdminPassword] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-
-  const [contactInfo, setContactInfo] = useState({
-    phone1: "",
-    phone2: "",
-    whatsapp: "",
-  });
+  const [packages, setPackages] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [messages, setMessages] = useState([]);
 
   const [newPackage, setNewPackage] = useState({
     name: "",
@@ -59,110 +45,43 @@ export default function Admin() {
     image: "",
   });
 
-  const [dashboard, setDashboard] = useState({
-    packages: 0,
-    reservations: 0,
-    clients: 0,
-    messages: 0,
-  });
-
-  const [bookings, setBookings] = useState([]);
-  const [packages, setPackages] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [clients, setClients] = useState([]);
-
-  /* =========================
-     FUNCTIONS
-  ========================= */
-
   const showSuccess = (msg) => {
     setAdminSuccess(msg);
-
-    setTimeout(() => {
-      setAdminSuccess("");
-    }, 3500);
+    setTimeout(() => setAdminSuccess(""), 3000);
   };
-
-  const fetchDashboard = async () => {
-    try {
-      const res = await API.get("/admin/dashboard");
-      setDashboard(res.data);
-    } catch (err) {
-      console.log("Dashboard error:", err);
-    }
-  };
-
-  const fetchPackages = async () => {
-    try {
-      const res = await API.get("/admin/packages");
-      setPackages(res.data);
-    } catch (err) {
-      console.log("Packages error:", err);
-    }
-  };
-
-  const fetchReservations = async () => {
-    try {
-      const res = await API.get("/admin/reservations");
-      setBookings(res.data);
-    } catch (err) {
-      console.log("Reservations error:", err);
-    }
-  };
-
-  const fetchClients = async () => {
-    try {
-      const res = await API.get("/admin/clients");
-      setClients(res.data);
-    } catch (err) {
-      console.log("Clients error:", err);
-    }
-  };
-
-  const fetchPayments = async () => {
-    try {
-      const res = await API.get("/admin/payments");
-      setPayments(res.data);
-    } catch (err) {
-      console.log("Payments error:", err);
-    }
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const res = await API.get("/admin/messages");
-      setMessages(res.data);
-    } catch (err) {
-      console.log("Messages error:", err);
-    }
-  };
-
-  /* =========================
-     USE EFFECT
-  ========================= */
-
-  useEffect(() => {
-    fetchDashboard();
-    fetchPackages();
-    fetchReservations();
-    fetchClients();
-    fetchPayments();
-    fetchMessages();
-  }, []);
-
-  /* =========================
-     ACTIONS
-  ========================= */
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    navigate("/login");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
   };
+
+  const fetchAllData = async () => {
+    try {
+      const dashboardRes = await API.get("/admin/dashboard");
+      const packagesRes = await API.get("/admin/packages");
+      const reservationsRes = await API.get("/admin/reservations");
+      const clientsRes = await API.get("/admin/clients");
+      const paymentsRes = await API.get("/admin/payments");
+      const messagesRes = await API.get("/admin/messages");
+
+      setDashboard(dashboardRes.data);
+      setPackages(packagesRes.data);
+      setBookings(reservationsRes.data);
+      setClients(clientsRes.data);
+      setPayments(paymentsRes.data);
+      setMessages(messagesRes.data);
+    } catch (err) {
+      console.log("Admin data error:", err.response?.data || err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
   const handlePackageImage = (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
 
     const reader = new FileReader();
@@ -178,26 +97,15 @@ export default function Admin() {
   };
 
   const addPackage = async () => {
-    if (
-      !newPackage.name.trim() ||
-      !newPackage.programme.trim() ||
-      !newPackage.price.trim()
-    ) {
-      showSuccess(
-        "Please fill package name, programme and price."
-      );
-
+    if (!newPackage.name || !newPackage.programme || !newPackage.price) {
+      showSuccess("Please fill all package fields.");
       return;
     }
 
     try {
-      const res = await API.post(
-        "/admin/packages",
-        newPackage
-      );
+      const res = await API.post("/admin/packages", newPackage);
 
       setPackages([res.data, ...packages]);
-
       setNewPackage({
         name: "",
         programme: "",
@@ -207,56 +115,94 @@ export default function Admin() {
       });
 
       setShowPackageForm(false);
+      showSuccess("Package added successfully.");
+      fetchAllData();
+    } catch (err) {
+      console.log("Add package error:", err.response?.data || err.message);
+    }
+  };
 
-      showSuccess(
-        "New package added successfully."
+  const updatePackageVisibility = async (index, visibility) => {
+    try {
+      const item = packages[index];
+
+      await API.put(`/admin/packages/${item.id}/visibility`, {
+        visibility,
+      });
+
+      const updated = [...packages];
+      updated[index].visibility = visibility;
+      setPackages(updated);
+
+      showSuccess("Package visibility updated.");
+    } catch (err) {
+      console.log("Visibility error:", err.response?.data || err.message);
+    }
+  };
+
+  const deletePackage = async (id) => {
+    try {
+      await API.delete(`/admin/packages/${id}`);
+
+      setPackages(packages.filter((item) => item.id !== id));
+      showSuccess("Package deleted successfully.");
+      fetchAllData();
+    } catch (err) {
+      console.log("Delete package error:", err.response?.data || err.message);
+    }
+  };
+
+  const updateReservationStatus = async (id, status) => {
+    try {
+      await API.put(`/admin/reservations/${id}/status`, {
+        status,
+      });
+
+      setBookings(
+        bookings.map((b) =>
+          b.id === id ? { ...b, status } : b
+        )
       );
 
-      fetchDashboard();
-
+      showSuccess("Reservation status updated.");
     } catch (err) {
-      console.log("Add package error:", err);
+      console.log("Reservation error:", err.response?.data || err.message);
+    }
+  };
+
+  const replyMessage = async (id, reply) => {
+    try {
+      await API.put(`/admin/messages/${id}/reply`, {
+        reply,
+      });
+
+      setMessages(
+        messages.map((m) =>
+          m.id === id ? { ...m, reply } : m
+        )
+      );
+
+      showSuccess("Reply sent successfully.");
+    } catch (err) {
+      console.log("Reply error:", err.response?.data || err.message);
     }
   };
 
   const stats = [
-    {
-      title: "Packages",
-      value: dashboard.packages,
-      icon: "📦",
-    },
-    {
-      title: "Reservations",
-      value: dashboard.reservations,
-      icon: "🧾",
-    },
-    {
-      title: "Clients",
-      value: dashboard.clients,
-      icon: "👥",
-    },
-    {
-      title: "Messages",
-      value: dashboard.messages,
-      icon: "💬",
-    },
+    { title: "Packages", value: dashboard.packages, icon: "📦" },
+    { title: "Reservations", value: dashboard.reservations, icon: "🧾" },
+    { title: "Clients", value: dashboard.clients, icon: "👥" },
+    { title: "Messages", value: dashboard.messages, icon: "💬" },
   ];
 
   return (
     <div className="admin-wrapper">
-
       <Navbar />
 
       <div className="admin-page">
-
-        {/* SIDEBAR */}
-
         <aside className="admin-sidebar">
-
           <div>
-
             <div className="admin-brand">
-
               <div className="brand-icon">
                 <FaPlane />
               </div>
@@ -265,11 +211,9 @@ export default function Admin() {
                 <h2>Egypt Holiday</h2>
                 <span>Admin Panel</span>
               </div>
-
             </div>
 
             <nav className="admin-nav">
-
               <button
                 className={activeTab === "dashboard" ? "active" : ""}
                 onClick={() => setActiveTab("dashboard")}
@@ -318,425 +262,328 @@ export default function Admin() {
               >
                 <FaCog /> Settings
               </button>
-
             </nav>
-
           </div>
 
-          <button
-            className="admin-logout"
-            onClick={handleLogout}
-          >
+          <button className="admin-logout" onClick={handleLogout}>
             <FaSignOutAlt /> Logout
           </button>
-
         </aside>
 
-        {/* MAIN */}
-
         <main className="admin-main">
-
           <header className="admin-top">
-
             <div>
-
-              <span className="admin-label">
-                Welcome back, Admin
-              </span>
-
+              <span className="admin-label">Welcome back, Admin</span>
               <h1>
-                {activeTab.charAt(0).toUpperCase() +
-                  activeTab.slice(1)}
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
               </h1>
-
             </div>
-
           </header>
 
           {adminSuccess && (
-            <div className="success-alert">
-              ✅ {adminSuccess}
-            </div>
+            <div className="success-alert">✅ {adminSuccess}</div>
           )}
 
-          {/* DASHBOARD */}
-
           {activeTab === "dashboard" && (
-
             <section className="admin-stats">
-
               {stats.map((item, index) => (
-
-                <div
-                  className="admin-stat-card"
-                  key={index}
-                >
-
+                <div className="admin-stat-card" key={index}>
                   <div>
                     <p>{item.title}</p>
                     <h3>{item.value}</h3>
                   </div>
-
                   <span>{item.icon}</span>
-
                 </div>
-
               ))}
-
             </section>
           )}
-
-          {/* PACKAGES */}
 
           {activeTab === "packages" && (
-
             <section className="admin-panel">
-
               <div className="panel-head">
-
                 <div>
                   <h2>Packages</h2>
-
-                  <p>
-                    Manage your travel packages and programmes.
-                  </p>
+                  <p>Manage your travel packages and programmes.</p>
                 </div>
 
-                <button
-                  onClick={() =>
-                    setShowPackageForm(true)
-                  }
-                >
+                <button onClick={() => setShowPackageForm(true)}>
                   <FaPlus /> Add New Package
                 </button>
-
               </div>
 
+              {packages.length === 0 ? (
+                <p className="empty-msg">No packages yet.</p>
+              ) : (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Cover</th>
+                        <th>Package</th>
+                        <th>Programme</th>
+                        <th>Price</th>
+                        <th>Visibility</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {packages.map((item, index) => (
+                        <tr key={item.id}>
+                          <td>
+                            <img
+                              src={item.image || defaultCover}
+                              alt={item.name}
+                              className="package-cover"
+                            />
+                          </td>
+
+                          <td>{item.name}</td>
+
+                          <td className="programme-cell">
+                            {item.programme || "No programme"}
+                          </td>
+
+                          <td>{item.price || "No price"}</td>
+
+                          <td>
+                            <select
+                              className={`package-select ${
+                                item.visibility === "Published"
+                                  ? "uploaded"
+                                  : "missing"
+                              }`}
+                              value={item.visibility || "Private"}
+                              onChange={(e) => {
+                                if (e.target.value === "Delete") {
+                                  deletePackage(item.id);
+                                } else {
+                                  updatePackageVisibility(index, e.target.value);
+                                }
+                              }}
+                            >
+                              <option value="Published">Published</option>
+                              <option value="Private">Private</option>
+                              <option value="Delete">Delete</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </section>
           )}
 
-          {/* SETTINGS */}
+          {activeTab === "reservations" && (
+            <section className="admin-panel">
+              <h2>Reservations</h2>
+
+              {bookings.length === 0 ? (
+                <p className="empty-msg">No reservations yet.</p>
+              ) : (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Client</th>
+                        <th>Trip</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {bookings.map((booking) => (
+                        <tr key={booking.id}>
+                          <td>{booking.name}</td>
+                          <td>{booking.trip}</td>
+                          <td>{booking.date}</td>
+                          <td>
+                            <select
+                              className={`status-select ${
+                                booking.status === "Confirmed"
+                                  ? "confirmed"
+                                  : booking.status === "Cancelled"
+                                  ? "cancelled"
+                                  : "pending"
+                              }`}
+                              value={booking.status}
+                              onChange={(e) =>
+                                updateReservationStatus(
+                                  booking.id,
+                                  e.target.value
+                                )
+                              }
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Confirmed">Confirmed</option>
+                              <option value="Cancelled">Cancelled</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
+
+          {activeTab === "clients" && (
+            <section className="admin-panel">
+              <h2>Clients</h2>
+
+              {clients.length === 0 ? (
+                <p className="empty-msg">No clients yet.</p>
+              ) : (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {clients.map((client) => (
+                        <tr key={client.id}>
+                          <td>{client.name}</td>
+                          <td>{client.email}</td>
+                          <td>{client.phone}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
+
+          {activeTab === "payments" && (
+            <section className="admin-panel">
+              <h2>Payments</h2>
+
+              {payments.length === 0 ? (
+                <p className="empty-msg">No payments yet.</p>
+              ) : (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Invoice</th>
+                        <th>Client</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {payments.map((payment) => (
+                        <tr key={payment.id}>
+                          <td>{payment.invoice}</td>
+                          <td>{payment.client}</td>
+                          <td>{payment.amount}</td>
+                          <td>
+                            <span
+                              className={
+                                payment.status === "Paid" ? "paid" : "unpaid"
+                              }
+                            >
+                              {payment.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
+
+          {activeTab === "messages" && (
+            <section className="admin-panel">
+              <h2>Messages</h2>
+
+              {messages.length === 0 ? (
+                <p className="empty-msg">No messages yet.</p>
+              ) : (
+                messages.map((msg) => (
+                  <div className="admin-message-card" key={msg.id}>
+                    <div className="admin-message-head">
+                      <div>
+                        <strong>{msg.name || "Client"}</strong>
+                        <span> • {msg.email}</span>
+                      </div>
+                      <small>{msg.date}</small>
+                    </div>
+
+                    <p className="client-msg">{msg.message}</p>
+
+                    <textarea
+                      placeholder="Write your reply..."
+                      value={msg.reply || ""}
+                      onChange={(e) =>
+                        setMessages(
+                          messages.map((m) =>
+                            m.id === msg.id
+                              ? { ...m, reply: e.target.value }
+                              : m
+                          )
+                        )
+                      }
+                    />
+
+                    <button onClick={() => replyMessage(msg.id, msg.reply)}>
+                      Send Reply
+                    </button>
+                  </div>
+                ))
+              )}
+            </section>
+          )}
 
           {activeTab === "settings" && (
-
             <section className="admin-panel">
-
               <h2>Settings</h2>
 
               <div className="quick-actions">
-
-                <button
-                  onClick={() =>
-                    setSettingsPopup("agency")
-                  }
-                >
-                  Edit Agency Information
-                </button>
-
-                <button
-                  onClick={() =>
-                    setSettingsPopup("password")
-                  }
-                >
-                  Change Admin Password
-                </button>
-
-                <button
-                  onClick={() =>
-                    setSettingsPopup("contact")
-                  }
-                >
-                  Update Contact Numbers
-                </button>
-
+                <button>Agency Information</button>
+                <button>Change Admin Password</button>
+                <button>Contact Numbers</button>
               </div>
-
             </section>
           )}
-
         </main>
-
       </div>
 
-      {/* SETTINGS POPUP */}
-
-      {settingsPopup && (
-
-        <div className="settings-popup-overlay">
-
-          <div className="settings-popup">
-
-            <button
-              className="settings-close"
-              onClick={() =>
-                setSettingsPopup(null)
-              }
-            >
-              ×
-            </button>
-
-            {/* AGENCY */}
-
-            {settingsPopup === "agency" && (
-              <>
-
-                <h2>Edit Agency Information</h2>
-
-                <p>
-                  Update your agency details displayed
-                  across the website.
-                </p>
-
-                <input
-                  type="text"
-                  placeholder="Agency Name"
-                  value={agencyInfo.name}
-                  onChange={(e) =>
-                    setAgencyInfo({
-                      ...agencyInfo,
-                      name: e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="email"
-                  placeholder="Agency Email"
-                  value={agencyInfo.email}
-                  onChange={(e) =>
-                    setAgencyInfo({
-                      ...agencyInfo,
-                      email: e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="text"
-                  placeholder="Agency Address"
-                  value={agencyInfo.address}
-                  onChange={(e) =>
-                    setAgencyInfo({
-                      ...agencyInfo,
-                      address: e.target.value,
-                    })
-                  }
-                />
-
-                <button
-                  className="settings-save"
-                  onClick={() => {
-
-                    showSuccess(
-                      "Agency information updated successfully."
-                    );
-
-                    setSettingsPopup(null);
-                  }}
-                >
-                  Save Changes
-                </button>
-
-              </>
-            )}
-
-            {/* PASSWORD */}
-
-            {settingsPopup === "password" && (
-              <>
-
-                <h2>Change Admin Password</h2>
-
-                <p>
-                  Choose a strong password to keep
-                  your admin account secure.
-                </p>
-
-                <input
-                  type="password"
-                  placeholder="Current Password"
-                  value={adminPassword.oldPassword}
-                  onChange={(e) =>
-                    setAdminPassword({
-                      ...adminPassword,
-                      oldPassword:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={adminPassword.newPassword}
-                  onChange={(e) =>
-                    setAdminPassword({
-                      ...adminPassword,
-                      newPassword:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="password"
-                  placeholder="Confirm New Password"
-                  value={
-                    adminPassword.confirmPassword
-                  }
-                  onChange={(e) =>
-                    setAdminPassword({
-                      ...adminPassword,
-                      confirmPassword:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <button
-                  className="settings-save"
-                  onClick={() => {
-
-                    if (
-                      adminPassword.newPassword !==
-                      adminPassword.confirmPassword
-                    ) {
-
-                      showSuccess(
-                        "Passwords do not match."
-                      );
-
-                      return;
-                    }
-
-                    showSuccess(
-                      "Password updated successfully."
-                    );
-
-                    setSettingsPopup(null);
-                  }}
-                >
-                  Update Password
-                </button>
-
-              </>
-            )}
-
-            {/* CONTACT */}
-
-            {settingsPopup === "contact" && (
-              <>
-
-                <h2>Update Contact Numbers</h2>
-
-                <p>
-                  Keep your agency phone and
-                  WhatsApp numbers updated.
-                </p>
-
-                <input
-                  type="text"
-                  placeholder="Main Phone Number"
-                  value={contactInfo.phone1}
-                  onChange={(e) =>
-                    setContactInfo({
-                      ...contactInfo,
-                      phone1:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="text"
-                  placeholder="Second Phone Number"
-                  value={contactInfo.phone2}
-                  onChange={(e) =>
-                    setContactInfo({
-                      ...contactInfo,
-                      phone2:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <input
-                  type="text"
-                  placeholder="WhatsApp Number"
-                  value={contactInfo.whatsapp}
-                  onChange={(e) =>
-                    setContactInfo({
-                      ...contactInfo,
-                      whatsapp:
-                        e.target.value,
-                    })
-                  }
-                />
-
-                <button
-                  className="settings-save"
-                  onClick={() => {
-
-                    showSuccess(
-                      "Contact numbers updated successfully."
-                    );
-
-                    setSettingsPopup(null);
-                  }}
-                >
-                  Save Contact Numbers
-                </button>
-
-              </>
-            )}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* ADD PACKAGE POPUP */}
-
       {showPackageForm && (
-
         <div className="package-popup-overlay">
-
           <div className="package-popup">
-
             <div className="package-popup-head">
-
               <div>
-
                 <h2>Add New Package</h2>
-
-                <p>
-                  Create a complete travel package.
-                </p>
-
+                <p>Create a complete travel package.</p>
               </div>
 
               <button
                 className="close-package-popup"
-                onClick={() =>
-                  setShowPackageForm(false)
-                }
+                onClick={() => setShowPackageForm(false)}
               >
                 ×
               </button>
-
             </div>
 
             <div className="package-popup-form">
-
               <input
                 type="text"
                 placeholder="Package Name"
                 value={newPackage.name}
                 onChange={(e) =>
-                  setNewPackage({
-                    ...newPackage,
-                    name: e.target.value,
-                  })
+                  setNewPackage({ ...newPackage, name: e.target.value })
                 }
               />
 
@@ -746,8 +593,7 @@ export default function Admin() {
                 onChange={(e) =>
                   setNewPackage({
                     ...newPackage,
-                    programme:
-                      e.target.value,
+                    programme: e.target.value,
                   })
                 }
               />
@@ -757,18 +603,11 @@ export default function Admin() {
                 placeholder="Price"
                 value={newPackage.price}
                 onChange={(e) =>
-                  setNewPackage({
-                    ...newPackage,
-                    price: e.target.value,
-                  })
+                  setNewPackage({ ...newPackage, price: e.target.value })
                 }
               />
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePackageImage}
-              />
+              <input type="file" accept="image/*" onChange={handlePackageImage} />
 
               {newPackage.image && (
                 <img
@@ -783,45 +622,28 @@ export default function Admin() {
                 onChange={(e) =>
                   setNewPackage({
                     ...newPackage,
-                    visibility:
-                      e.target.value,
+                    visibility: e.target.value,
                   })
                 }
               >
-                <option value="Published">
-                  Published
-                </option>
-
-                <option value="Private">
-                  Private
-                </option>
-
+                <option value="Published">Published</option>
+                <option value="Private">Private</option>
               </select>
 
               <div className="package-popup-actions">
-
-                <button onClick={addPackage}>
-                  Save Package
-                </button>
+                <button onClick={addPackage}>Save Package</button>
 
                 <button
                   className="cancel-package-btn"
-                  onClick={() =>
-                    setShowPackageForm(false)
-                  }
+                  onClick={() => setShowPackageForm(false)}
                 >
                   Cancel
                 </button>
-
               </div>
-
             </div>
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 }

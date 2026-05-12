@@ -38,7 +38,7 @@ export default function Navbar() {
 
         <button
           className="nav-link-btn"
-          onClick={() => navigate("/#info")}
+          onClick={() => navigate("/hotels")}
         >
           Hotels
         </button>
