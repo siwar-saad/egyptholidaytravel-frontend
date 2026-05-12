@@ -25,12 +25,7 @@ export default function Admin() {
   const [adminSuccess, setAdminSuccess] = useState("");
   const [showPackageForm, setShowPackageForm] = useState(false);
 
-  const [dashboard, setDashboard] = useState({
-    packages: 0,
-    reservations: 0,
-    clients: 0,
-    messages: 0,
-  });
+  const [dashboard, setDashboard] = useState(null);
 
   const [packages, setPackages] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -60,22 +55,52 @@ export default function Admin() {
   const fetchAllData = async () => {
     try {
       const dashboardRes = await API.get("/admin/dashboard");
-      const packagesRes = await API.get("/admin/packages");
-      const reservationsRes = await API.get("/admin/reservations");
-      const clientsRes = await API.get("/admin/clients");
-      const paymentsRes = await API.get("/admin/payments");
-      const messagesRes = await API.get("/admin/messages");
+
+      setDashboard({
+        packages: Number(dashboardRes.data?.packages ?? 0),
+        reservations: Number(dashboardRes.data?.reservations ?? 0),
+        clients: Number(dashboardRes.data?.clients ?? 0),
+        messages: Number(dashboardRes.data?.messages ?? 0),
+      });
 
       console.log("Dashboard data:", dashboardRes.data);
+    } catch (err) {
+      console.log("Dashboard error:", err.response?.data || err.message);
+    }
 
-      setDashboard(dashboardRes.data);
+    try {
+      const packagesRes = await API.get("/admin/packages");
       setPackages(packagesRes.data || []);
+    } catch (err) {
+      console.log("Packages error:", err.response?.data || err.message);
+    }
+
+    try {
+      const reservationsRes = await API.get("/admin/reservations");
       setBookings(reservationsRes.data || []);
+    } catch (err) {
+      console.log("Reservations error:", err.response?.data || err.message);
+    }
+
+    try {
+      const clientsRes = await API.get("/admin/clients");
       setClients(clientsRes.data || []);
+    } catch (err) {
+      console.log("Clients error:", err.response?.data || err.message);
+    }
+
+    try {
+      const paymentsRes = await API.get("/admin/payments");
       setPayments(paymentsRes.data || []);
+    } catch (err) {
+      console.log("Payments error:", err.response?.data || err.message);
+    }
+
+    try {
+      const messagesRes = await API.get("/admin/messages");
       setMessages(messagesRes.data || []);
     } catch (err) {
-      console.log("Admin data error:", err.response?.data || err.message);
+      console.log("Messages error:", err.response?.data || err.message);
     }
   };
 
@@ -151,6 +176,7 @@ export default function Admin() {
   const deletePackage = async (id) => {
     try {
       await API.delete(`/admin/packages/${id}`);
+
       setPackages(packages.filter((item) => item.id !== id));
       showSuccess("Package deleted successfully.");
       fetchAllData();
@@ -188,10 +214,26 @@ export default function Admin() {
   };
 
   const stats = [
-    { title: "Packages", value: dashboard.packages, icon: "📦" },
-    { title: "Reservations", value: dashboard.reservations, icon: "🧾" },
-    { title: "Clients", value: dashboard.clients, icon: "👥" },
-    { title: "Messages", value: dashboard.messages, icon: "💬" },
+    {
+      title: "Packages",
+      value: dashboard?.packages ?? 0,
+      icon: "📦",
+    },
+    {
+      title: "Reservations",
+      value: dashboard?.reservations ?? 0,
+      icon: "🧾",
+    },
+    {
+      title: "Clients",
+      value: dashboard?.clients ?? 0,
+      icon: "👥",
+    },
+    {
+      title: "Messages",
+      value: dashboard?.messages ?? 0,
+      icon: "💬",
+    },
   ];
 
   return (
@@ -289,7 +331,7 @@ export default function Admin() {
                 <div className="admin-stat-card" key={index}>
                   <div>
                     <p>{item.title}</p>
-                    <h3>{item.value}</h3>
+                    <h3>{String(item.value)}</h3>
                   </div>
                   <span>{item.icon}</span>
                 </div>
@@ -337,23 +379,28 @@ export default function Admin() {
                           </td>
 
                           <td>{item.name}</td>
+
                           <td className="programme-cell">
                             {item.programme || "No programme"}
                           </td>
+
                           <td>{item.price || "No price"}</td>
 
                           <td>
                             <select
                               className={`package-select ${item.visibility === "Published"
-                                ? "uploaded"
-                                : "missing"
+                                  ? "uploaded"
+                                  : "missing"
                                 }`}
                               value={item.visibility || "Private"}
                               onChange={(e) => {
                                 if (e.target.value === "Delete") {
                                   deletePackage(item.id);
                                 } else {
-                                  updatePackageVisibility(index, e.target.value);
+                                  updatePackageVisibility(
+                                    index,
+                                    e.target.value
+                                  );
                                 }
                               }}
                             >
@@ -398,10 +445,10 @@ export default function Admin() {
                           <td>
                             <select
                               className={`status-select ${booking.status === "Confirmed"
-                                ? "confirmed"
-                                : booking.status === "Cancelled"
-                                  ? "cancelled"
-                                  : "pending"
+                                  ? "confirmed"
+                                  : booking.status === "Cancelled"
+                                    ? "cancelled"
+                                    : "pending"
                                 }`}
                               value={booking.status}
                               onChange={(e) =>
@@ -602,7 +649,11 @@ export default function Admin() {
                 }
               />
 
-              <input type="file" accept="image/*" onChange={handlePackageImage} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePackageImage}
+              />
 
               {newPackage.image && (
                 <img
