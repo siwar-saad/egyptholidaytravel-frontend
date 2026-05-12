@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import {
   FaPlane,
@@ -65,19 +66,25 @@ export default function Admin() {
       const paymentsRes = await API.get("/admin/payments");
       const messagesRes = await API.get("/admin/messages");
 
+      console.log("Dashboard data:", dashboardRes.data);
+
       setDashboard(dashboardRes.data);
-      setPackages(packagesRes.data);
-      setBookings(reservationsRes.data);
-      setClients(clientsRes.data);
-      setPayments(paymentsRes.data);
-      setMessages(messagesRes.data);
+      setPackages(packagesRes.data || []);
+      setBookings(reservationsRes.data || []);
+      setClients(clientsRes.data || []);
+      setPayments(paymentsRes.data || []);
+      setMessages(messagesRes.data || []);
     } catch (err) {
       console.log("Admin data error:", err.response?.data || err.message);
     }
   };
 
   useEffect(() => {
-    fetchAllData();
+    const timer = setTimeout(() => {
+      fetchAllData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handlePackageImage = (e) => {
@@ -106,6 +113,7 @@ export default function Admin() {
       const res = await API.post("/admin/packages", newPackage);
 
       setPackages([res.data, ...packages]);
+
       setNewPackage({
         name: "",
         programme: "",
@@ -143,7 +151,6 @@ export default function Admin() {
   const deletePackage = async (id) => {
     try {
       await API.delete(`/admin/packages/${id}`);
-
       setPackages(packages.filter((item) => item.id !== id));
       showSuccess("Package deleted successfully.");
       fetchAllData();
@@ -154,14 +161,10 @@ export default function Admin() {
 
   const updateReservationStatus = async (id, status) => {
     try {
-      await API.put(`/admin/reservations/${id}/status`, {
-        status,
-      });
+      await API.put(`/admin/reservations/${id}/status`, { status });
 
       setBookings(
-        bookings.map((b) =>
-          b.id === id ? { ...b, status } : b
-        )
+        bookings.map((b) => (b.id === id ? { ...b, status } : b))
       );
 
       showSuccess("Reservation status updated.");
@@ -172,14 +175,10 @@ export default function Admin() {
 
   const replyMessage = async (id, reply) => {
     try {
-      await API.put(`/admin/messages/${id}/reply`, {
-        reply,
-      });
+      await API.put(`/admin/messages/${id}/reply`, { reply });
 
       setMessages(
-        messages.map((m) =>
-          m.id === id ? { ...m, reply } : m
-        )
+        messages.map((m) => (m.id === id ? { ...m, reply } : m))
       );
 
       showSuccess("Reply sent successfully.");
@@ -338,20 +337,17 @@ export default function Admin() {
                           </td>
 
                           <td>{item.name}</td>
-
                           <td className="programme-cell">
                             {item.programme || "No programme"}
                           </td>
-
                           <td>{item.price || "No price"}</td>
 
                           <td>
                             <select
-                              className={`package-select ${
-                                item.visibility === "Published"
-                                  ? "uploaded"
-                                  : "missing"
-                              }`}
+                              className={`package-select ${item.visibility === "Published"
+                                ? "uploaded"
+                                : "missing"
+                                }`}
                               value={item.visibility || "Private"}
                               onChange={(e) => {
                                 if (e.target.value === "Delete") {
@@ -401,13 +397,12 @@ export default function Admin() {
                           <td>{booking.date}</td>
                           <td>
                             <select
-                              className={`status-select ${
-                                booking.status === "Confirmed"
-                                  ? "confirmed"
-                                  : booking.status === "Cancelled"
+                              className={`status-select ${booking.status === "Confirmed"
+                                ? "confirmed"
+                                : booking.status === "Cancelled"
                                   ? "cancelled"
                                   : "pending"
-                              }`}
+                                }`}
                               value={booking.status}
                               onChange={(e) =>
                                 updateReservationStatus(

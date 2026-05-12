@@ -49,7 +49,9 @@ export default function Navbar() {
             onClick={() => navigate(user.role === "admin" ? "/admin" : "/profile")}
           >
             <FaUser />
-            <span>{user.name}</span>
+            <span>
+              {user.name || user.email || "Profile"}
+            </span>
           </button>
         ) : (
           <button
@@ -59,11 +61,11 @@ export default function Navbar() {
             <FaUser />
           </button>
         )}
-        
-         
-        
-      
-    </nav>
+
+
+
+
+      </nav>
     </header >
   );
 }

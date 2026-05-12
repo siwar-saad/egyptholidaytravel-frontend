@@ -1,6 +1,12 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import Home from "./page/Home";
+
 import Login from "./page/login_signup/Login";
 import Signup from "./page/login_signup/Signup";
 import ForgotPassword from "./page/login_signup/ForgotPassword";
@@ -21,16 +27,65 @@ import Hotels from "./page/hotel/Hotels";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+  const token = localStorage.getItem("token");
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "null"
+  );
+
   return (
     <BrowserRouter>
       <Routes>
 
         {/* PUBLIC ROUTES */}
+
+        <Route
+          path="/login"
+          element={
+            token && user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Login />
+            )
+          }
+        />
+
+        <Route
+          path="/signup"
+          element={
+            token && user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Signup />
+            )
+          }
+        />
+
+        <Route
+          path="/forgot-password"
+          element={
+            token && user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <ForgotPassword />
+            )
+          }
+        />
+
+        <Route
+          path="/reset-password"
+          element={
+            token && user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <ResetPassword />
+            )
+          }
+        />
+
+        {/* MAIN PAGES */}
+
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route path="/basic-facts" element={<BasicFacts />} />
         <Route path="/history" element={<History />} />
@@ -41,7 +96,6 @@ function App() {
         <Route path="/packages" element={<Packages />} />
         <Route path="/hotels" element={<Hotels />} />
 
-        {/* PRIVATE ROUTES */}
         <Route
           path="/profile"
           element={
@@ -51,6 +105,8 @@ function App() {
           }
         />
 
+        {/* ADMIN */}
+
         <Route
           path="/admin"
           element={
@@ -58,6 +114,13 @@ function App() {
               <Admin />
             </ProtectedRoute>
           }
+        />
+
+        {/* FALLBACK */}
+
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
         />
 
       </Routes>
