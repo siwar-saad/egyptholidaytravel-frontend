@@ -18,6 +18,11 @@ import API from "../../api";
 import "./Admin.css";
 
 export default function Admin() {
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
   const navigate = useNavigate();
 
   const defaultCover =
@@ -123,10 +128,12 @@ export default function Admin() {
     { title: "Messages", value: dashboard.messages, icon: "💬" },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin");
-    navigate("/login");
-  };
+  <button
+    className="admin-logout"
+    onClick={handleLogout}
+  >
+    Logout
+  </button>
 
   const updateBooking = async (index, field, value) => {
     const updated = [...bookings];
@@ -399,11 +406,10 @@ export default function Admin() {
 
                         <td>
                           <select
-                            className={`package-select ${
-                              item.visibility === "Published"
-                                ? "uploaded"
-                                : "missing"
-                            }`}
+                            className={`package-select ${item.visibility === "Published"
+                              ? "uploaded"
+                              : "missing"
+                              }`}
                             value={item.visibility || "Private"}
                             onChange={(e) => {
                               if (e.target.value === "Delete") {
