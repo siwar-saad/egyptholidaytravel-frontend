@@ -22,6 +22,7 @@ import Packages from "./page/Packages";
 
 import Admin from "./page/admin/Admin";
 import UserProfile from "./page/client/profile/UserProfile";
+import Hotels from "./page/hotel/Hotels";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
