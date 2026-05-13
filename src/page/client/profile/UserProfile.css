@@ -293,12 +293,14 @@
   color: #a86700;
 }
 
+/* POPUPS */
+
 .popup-overlay,
 .contact-popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.48);
-  backdrop-filter: blur(6px);
+  background: rgba(18, 10, 5, 0.58);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -306,38 +308,82 @@
   padding: 20px;
 }
 
-.profile-popup,
-.contact-popup {
+.profile-popup {
   width: 100%;
   max-width: 480px;
   background: white;
-  border-radius: 28px;
-  padding: 30px;
+  border-radius: 30px;
+  padding: 32px;
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.25);
   animation: popupFade 0.35s ease;
+}
+
+.contact-popup {
+  width: 100%;
+  max-width: 560px;
+  background: rgba(255, 252, 248, 0.98);
+  border-radius: 34px;
+  padding: 36px 30px 30px;
+  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  animation: popupFade 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-popup::before {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  background: rgba(147, 84, 38, 0.06);
+  border-radius: 50%;
+  top: -60px;
+  right: -60px;
+}
+
+.contact-popup::after {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  background: rgba(147, 84, 38, 0.05);
+  border-radius: 50%;
+  bottom: -40px;
+  left: -40px;
 }
 
 .profile-popup h2,
 .contact-header h2 {
   font-family: "Playfair Display", serif;
-  font-size: 28px;
+  font-size: 31px;
   margin-bottom: 12px;
   text-align: center;
+  color: #2b1a14;
+  position: relative;
+  z-index: 2;
 }
 
 .profile-popup input,
 .profile-popup select {
   width: 100%;
-  height: 50px;
+  height: 52px;
   border: none;
   outline: none;
-  background: #f3ebe4;
-  border-radius: 16px;
-  padding: 0 15px;
-  margin-bottom: 13px;
+  background: #f5ede6;
+  border-radius: 18px;
+  padding: 0 16px;
+  margin-bottom: 14px;
   color: #24160f;
   font-size: 14px;
   box-sizing: border-box;
+  transition: 0.3s;
+}
+
+.profile-popup input:focus,
+.profile-popup select:focus {
+  border: 1px solid #935426;
+  background: white;
 }
 
 .popup-actions {
@@ -350,12 +396,20 @@
 .close-contact-btn {
   flex: 1;
   border: none;
-  border-radius: 16px;
-  padding: 13px;
-  background: linear-gradient(135deg, #935426, #6f3a15);
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(135deg, #a65f2a, #7b4016);
   color: white;
-  font-weight: 800;
+  font-weight: 900;
+  font-size: 15px;
   cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.popup-actions button:hover,
+.close-contact-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 28px rgba(147, 84, 38, 0.28);
 }
 
 .popup-actions .cancel-btn {
@@ -363,44 +417,68 @@
   color: #935426;
 }
 
+.popup-actions .cancel-btn:hover {
+  background: #ead8ca;
+  box-shadow: none;
+}
+
 .contact-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 2;
 }
 
 .contact-header p {
   color: #7b6859;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 430px;
+  margin: auto;
 }
 
 .contact-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 15px;
+  position: relative;
+  z-index: 2;
 }
 
 .contact-grid a {
-  background: #fffaf5;
-  border: 1px solid rgba(147, 84, 38, 0.12);
-  border-radius: 18px;
-  padding: 16px;
+  min-height: 74px;
+  background: #fff8f2;
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  border-radius: 22px;
+  padding: 14px;
   text-decoration: none;
   color: #24160f;
-  font-weight: 800;
-  transition: 0.3s;
+  font-weight: 900;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   text-align: center;
+  transition: 0.3s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .contact-grid a:hover {
-  background: #935426;
+  background: linear-gradient(135deg, #a65f2a, #7b4016);
   color: white;
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 28px rgba(147, 84, 38, 0.24);
 }
 
 .close-contact-btn {
   width: 100%;
-  margin-top: 22px;
+  margin-top: 26px;
+  position: relative;
+  z-index: 2;
 }
+
+/* MESSAGES */
 
 .section-desc {
   color: #6e5b4d;
@@ -457,26 +535,6 @@
   color: #8b7665;
 }
 
-.success-alert {
-  background: #e8f8ee;
-  color: #16833a;
-  border: 1px solid rgba(22, 131, 58, 0.18);
-  padding: 14px 16px;
-  border-radius: 16px;
-  font-weight: 800;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
-
-.section-desc {
-  color: #6e5b4d;
-  margin-bottom: 18px;
-}
-
-.empty-msg {
-  color: #8b7665;
-}
-
 @keyframes popupFade {
   from {
     opacity: 0;
@@ -509,36 +567,8 @@
     border-radius: 22px;
   }
 
-  .client-sidebar-brand {
-    min-width: 160px;
-    margin-bottom: 0;
-  }
-
-  .client-sidebar button {
-    min-width: 140px;
-    justify-content: center;
-    margin-bottom: 0;
-  }
-
-  .sidebar-logout {
-    margin-top: 0 !important;
-  }
-
-  .user-hero {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .user-main-info {
-    flex-direction: column;
-  }
-
   .user-grid {
     grid-template-columns: 1fr;
-  }
-
-  .big-card {
-    grid-row: auto;
   }
 }
 
@@ -547,27 +577,14 @@
     padding: 105px 12px 35px;
   }
 
-  .client-sidebar {
-    padding: 12px;
-  }
-
-  .client-sidebar-brand {
-    min-width: 140px;
-  }
-
-  .client-sidebar-brand h2 {
-    font-size: 18px;
-  }
-
-  .client-sidebar button {
-    min-width: 125px;
-    padding: 12px;
-    font-size: 13px;
-  }
-
   .user-hero {
     padding: 24px 18px;
     border-radius: 22px;
+  }
+
+  .user-main-info {
+    flex-direction: column;
+    text-align: center;
   }
 
   .profile-avatar {
@@ -586,28 +603,10 @@
     border-radius: 20px;
   }
 
-  .info-list div {
-    grid-template-columns: 22px 1fr;
-  }
-
-  .info-list strong {
-    grid-column: 2;
-  }
-
-  .booking-pro-card,
-  .payment-card-pro {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .popup-actions {
-    flex-direction: column;
-  }
-
   .contact-popup,
   .profile-popup {
-    padding: 24px 18px;
-    border-radius: 22px;
+    padding: 25px 18px;
+    border-radius: 24px;
   }
 
   .contact-grid {
@@ -616,11 +615,18 @@
 
   .contact-header h2,
   .profile-popup h2 {
-    font-size: 25px;
+    font-size: 26px;
   }
-}
 
-@media (max-width: 600px) {
+  .contact-grid a {
+    min-height: 66px;
+    font-size: 14px;
+  }
+
+  .popup-actions {
+    flex-direction: column;
+  }
+
   .message-box textarea {
     min-height: 120px;
     font-size: 13px;
@@ -629,13 +635,5 @@
 
   .message-box button {
     width: 100%;
-  }
-
-  .user-message-card {
-    padding: 15px;
-  }
-
-  .admin-reply {
-    padding: 12px;
   }
 }

@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
+import AdminSettings from "./AdminSettings";
 import {
   FaPlane,
   FaHome,
   FaBoxOpen,
+  FaHotel,
   FaCalendarCheck,
   FaUsers,
   FaCreditCard,
@@ -22,12 +24,15 @@ export default function Admin() {
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
 
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [reservationTab, setReservationTab] = useState("packages");
+
   const [adminSuccess, setAdminSuccess] = useState("");
   const [showPackageForm, setShowPackageForm] = useState(false);
+  const [showHotelForm, setShowHotelForm] = useState(false);
 
   const [dashboard, setDashboard] = useState(null);
-
   const [packages, setPackages] = useState([]);
+  const [hotels, setHotels] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [clients, setClients] = useState([]);
   const [payments, setPayments] = useState([]);
@@ -40,6 +45,26 @@ export default function Admin() {
     visibility: "Private",
     image: "",
   });
+
+  const [newHotel, setNewHotel] = useState({
+    name: "",
+    city: "",
+    mealPlan: "",
+    fromDate: "",
+    toDate: "",
+    singleRoom: "",
+    doubleRoom: "",
+    tripleRoom: "",
+    images: [],
+  });
+
+  const packageReservations = bookings.filter(
+    (item) => item.type === "package" || item.packageName || item.trip
+  );
+
+  const hotelReservations = bookings.filter(
+    (item) => item.type === "hotel" || item.hotelName
+  );
 
   const showSuccess = (msg) => {
     setAdminSuccess(msg);
@@ -62,8 +87,6 @@ export default function Admin() {
         clients: Number(dashboardRes.data?.clients ?? 0),
         messages: Number(dashboardRes.data?.messages ?? 0),
       });
-
-      console.log("Dashboard data:", dashboardRes.data);
     } catch (err) {
       console.log("Dashboard error:", err.response?.data || err.message);
     }
@@ -105,11 +128,7 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchAllData();
-    }, 0);
-
-    return () => clearTimeout(timer);
+    fetchAllData();
   }, []);
 
   const handlePackageImage = (e) => {
@@ -126,6 +145,14 @@ export default function Admin() {
     };
 
     reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const removePackageImage = () => {
+    setNewPackage({
+      ...newPackage,
+      image: "",
+    });
   };
 
   const addPackage = async () => {
@@ -185,13 +212,54 @@ export default function Admin() {
     }
   };
 
+  const handleHotelImages = (e) => {
+    const files = Array.from(e.target.files || []);
+    const images = files.map((file) => URL.createObjectURL(file));
+
+    setNewHotel({
+      ...newHotel,
+      images: [...newHotel.images, ...images],
+    });
+
+    e.target.value = "";
+  };
+
+  const removeHotelImage = (index) => {
+    setNewHotel({
+      ...newHotel,
+      images: newHotel.images.filter((_, i) => i !== index),
+    });
+  };
+
+  const addHotel = () => {
+    if (!newHotel.name || !newHotel.city || !newHotel.mealPlan) {
+      showSuccess("Please fill hotel information.");
+      return;
+    }
+
+    setHotels([newHotel, ...hotels]);
+
+    setNewHotel({
+      name: "",
+      city: "",
+      mealPlan: "",
+      fromDate: "",
+      toDate: "",
+      singleRoom: "",
+      doubleRoom: "",
+      tripleRoom: "",
+      images: [],
+    });
+
+    setShowHotelForm(false);
+    showSuccess("Hotel added successfully.");
+  };
+
   const updateReservationStatus = async (id, status) => {
     try {
       await API.put(`/admin/reservations/${id}/status`, { status });
 
-      setBookings(
-        bookings.map((b) => (b.id === id ? { ...b, status } : b))
-      );
+      setBookings(bookings.map((b) => (b.id === id ? { ...b, status } : b)));
 
       showSuccess("Reservation status updated.");
     } catch (err) {
@@ -203,9 +271,7 @@ export default function Admin() {
     try {
       await API.put(`/admin/messages/${id}/reply`, { reply });
 
-      setMessages(
-        messages.map((m) => (m.id === id ? { ...m, reply } : m))
-      );
+      setMessages(messages.map((m) => (m.id === id ? { ...m, reply } : m)));
 
       showSuccess("Reply sent successfully.");
     } catch (err) {
@@ -214,26 +280,10 @@ export default function Admin() {
   };
 
   const stats = [
-    {
-      title: "Packages",
-      value: dashboard?.packages ?? 0,
-      icon: "📦",
-    },
-    {
-      title: "Reservations",
-      value: dashboard?.reservations ?? 0,
-      icon: "🧾",
-    },
-    {
-      title: "Clients",
-      value: dashboard?.clients ?? 0,
-      icon: "👥",
-    },
-    {
-      title: "Messages",
-      value: dashboard?.messages ?? 0,
-      icon: "💬",
-    },
+    { title: "Packages", value: dashboard?.packages ?? 0, icon: "📦" },
+    { title: "Reservations", value: dashboard?.reservations ?? 0, icon: "🧾" },
+    { title: "Clients", value: dashboard?.clients ?? 0, icon: "👥" },
+    { title: "Messages", value: dashboard?.messages ?? 0, icon: "💬" },
   ];
 
   return (
@@ -267,6 +317,13 @@ export default function Admin() {
                 onClick={() => setActiveTab("packages")}
               >
                 <FaBoxOpen /> Packages
+              </button>
+
+              <button
+                className={activeTab === "hotels" ? "active" : ""}
+                onClick={() => setActiveTab("hotels")}
+              >
+                <FaHotel /> Hotels
               </button>
 
               <button
@@ -312,30 +369,31 @@ export default function Admin() {
         </aside>
 
         <main className="admin-main">
-          <header className="admin-top">
-            <div>
-              <span className="admin-label">Welcome back, Admin</span>
-              <h1>
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-              </h1>
-            </div>
-          </header>
-
           {adminSuccess && (
             <div className="success-alert">✅ {adminSuccess}</div>
           )}
 
           {activeTab === "dashboard" && (
-            <section className="admin-stats">
-              {stats.map((item, index) => (
-                <div className="admin-stat-card" key={index}>
-                  <div>
-                    <p>{item.title}</p>
-                    <h3>{String(item.value)}</h3>
-                  </div>
-                  <span>{item.icon}</span>
+            <section className="admin-panel">
+              <div className="panel-head">
+                <div>
+                  <h2>Dashboard</h2>
+                  <p>Overview of the admin panel.</p>
                 </div>
-              ))}
+              </div>
+
+              <div className="dashboard-grid">
+                {stats.map((item) => (
+                  <div key={item.title} className="dashboard-card">
+                    <span className="dashboard-icon">{item.icon}</span>
+
+                    <div>
+                      <h3>{item.value}</h3>
+                      <p>{item.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
 
@@ -347,72 +405,128 @@ export default function Admin() {
                   <p>Manage your travel packages and programmes.</p>
                 </div>
 
-                <button onClick={() => setShowPackageForm(true)}>
+                <button
+                  className="add-package-btn-pro"
+                  onClick={() => setShowPackageForm(true)}
+                >
                   <FaPlus /> Add New Package
                 </button>
               </div>
 
               {packages.length === 0 ? (
-                <p className="empty-msg">No packages yet.</p>
+                <p className="empty-msg">No packages available.</p>
               ) : (
-                <div className="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Cover</th>
-                        <th>Package</th>
-                        <th>Programme</th>
-                        <th>Price</th>
-                        <th>Visibility</th>
-                      </tr>
-                    </thead>
+                <div className="packages-admin-grid">
+                  {packages.map((item, index) => (
+                    <div className="package-admin-card" key={item.id || index}>
+                      <img
+                        src={
+                          item.image ||
+                          item.image_url ||
+                          item.cover ||
+                          defaultCover
+                        }
+                        alt={item.name}
+                        className="package-admin-image"
+                        onError={(e) => {
+                          e.currentTarget.src = defaultCover;
+                        }}
+                      />
 
-                    <tbody>
-                      {packages.map((item, index) => (
-                        <tr key={item.id}>
-                          <td>
-                            <img
-                              src={item.image || defaultCover}
-                              alt={item.name}
-                              className="package-cover"
-                            />
-                          </td>
+                      <div className="package-admin-content">
+                        <h3>{item.name}</h3>
 
-                          <td>{item.name}</td>
+                        <p>
+                          {item.programme ||
+                            "No programme added for this package yet."}
+                        </p>
 
-                          <td className="programme-cell">
-                            {item.programme || "No programme"}
-                          </td>
+                        <div className="package-admin-meta">
+                          <span>{item.price || "No price"}</span>
+                          <span>{item.visibility || "Private"}</span>
+                        </div>
+                      </div>
 
-                          <td>{item.price || "No price"}</td>
+                      <div className="package-admin-actions">
+                        <select
+                          className={`package-select ${
+                            item.visibility === "Published"
+                              ? "uploaded"
+                              : "missing"
+                          }`}
+                          value={item.visibility || "Private"}
+                          onChange={(e) => {
+                            if (e.target.value === "Delete") {
+                              deletePackage(item.id);
+                            } else {
+                              updatePackageVisibility(index, e.target.value);
+                            }
+                          }}
+                        >
+                          <option value="Published">Published</option>
+                          <option value="Private">Private</option>
+                          <option value="Delete">Delete</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
-                          <td>
-                            <select
-                              className={`package-select ${item.visibility === "Published"
-                                  ? "uploaded"
-                                  : "missing"
-                                }`}
-                              value={item.visibility || "Private"}
-                              onChange={(e) => {
-                                if (e.target.value === "Delete") {
-                                  deletePackage(item.id);
-                                } else {
-                                  updatePackageVisibility(
-                                    index,
-                                    e.target.value
-                                  );
-                                }
-                              }}
-                            >
-                              <option value="Published">Published</option>
-                              <option value="Private">Private</option>
-                              <option value="Delete">Delete</option>
-                            </select>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          {activeTab === "hotels" && (
+            <section className="admin-panel">
+              <div className="panel-head">
+                <div>
+                  <h2>Hotels</h2>
+                  <p>
+                    Manage hotel photos, meal plans, prices and travel periods.
+                  </p>
+                </div>
+
+                <button
+                  className="add-package-btn-pro"
+                  onClick={() => setShowHotelForm(true)}
+                >
+                  <FaPlus /> Add New Hotel
+                </button>
+              </div>
+
+              {hotels.length === 0 ? (
+                <p className="empty-msg">No hotels yet.</p>
+              ) : (
+                <div className="packages-admin-grid">
+                  {hotels.map((hotel, index) => (
+                    <div className="package-admin-card" key={index}>
+                      <img
+                        src={hotel.images[0] || defaultCover}
+                        alt={hotel.name}
+                        className="package-admin-image"
+                        onError={(e) => {
+                          e.currentTarget.src = defaultCover;
+                        }}
+                      />
+
+                      <div className="package-admin-content">
+                        <h3>{hotel.name}</h3>
+
+                        <p>
+                          <strong>City:</strong> {hotel.city} <br />
+                          <strong>Meal Plan:</strong> {hotel.mealPlan} <br />
+                          <strong>Period:</strong>{" "}
+                          {hotel.fromDate || "No date"} →{" "}
+                          {hotel.toDate || "No date"}
+                        </p>
+
+                        <div className="package-admin-meta">
+                          <span>Single: {hotel.singleRoom || "-"} USD</span>
+                          <span>Double: {hotel.doubleRoom || "-"} USD</span>
+                          <span>Triple: {hotel.tripleRoom || "-"} USD</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </section>
@@ -420,55 +534,132 @@ export default function Admin() {
 
           {activeTab === "reservations" && (
             <section className="admin-panel">
-              <h2>Reservations</h2>
+              <div className="panel-head">
+                <div>
+                  <h2>Reservations</h2>
+                  <p>Manage package and hotel reservations separately.</p>
+                </div>
+              </div>
 
-              {bookings.length === 0 ? (
-                <p className="empty-msg">No reservations yet.</p>
-              ) : (
-                <div className="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Client</th>
-                        <th>Trip</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
+              <div className="reservation-switcher">
+                <button
+                  className={reservationTab === "packages" ? "active" : ""}
+                  onClick={() => setReservationTab("packages")}
+                >
+                  Packages Reservations
+                </button>
 
-                    <tbody>
-                      {bookings.map((booking) => (
-                        <tr key={booking.id}>
-                          <td>{booking.name}</td>
-                          <td>{booking.trip}</td>
-                          <td>{booking.date}</td>
-                          <td>
-                            <select
-                              className={`status-select ${booking.status === "Confirmed"
-                                  ? "confirmed"
-                                  : booking.status === "Cancelled"
+                <button
+                  className={reservationTab === "hotels" ? "active" : ""}
+                  onClick={() => setReservationTab("hotels")}
+                >
+                  Hotels Reservations
+                </button>
+              </div>
+
+              {reservationTab === "packages" &&
+                (packageReservations.length === 0 ? (
+                  <p className="empty-msg">No package reservations yet.</p>
+                ) : (
+                  <div className="table-wrapper">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Client</th>
+                          <th>Package</th>
+                          <th>Date</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {packageReservations.map((booking) => (
+                          <tr key={booking.id}>
+                            <td>{booking.name || booking.client}</td>
+                            <td>{booking.packageName || booking.trip}</td>
+                            <td>{booking.date}</td>
+
+                            <td>
+                              <select
+                                className={`status-select ${
+                                  booking.status === "Confirmed"
+                                    ? "confirmed"
+                                    : booking.status === "Cancelled"
                                     ? "cancelled"
                                     : "pending"
                                 }`}
-                              value={booking.status}
-                              onChange={(e) =>
-                                updateReservationStatus(
-                                  booking.id,
-                                  e.target.value
-                                )
-                              }
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Confirmed">Confirmed</option>
-                              <option value="Cancelled">Cancelled</option>
-                            </select>
-                          </td>
+                                value={booking.status || "Pending"}
+                                onChange={(e) =>
+                                  updateReservationStatus(
+                                    booking.id,
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+
+              {reservationTab === "hotels" &&
+                (hotelReservations.length === 0 ? (
+                  <p className="empty-msg">No hotel reservations yet.</p>
+                ) : (
+                  <div className="table-wrapper">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Client</th>
+                          <th>Hotel</th>
+                          <th>Check In</th>
+                          <th>Check Out</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                      </thead>
+
+                      <tbody>
+                        {hotelReservations.map((booking) => (
+                          <tr key={booking.id}>
+                            <td>{booking.name || booking.client}</td>
+                            <td>{booking.hotelName}</td>
+                            <td>{booking.checkIn || booking.date}</td>
+                            <td>{booking.checkOut || "-"}</td>
+
+                            <td>
+                              <select
+                                className={`status-select ${
+                                  booking.status === "Confirmed"
+                                    ? "confirmed"
+                                    : booking.status === "Cancelled"
+                                    ? "cancelled"
+                                    : "pending"
+                                }`}
+                                value={booking.status || "Pending"}
+                                onChange={(e) =>
+                                  updateReservationStatus(
+                                    booking.id,
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
             </section>
           )}
 
@@ -528,6 +719,7 @@ export default function Admin() {
                           <td>{payment.invoice}</td>
                           <td>{payment.client}</td>
                           <td>{payment.amount}</td>
+
                           <td>
                             <span
                               className={
@@ -560,6 +752,7 @@ export default function Admin() {
                         <strong>{msg.name || "Client"}</strong>
                         <span> • {msg.email}</span>
                       </div>
+
                       <small>{msg.date}</small>
                     </div>
 
@@ -588,17 +781,7 @@ export default function Admin() {
             </section>
           )}
 
-          {activeTab === "settings" && (
-            <section className="admin-panel">
-              <h2>Settings</h2>
-
-              <div className="quick-actions">
-                <button>Agency Information</button>
-                <button>Change Admin Password</button>
-                <button>Contact Numbers</button>
-              </div>
-            </section>
-          )}
+          {activeTab === "settings" && <AdminSettings />}
         </main>
       </div>
 
@@ -625,7 +808,10 @@ export default function Admin() {
                 placeholder="Package Name"
                 value={newPackage.name}
                 onChange={(e) =>
-                  setNewPackage({ ...newPackage, name: e.target.value })
+                  setNewPackage({
+                    ...newPackage,
+                    name: e.target.value,
+                  })
                 }
               />
 
@@ -645,7 +831,10 @@ export default function Admin() {
                 placeholder="Price"
                 value={newPackage.price}
                 onChange={(e) =>
-                  setNewPackage({ ...newPackage, price: e.target.value })
+                  setNewPackage({
+                    ...newPackage,
+                    price: e.target.value,
+                  })
                 }
               />
 
@@ -656,11 +845,15 @@ export default function Admin() {
               />
 
               {newPackage.image && (
-                <img
-                  src={newPackage.image}
-                  alt="preview"
-                  className="package-preview-image"
-                />
+                <div className="hotel-preview-grid">
+                  <div className="hotel-preview-item">
+                    <img src={newPackage.image} alt="preview" />
+
+                    <button type="button" onClick={removePackageImage}>
+                      ×
+                    </button>
+                  </div>
+                </div>
               )}
 
               <select
@@ -682,6 +875,157 @@ export default function Admin() {
                 <button
                   className="cancel-package-btn"
                   onClick={() => setShowPackageForm(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showHotelForm && (
+        <div className="package-popup-overlay">
+          <div className="package-popup">
+            <div className="package-popup-head">
+              <div>
+                <h2>Add New Hotel</h2>
+                <p>Add hotel details, photos, prices and travel periods.</p>
+              </div>
+
+              <button
+                className="close-package-popup"
+                onClick={() => setShowHotelForm(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="package-popup-form">
+              <input
+                type="text"
+                placeholder="Hotel Name"
+                value={newHotel.name}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    name: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="City"
+                value={newHotel.city}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    city: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Meal Plan"
+                value={newHotel.mealPlan}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    mealPlan: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="date"
+                value={newHotel.fromDate}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    fromDate: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="date"
+                value={newHotel.toDate}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    toDate: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Single Room Price"
+                value={newHotel.singleRoom}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    singleRoom: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Double Room Price"
+                value={newHotel.doubleRoom}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    doubleRoom: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Triple Room / Note"
+                value={newHotel.tripleRoom}
+                onChange={(e) =>
+                  setNewHotel({
+                    ...newHotel,
+                    tripleRoom: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleHotelImages}
+              />
+
+              {newHotel.images.length > 0 && (
+                <div className="hotel-preview-grid">
+                  {newHotel.images.map((img, index) => (
+                    <div className="hotel-preview-item" key={index}>
+                      <img src={img} alt="hotel preview" />
+
+                      <button
+                        type="button"
+                        onClick={() => removeHotelImage(index)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="package-popup-actions">
+                <button onClick={addHotel}>Save Hotel</button>
+
+                <button
+                  className="cancel-package-btn"
+                  onClick={() => setShowHotelForm(false)}
                 >
                   Cancel
                 </button>
