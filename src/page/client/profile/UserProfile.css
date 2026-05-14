@@ -1,48 +1,54 @@
 .user-page {
   min-height: 100vh;
-  background: #f4f0ea;
+  background: linear-gradient(135deg, #f8f4ef, #efe4d8);
   padding: 125px 20px 60px;
   color: #24160f;
 }
 
 .user-container {
-  max-width: 1250px;
+  max-width: 1280px;
   margin: auto;
   display: grid;
-  grid-template-columns: 250px 1fr;
-  gap: 25px;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
 }
+
+/* SIDEBAR */
 
 .client-sidebar {
   position: sticky;
   top: 110px;
   height: calc(100vh - 135px);
-  background: white;
-  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  border-radius: 30px;
   padding: 28px 18px;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(147, 84, 38, 0.08);
   display: flex;
   flex-direction: column;
 }
 
 .client-sidebar-brand {
-  margin-bottom: 35px;
+  margin-bottom: 34px;
 }
 
 .client-sidebar-brand svg {
   color: #935426;
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .client-sidebar-brand h2 {
   font-family: "Playfair Display", serif;
   color: #935426;
-  font-size: 23px;
+  font-size: 24px;
   margin: 8px 0 2px;
 }
 
 .client-sidebar-brand p {
-  font-size: 14px;
+  font-size: 13px;
+  color: #7b6859;
+  font-weight: 700;
 }
 
 .client-sidebar button {
@@ -51,21 +57,23 @@
   background: transparent;
   text-align: left;
   padding: 15px 16px;
-  border-radius: 16px;
+  border-radius: 18px;
   margin-bottom: 10px;
   color: #24160f;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
 }
 
 .client-sidebar button:hover,
 .client-sidebar button.active {
-  background: #935426;
+  background: linear-gradient(135deg, #935426, #6f3a15);
   color: white;
+  transform: translateX(4px);
+  box-shadow: 0 14px 24px rgba(147, 84, 38, 0.2);
 }
 
 .sidebar-logout {
@@ -79,6 +87,8 @@
   color: white !important;
 }
 
+/* CONTENT */
+
 .client-content {
   min-width: 0;
 }
@@ -86,28 +96,27 @@
 .user-hero,
 .user-card,
 .page-section {
-  background: white;
-  border-radius: 28px;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 30px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(147, 84, 38, 0.08);
 }
 
 .user-hero {
   padding: 34px;
-  display: flex;
-  align-items: center;
-  gap: 25px;
   margin-bottom: 28px;
+  background: linear-gradient(135deg, #ffffff, #fff8f2);
 }
 
 .user-main-info {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 24px;
 }
 
 .profile-avatar {
-  width: 100px;
-  height: 100px;
+  width: 105px;
+  height: 105px;
   border-radius: 50%;
   background: linear-gradient(135deg, #935426, #6f3a15);
   color: white;
@@ -115,9 +124,10 @@
   align-items: center;
   justify-content: center;
   font-size: 42px;
-  font-weight: 800;
+  font-weight: 900;
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: 0 18px 35px rgba(147, 84, 38, 0.25);
 }
 
 .profile-avatar img {
@@ -128,24 +138,25 @@
 
 .user-hero h1 {
   font-family: "Playfair Display", serif;
-  font-size: 36px;
+  font-size: 38px;
   margin-bottom: 6px;
 }
 
 .user-hero p {
   color: #6e5b4d;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .upload-btn {
   display: inline-block;
   background: #f3ebe4;
   color: #935426;
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
+  transition: 0.3s ease;
 }
 
 .upload-btn input {
@@ -155,7 +166,10 @@
 .upload-btn:hover {
   background: #935426;
   color: white;
+  transform: translateY(-2px);
 }
+
+/* CARDS */
 
 .user-grid {
   display: grid;
@@ -163,21 +177,17 @@
   gap: 24px;
 }
 
-.user-card {
-  padding: 26px;
-  border: 1px solid rgba(147, 84, 38, 0.1);
+.user-card,
+.page-section {
+  padding: 28px;
 }
 
 .user-card h2,
 .page-section h2 {
   font-family: "Playfair Display", serif;
-  font-size: 28px;
+  font-size: 30px;
   margin-bottom: 20px;
   color: #24160f;
-}
-
-.big-card {
-  grid-row: span 2;
 }
 
 .info-list {
@@ -187,12 +197,13 @@
 
 .info-list div {
   display: grid;
-  grid-template-columns: 24px 90px 1fr;
+  grid-template-columns: 26px 90px 1fr;
   align-items: center;
   gap: 12px;
-  background: #fffaf5;
-  padding: 14px;
-  border-radius: 16px;
+  background: #fff8f2;
+  padding: 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(147, 84, 38, 0.08);
 }
 
 .info-list svg {
@@ -202,16 +213,18 @@
 .info-list span {
   color: #8b7665;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .info-list strong {
   font-size: 14px;
 }
 
-.support-card p {
+.support-card p,
+.section-desc {
   color: #6e5b4d;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  line-height: 1.6;
 }
 
 .settings-actions {
@@ -220,29 +233,31 @@
 }
 
 .settings-actions button,
-.support-card button {
+.support-card button,
+.message-box button {
   border: none;
-  border-radius: 16px;
-  padding: 13px 18px;
+  border-radius: 18px;
+  padding: 14px 20px;
   background: linear-gradient(135deg, #935426, #6f3a15);
   color: white;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  transition: 0.3s;
+  transition: 0.3s ease;
+  box-shadow: 0 14px 25px rgba(147, 84, 38, 0.18);
 }
 
 .settings-actions button:hover,
-.support-card button:hover {
+.support-card button:hover,
+.message-box button:hover {
   transform: translateY(-3px);
+  box-shadow: 0 18px 35px rgba(147, 84, 38, 0.26);
 }
 
-.page-section {
-  padding: 30px;
-}
+/* BOOKING / PAYMENT */
 
 .booking-list {
   display: grid;
@@ -251,10 +266,10 @@
 
 .booking-pro-card,
 .payment-card-pro {
-  background: #fffaf5;
+  background: linear-gradient(135deg, #ffffff, #fff8f2);
   border: 1px solid rgba(147, 84, 38, 0.12);
-  border-radius: 20px;
-  padding: 18px;
+  border-radius: 22px;
+  padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -262,7 +277,7 @@
 }
 
 .booking-pro-card h3 {
-  font-size: 18px;
+  font-size: 19px;
   margin-bottom: 6px;
 }
 
@@ -274,10 +289,10 @@
 .status,
 .paid,
 .unpaid {
-  padding: 7px 12px;
+  padding: 8px 13px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
   white-space: nowrap;
 }
 
@@ -293,66 +308,120 @@
   color: #a86700;
 }
 
-/* POPUPS */
+/* MESSAGES */
 
-.popup-overlay,
-.contact-popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(18, 10, 5, 0.58);
-  backdrop-filter: blur(8px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999;
+.message-box textarea {
+  width: 100%;
+  min-height: 140px;
+  border: none;
+  outline: none;
+  background: #fff8f2;
+  border-radius: 22px;
+  padding: 18px;
+  resize: none;
+  font-size: 15px;
+  color: #24160f;
+  font-weight: 700;
+  box-sizing: border-box;
+  margin-bottom: 14px;
+  transition: 0.3s ease;
+}
+
+.message-box textarea:focus {
+  background: white;
+  border: 1px solid #935426;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08);
+}
+
+.user-message-card {
+  margin-top: 16px;
+  background: linear-gradient(135deg, #ffffff, #fff8f2);
+  border: 1px solid rgba(147, 84, 38, 0.1);
+  border-radius: 22px;
   padding: 20px;
 }
 
-.profile-popup {
-  width: 100%;
-  max-width: 480px;
-  background: white;
-  border-radius: 30px;
-  padding: 32px;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.25);
-  animation: popupFade 0.35s ease;
+.msg-date {
+  font-size: 12px;
+  color: #8b7665;
+  margin-bottom: 8px;
+  font-weight: 800;
 }
 
-.contact-popup {
+.admin-reply {
+  margin-top: 14px;
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+  display: grid;
+  gap: 6px;
+  border-left: 4px solid #935426;
+}
+
+.empty-msg {
+  color: #8b7665;
+  font-weight: 700;
+}
+
+/* POPUPS */
+
+.popup-overlay,
+.contact-popup-overlay,
+.message-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 10, 5, 0.58);
+  backdrop-filter: blur(9px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  padding: 20px;
+}
+
+.profile-popup,
+.contact-popup,
+.message-success-popup {
   width: 100%;
-  max-width: 560px;
-  background: rgba(255, 252, 248, 0.98);
-  border-radius: 34px;
-  padding: 36px 30px 30px;
-  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(145deg, #fffdfb, #fff7f1);
+  border-radius: 32px;
+  padding: 34px;
+  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(147, 84, 38, 0.12);
   animation: popupFade 0.35s ease;
   position: relative;
   overflow: hidden;
 }
 
-.contact-popup::before {
-  content: "";
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  background: rgba(147, 84, 38, 0.06);
-  border-radius: 50%;
-  top: -60px;
-  right: -60px;
+.profile-popup {
+  max-width: 480px;
 }
 
-.contact-popup::after {
-  content: "";
-  position: absolute;
-  width: 130px;
-  height: 130px;
-  background: rgba(147, 84, 38, 0.05);
-  border-radius: 50%;
-  bottom: -40px;
-  left: -40px;
+.contact-popup {
+  max-width: 560px;
 }
 
+.message-success-popup {
+  max-width: 480px;
+  text-align: center;
+}
+
+.message-success-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16833a, #0d6b2d);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: 900;
+  box-shadow: 0 16px 30px rgba(22, 131, 58, 0.25);
+}
+
+.message-success-popup h2,
 .profile-popup h2,
 .contact-header h2 {
   font-family: "Playfair Display", serif;
@@ -364,37 +433,30 @@
   z-index: 2;
 }
 
-.profile-popup input,
-.profile-popup select {
-  width: 100%;
-  height: 52px;
-  border: none;
-  outline: none;
-  background: #f5ede6;
-  border-radius: 18px;
-  padding: 0 16px;
-  margin-bottom: 14px;
-  color: #24160f;
-  font-size: 14px;
-  box-sizing: border-box;
-  transition: 0.3s;
+.message-success-popup p,
+.contact-header p {
+  color: #7b6859;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 430px;
+  margin: 0 auto 18px;
 }
 
-.profile-popup input:focus,
-.profile-popup select:focus {
-  border: 1px solid #935426;
-  background: white;
+.sent-message-box {
+  background: #fff8f2;
+  border: 1px solid rgba(147, 84, 38, 0.1);
+  border-radius: 20px;
+  padding: 18px;
+  color: #3b2a1d;
+  font-weight: 800;
+  margin-bottom: 22px;
+  text-align: left;
+  line-height: 1.6;
 }
 
-.popup-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
-}
-
+.message-success-popup button,
 .popup-actions button,
 .close-contact-btn {
-  flex: 1;
   border: none;
   border-radius: 18px;
   padding: 14px;
@@ -406,35 +468,54 @@
   transition: 0.3s ease;
 }
 
+.message-success-popup button {
+  width: 100%;
+}
+
+.message-success-popup button:hover,
 .popup-actions button:hover,
 .close-contact-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 15px 28px rgba(147, 84, 38, 0.28);
 }
 
+.profile-popup input,
+.profile-popup select {
+  width: 100%;
+  height: 54px;
+  border: none;
+  outline: none;
+  background: #fff5ed;
+  border-radius: 18px;
+  padding: 0 16px;
+  margin-bottom: 14px;
+  color: #24160f;
+  font-size: 14px;
+  font-weight: 700;
+  box-sizing: border-box;
+  transition: 0.3s ease;
+}
+
+.profile-popup input:focus,
+.profile-popup select:focus {
+  border: 1px solid #935426;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08);
+}
+
+.popup-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.popup-actions button {
+  flex: 1;
+}
+
 .popup-actions .cancel-btn {
   background: #f3ebe4;
   color: #935426;
-}
-
-.popup-actions .cancel-btn:hover {
-  background: #ead8ca;
-  box-shadow: none;
-}
-
-.contact-header {
-  text-align: center;
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 2;
-}
-
-.contact-header p {
-  color: #7b6859;
-  font-size: 15px;
-  line-height: 1.6;
-  max-width: 430px;
-  margin: auto;
 }
 
 .contact-grid {
@@ -458,82 +539,83 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   text-align: center;
   transition: 0.3s ease;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .contact-grid a:hover {
   background: linear-gradient(135deg, #a65f2a, #7b4016);
   color: white;
   transform: translateY(-4px);
-  box-shadow: 0 16px 28px rgba(147, 84, 38, 0.24);
 }
 
 .close-contact-btn {
   width: 100%;
   margin-top: 26px;
+}
+
+.client-sidebar button {
   position: relative;
-  z-index: 2;
 }
 
-/* MESSAGES */
-
-.section-desc {
-  color: #6e5b4d;
-  margin-bottom: 18px;
+.message-badge {
+  margin-left: auto;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d94b3d, #a91f16);
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(180, 35, 24, 0.25);
 }
 
-.message-box textarea {
+.client-sidebar button.active .message-badge {
+  background: white;
+  color: #935426;
+}
+
+.user-reply-box {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.user-reply-box textarea {
   width: 100%;
-  min-height: 130px;
+  min-height: 90px;
   border: none;
   outline: none;
-  background: #fffaf5;
-  border-radius: 18px;
-  padding: 16px;
   resize: none;
-  font-size: 14px;
-  box-sizing: border-box;
-  margin-bottom: 14px;
+  border-radius: 18px;
+  background: #fff8f2;
+  padding: 15px;
+  font-weight: 700;
+  color: #24160f;
 }
 
-.message-box button {
+.user-reply-box textarea:focus {
+  background: white;
+  border: 1px solid #935426;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08);
+}
+
+.user-reply-box button {
+  justify-self: flex-end;
   border: none;
   border-radius: 16px;
-  padding: 13px 22px;
+  padding: 13px 24px;
   background: linear-gradient(135deg, #935426, #6f3a15);
   color: white;
-  font-weight: 800;
+  font-weight: 900;
   cursor: pointer;
 }
 
-.user-message-card {
-  margin-top: 16px;
-  background: #fffaf5;
-  border-radius: 18px;
-  padding: 18px;
-}
-
-.msg-date {
-  font-size: 12px;
-  color: #8b7665;
-  margin-bottom: 8px;
-}
-
-.admin-reply {
-  margin-top: 14px;
-  background: white;
-  padding: 14px;
-  border-radius: 14px;
-  display: grid;
-  gap: 6px;
-}
-
-.empty-msg {
-  color: #8b7665;
-}
+/* ANIMATION */
 
 @keyframes popupFade {
   from {
@@ -547,7 +629,9 @@
   }
 }
 
-@media (max-width: 900px) {
+/* RESPONSIVE */
+
+@media (max-width: 950px) {
   .user-page {
     padding: 115px 16px 45px;
   }
@@ -564,7 +648,22 @@
     overflow-x: auto;
     gap: 10px;
     padding: 16px;
-    border-radius: 22px;
+    border-radius: 24px;
+  }
+
+  .client-sidebar-brand {
+    min-width: 170px;
+    margin-bottom: 0;
+  }
+
+  .client-sidebar button {
+    min-width: 145px;
+    justify-content: center;
+    margin-bottom: 0;
+  }
+
+  .sidebar-logout {
+    margin-top: 0 !important;
   }
 
   .user-grid {
@@ -572,14 +671,14 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
   .user-page {
     padding: 105px 12px 35px;
   }
 
   .user-hero {
     padding: 24px 18px;
-    border-radius: 22px;
+    border-radius: 24px;
   }
 
   .user-main-info {
@@ -588,49 +687,54 @@
   }
 
   .profile-avatar {
-    width: 85px;
-    height: 85px;
+    width: 88px;
+    height: 88px;
     font-size: 34px;
   }
 
   .user-hero h1 {
-    font-size: 28px;
+    font-size: 29px;
   }
 
   .user-card,
   .page-section {
     padding: 20px;
-    border-radius: 20px;
+    border-radius: 22px;
   }
 
-  .contact-popup,
-  .profile-popup {
-    padding: 25px 18px;
-    border-radius: 24px;
+  .info-list div {
+    grid-template-columns: 24px 1fr;
+  }
+
+  .info-list strong {
+    grid-column: 1 / -1;
+  }
+
+  .booking-pro-card,
+  .payment-card-pro {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .contact-grid {
     grid-template-columns: 1fr;
   }
 
-  .contact-header h2,
-  .profile-popup h2 {
-    font-size: 26px;
+  .profile-popup,
+  .contact-popup,
+  .message-success-popup {
+    padding: 24px 18px;
+    border-radius: 26px;
   }
 
-  .contact-grid a {
-    min-height: 66px;
-    font-size: 14px;
+  .message-success-popup h2,
+  .profile-popup h2,
+  .contact-header h2 {
+    font-size: 26px;
   }
 
   .popup-actions {
     flex-direction: column;
-  }
-
-  .message-box textarea {
-    min-height: 120px;
-    font-size: 13px;
-    padding: 14px;
   }
 
   .message-box button {

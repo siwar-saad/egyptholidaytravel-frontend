@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import API from "../../../api";
 import "./UserProfile.css";
@@ -37,6 +38,11 @@ const UserProfile = () => {
   const [messages, setMessages] = useState([]);
 
   const [messageText, setMessageText] = useState("");
+  const [replyTexts, setReplyTexts] = useState({});
+  const [messageNotifications, setMessageNotifications] = useState(0);
+
+  const [showClientPopup, setShowClientPopup] = useState(false);
+  const [sentMessageText, setSentMessageText] = useState("");
 
   const [showEdit, setShowEdit] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -50,36 +56,42 @@ const UserProfile = () => {
     confirmPassword: "",
   });
 
-  const loadClientData = async () => {
-    try {
-      const profileRes = await API.get("/client/profile");
-      const bookingsRes = await API.get("/client/bookings");
-      const paymentsRes = await API.get("/client/payments");
-      const messagesRes = await API.get("/client/messages");
-
-      const profileData = {
-        ...profileRes.data,
-        name: profileRes.data.name || storedUser.name || "Client",
-        email: profileRes.data.email || storedUser.email || "",
-        phone: profileRes.data.phone || storedUser.phone || "No phone",
-        city: profileRes.data.city || storedUser.city || "Mansoura",
-        country: profileRes.data.country || storedUser.country || "Egypt",
-        avatar: storedUser.avatar || profileRes.data.avatar || "",
-      };
-
-      setUser(profileData);
-      setEditForm(profileData);
-      setBookings(bookingsRes.data);
-      setPayments(paymentsRes.data);
-      setMessages(messagesRes.data);
-
-      localStorage.setItem("user", JSON.stringify(profileData));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   useEffect(() => {
+    const loadClientData = async () => {
+      try {
+        const profileRes = await API.get("/client/profile");
+        const bookingsRes = await API.get("/client/bookings");
+        const paymentsRes = await API.get("/client/payments");
+        const messagesRes = await API.get("/client/messages");
+
+        const profileData = {
+          ...profileRes.data,
+          name: profileRes.data.name || storedUser.name || "Client",
+          email: profileRes.data.email || storedUser.email || "",
+          phone: profileRes.data.phone || storedUser.phone || "No phone",
+          city: profileRes.data.city || storedUser.city || "Mansoura",
+          country: profileRes.data.country || storedUser.country || "Egypt",
+          avatar: storedUser.avatar || profileRes.data.avatar || "",
+        };
+
+        const clientMessages = messagesRes.data || [];
+
+        setUser(profileData);
+        setEditForm(profileData);
+        setBookings(bookingsRes.data || []);
+        setPayments(paymentsRes.data || []);
+        setMessages(clientMessages);
+
+        setMessageNotifications(
+          clientMessages.filter((msg) => msg.reply).length
+        );
+
+        localStorage.setItem("user", JSON.stringify(profileData));
+      } catch (err) {
+        console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
+      }
+    };
+
     loadClientData();
   }, []);
 
@@ -101,26 +113,19 @@ const UserProfile = () => {
       setUser(updatedUser);
       setEditForm(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
-
       setShowEdit(false);
     } catch (err) {
-      console.log("FRONT PROFILE ERROR:", err.response?.data || err.message);
-
-      alert(
-        err.response?.data?.details ||
-        err.response?.data?.error ||
-        err.message ||
-        "Update profile error"
-      );
+      alert(err.response?.data?.error || err.message || "Update profile error");
     }
   };
-  const handleChangePassword = async () => {
-    try {
-      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-        alert("Passwords do not match");
-        return;
-      }
 
+  const handleChangePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
       await API.put("/client/change-password", {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
@@ -136,39 +141,50 @@ const UserProfile = () => {
 
       setShowPassword(false);
     } catch (err) {
-      console.log(err);
       alert(err.response?.data?.error || "Password change failed");
     }
   };
 
   const handleSendMessage = async () => {
-    try {
-      if (!messageText.trim()) return;
+    if (!messageText.trim()) return;
 
+    try {
       const res = await API.post("/client/messages", {
         message: messageText,
       });
 
       setMessages([res.data, ...messages]);
+      setSentMessageText(messageText);
+      setShowClientPopup(true);
       setMessageText("");
     } catch (err) {
-      console.log(
-        "SEND MESSAGE FRONT ERROR:",
-        err.response?.data || err.message
-      );
+      alert(err.response?.data?.error || err.message || "Message not sent");
+    }
+  };
 
-      alert(
-        err.response?.data?.details ||
-        err.response?.data?.error ||
-        err.message ||
-        "Message not sent"
-      );
+  const handleReplyMessage = async (messageId) => {
+    if (!replyTexts[messageId]?.trim()) return;
+
+    try {
+      const res = await API.post("/client/messages", {
+        message: replyTexts[messageId],
+      });
+
+      setMessages([res.data, ...messages]);
+      setSentMessageText(replyTexts[messageId]);
+      setShowClientPopup(true);
+
+      setReplyTexts({
+        ...replyTexts,
+        [messageId]: "",
+      });
+    } catch (err) {
+      alert(err.response?.data?.error || "Reply not sent");
     }
   };
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
 
     const reader = new FileReader();
@@ -192,6 +208,7 @@ const UserProfile = () => {
         setEditForm(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser));
       } catch (err) {
+        console.log("Photo update failed:", err.response?.data || err.message);
         alert("Photo update failed");
       }
     };
@@ -210,6 +227,7 @@ const UserProfile = () => {
   return (
     <div className="user-page">
       <Navbar />
+
       <div className="user-container">
         <aside className="client-sidebar">
           <div className="client-sidebar-brand">
@@ -241,9 +259,17 @@ const UserProfile = () => {
 
           <button
             className={activePage === "messages" ? "active" : ""}
-            onClick={() => setActivePage("messages")}
+            onClick={() => {
+              setActivePage("messages");
+              setMessageNotifications(0);
+            }}
           >
-            <FaEnvelope /> Messages
+            <FaEnvelope />
+            <span>Messages</span>
+
+            {messageNotifications > 0 && (
+              <span className="message-badge">{messageNotifications}</span>
+            )}
           </button>
 
           <button
@@ -262,7 +288,11 @@ const UserProfile = () => {
           <section className="user-hero">
             <div className="user-main-info">
               <div className="profile-avatar">
-                {user.avatar ? <img src={user.avatar} alt="profile" /> : initials}
+                {user.avatar ? (
+                  <img src={user.avatar} alt="profile" />
+                ) : (
+                  initials
+                )}
               </div>
 
               <div>
@@ -346,8 +376,11 @@ const UserProfile = () => {
                     </div>
 
                     <span
-                      className={`status ${booking.status === "Confirmed" ? "confirmed" : "pending"
-                        }`}
+                      className={`status ${
+                        booking.status === "Confirmed"
+                          ? "confirmed"
+                          : "pending"
+                      }`}
                     >
                       {booking.status || "Pending"}
                     </span>
@@ -416,6 +449,23 @@ const UserProfile = () => {
                       <p>{msg.reply}</p>
                     </div>
                   )}
+
+                  <div className="user-reply-box">
+                    <textarea
+                      placeholder="Write your reply to the agency..."
+                      value={replyTexts[msg.id] || ""}
+                      onChange={(e) =>
+                        setReplyTexts({
+                          ...replyTexts,
+                          [msg.id]: e.target.value,
+                        })
+                      }
+                    />
+
+                    <button onClick={() => handleReplyMessage(msg.id)}>
+                      Reply
+                    </button>
+                  </div>
                 </div>
               ))}
             </section>
@@ -494,6 +544,7 @@ const UserProfile = () => {
 
             <div className="popup-actions">
               <button onClick={handleSaveProfile}>Save</button>
+
               <button className="cancel-btn" onClick={() => setShowEdit(false)}>
                 Cancel
               </button>
@@ -545,6 +596,7 @@ const UserProfile = () => {
 
             <div className="popup-actions">
               <button onClick={handleChangePassword}>Save</button>
+
               <button
                 className="cancel-btn"
                 onClick={() => setShowPassword(false)}
@@ -563,28 +615,16 @@ const UserProfile = () => {
               <h2>Contact Our Agency</h2>
 
               <p>
-                Our Egypt Holiday support team is available
-                anytime to help you with bookings, flights,
-                hotels, and travel details.
+                Our Egypt Holiday support team is available anytime to help you
+                with bookings, flights, hotels, and travel details.
               </p>
             </div>
 
             <div className="contact-grid">
-              <a href="tel:01099999234">
-                ☎️ 01099999234
-              </a>
-
-              <a href="tel:01050971444">
-                ☎️ 01050971444
-              </a>
-
-              <a href="tel:01050383173">
-                ☎️ 01050383173
-              </a>
-
-              <a href="tel:01111787867">
-                ☎️ 01111787867
-              </a>
+              <a href="tel:01099999234">☎️ 01099999234</a>
+              <a href="tel:01050971444">☎️ 01050971444</a>
+              <a href="tel:01050383173">☎️ 01050383173</a>
+              <a href="tel:01111787867">☎️ 01111787867</a>
 
               <a href="mailto:ghaddabnessrine@gmail.com">
                 📧 ghaddabnessrine@gmail.com
@@ -609,6 +649,24 @@ const UserProfile = () => {
         </div>
       )}
 
+      {showClientPopup && (
+        <div className="message-success-overlay">
+          <div className="message-success-popup">
+            <div className="message-success-icon">✓</div>
+
+            <h2>Message Sent Successfully</h2>
+
+            <p>
+              Thank you for contacting Egypt Holiday Travel. Our support team
+              will review your message and get back to you as soon as possible.
+            </p>
+
+            <div className="sent-message-box">{sentMessageText}</div>
+
+            <button onClick={() => setShowClientPopup(false)}>Done</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
