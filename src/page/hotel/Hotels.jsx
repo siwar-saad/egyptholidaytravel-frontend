@@ -509,21 +509,46 @@ export default function Hotels() {
     setShowBookingForm(false);
   };
 
-  const handleBookingSubmit = () => {
-    alert("Booking request sent successfully!");
+  const handleBookingSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/hotels/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          hotelName: selectedHotel.name,
+          hotelCity: selectedHotel.city,
+          mealPlan: selectedHotel.meal,
+          ...bookingData,
+        }),
+      });
 
-    setBookingData({
-      fullName: "",
-      email: "",
-      phone: "",
-      travelers: "",
-      checkIn: "",
-      checkOut: "",
-      roomType: "Single Room",
-      notes: "",
-    });
+      const data = await response.json();
 
-    setShowBookingForm(false);
+      if (!response.ok) {
+        alert(data.error || "Booking failed");
+        return;
+      }
+
+      alert("Booking request sent successfully!");
+
+      setBookingData({
+        fullName: "",
+        email: "",
+        phone: "",
+        travelers: "",
+        checkIn: "",
+        checkOut: "",
+        roomType: "Single Room",
+        notes: "",
+      });
+
+      setShowBookingForm(false);
+    } catch (error) {
+      console.error(error);
+      alert("Server error. Please try again.");
+    }
   };
 
   return (

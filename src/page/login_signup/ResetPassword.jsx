@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import API from "../../api";
 import "./ForgotPassword.css";
 
@@ -11,35 +11,54 @@ export default function ResetPassword() {
   const code = location.state?.code;
 
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleReset = async (e) => {
     e.preventDefault();
     setError("");
 
     if (!email || !code) {
-      setError("Missing email or code. Please try again.");
+      setError("Missing email or verification code");
       return;
     }
 
-  if (password !== confirm) {
-    setError("Passwords do not match");
-    return;
-  }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
     try {
+      // RESET PASSWORD
       await API.post("/auth/reset-password", {
         email,
         code,
-        newPassword: password,
-        confirmPassword: confirm,
+        password,
       });
 
-      alert("Password changed successfully ✅");
-      navigate("/login");
+      // AUTO LOGIN
+      const loginRes = await API.post("/auth/login", {
+        email,
+        password,
+      });
+
+      // SAVE TOKEN
+      localStorage.setItem("token", loginRes.data.token);
+
+      // SAVE USER
+      localStorage.setItem(
+        "user",
+        JSON.stringify(loginRes.data.user)
+      );
+
+      // REDIRECT HOME
+      navigate("/");
     } catch (error) {
-      setError(error.response?.data?.error || "Reset failed ❌");
+      setError(
+        error.response?.data?.error ||
+        "Failed to reset password"
+      );
     }
   };
 
@@ -47,11 +66,12 @@ export default function ResetPassword() {
     <div className="forgot-page">
       <div className="forgot-card">
         <h1>Reset Password</h1>
+        <p>Enter your new password.</p>
 
         <form className="forgot-form" onSubmit={handleReset}>
           <input
             type="password"
-            placeholder="New Password"
+            placeholder="New password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -59,17 +79,31 @@ export default function ResetPassword() {
 
           <input
             type="password"
-            placeholder="Confirm Password"
+            placeholder="Confirm password"
             required
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
 
           {error && <span className="error-text">{error}</span>}
 
-          <button type="submit">Save</button>
+          <button type="submit">Reset Password</button>
         </form>
+
+        <span className="back-login" onClick={() => navigate("/login")}>
+          ← Back to Login
+        </span>
       </div>
+
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-card">
+            <h3>Password Changed</h3>
+            <p>Your password has been reset successfully.</p>
+            <button onClick={() => navigate("/login")}>OK</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
