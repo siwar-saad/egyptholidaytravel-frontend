@@ -18,6 +18,7 @@ import {
 import Navbar from "../../components/navbar";
 import API from "../../api";
 import "./Admin.css";
+import { FaMailBulk } from "react-icons/fa";
 
 export default function Admin() {
   const defaultCover =
@@ -50,6 +51,10 @@ export default function Admin() {
   const [clientSearch, setClientSearch] = useState("");
 
   const [editingClient, setEditingClient] = useState(null);
+
+  const [subscribers, setSubscribers] = useState([]);
+
+  const [subscriberSearch, setSubscriberSearch] = useState("");
 
   const [clientForm, setClientForm] = useState({
     name: "",
@@ -89,56 +94,63 @@ export default function Admin() {
   };
 
   const fetchAllData = async () => {
-  try {
-    const dashboardRes = await API.get("/admin/dashboard");
-    setDashboard({
-      packages: Number(dashboardRes.data?.packages ?? 0),
-      reservations: Number(dashboardRes.data?.reservations ?? 0),
-      clients: Number(dashboardRes.data?.clients ?? 0),
-      messages: Number(dashboardRes.data?.messages ?? 0),
-    });
-  } catch (err) {
-    console.log("Dashboard error:", err.response?.data || err.message);
-  }
+    try {
+      const dashboardRes = await API.get("/admin/dashboard");
+      setDashboard({
+        packages: Number(dashboardRes.data?.packages ?? 0),
+        reservations: Number(dashboardRes.data?.reservations ?? 0),
+        clients: Number(dashboardRes.data?.clients ?? 0),
+        messages: Number(dashboardRes.data?.messages ?? 0),
+      });
+    } catch (err) {
+      console.log("Dashboard error:", err.response?.data || err.message);
+    }
 
-  try {
-    const packagesRes = await API.get("/admin/packages");
-    setPackages(packagesRes.data || []);
-  } catch (err) {
-    console.log("Packages error:", err.response?.data || err.message);
-  }
+    try {
+      const packagesRes = await API.get("/admin/packages");
+      setPackages(packagesRes.data || []);
+    } catch (err) {
+      console.log("Packages error:", err.response?.data || err.message);
+    }
 
-  try {
-    const reservationsRes = await API.get("/admin/reservations");
-    setBookings(reservationsRes.data || []);
-  } catch (err) {
-    console.log("Reservations error:", err.response?.data || err.message);
-  }
+    try {
+      const reservationsRes = await API.get("/admin/reservations");
+      setBookings(reservationsRes.data || []);
+    } catch (err) {
+      console.log("Reservations error:", err.response?.data || err.message);
+    }
 
-  try {
-    const clientsRes = await API.get("/admin/clients");
-    setClients(clientsRes.data || []);
-  } catch (err) {
-    console.log("Clients error:", err.response?.data || err.message);
-  }
+    try {
+      const clientsRes = await API.get("/admin/clients");
+      setClients(clientsRes.data || []);
+    } catch (err) {
+      console.log("Clients error:", err.response?.data || err.message);
+    }
 
-  try {
-    const paymentsRes = await API.get("/admin/payments");
-    setPayments(paymentsRes.data || []);
-  } catch (err) {
-    console.log("Payments error:", err.response?.data || err.message);
-  }
+    try {
+      const paymentsRes = await API.get("/admin/payments");
+      setPayments(paymentsRes.data || []);
+    } catch (err) {
+      console.log("Payments error:", err.response?.data || err.message);
+    }
 
-  try {
-    const messagesRes = await API.get("/admin/messages");
-    const messagesData = messagesRes.data || [];
+    try {
+      const messagesRes = await API.get("/admin/messages");
+      const messagesData = messagesRes.data || [];
 
-    setMessages(messagesData);
-    setAdminMessageNotifications(messagesData.length);
-  } catch (err) {
-    console.log("Messages error:", err.response?.data || err.message);
-  }
-};
+      setMessages(messagesData);
+      setAdminMessageNotifications(messagesData.length);
+    } catch (err) {
+      console.log("Messages error:", err.response?.data || err.message);
+    }
+
+    try {
+      const subsRes = await API.get("/admin/subscribers");
+      setSubscribers(subsRes.data || []);
+    } catch (err) {
+      console.log("Subscribers error:", err.response?.data || err.message);
+    }
+  };
 
   useEffect(() => {
     fetchAllData();
@@ -404,6 +416,10 @@ export default function Admin() {
     { title: "Messages", value: dashboard?.messages ?? 0, icon: "💬" },
   ];
 
+  const filteredSubscribers = subscribers.filter((item) =>
+  item.email?.toLowerCase().includes(subscriberSearch.toLowerCase())
+);
+
   return (
     <div className="admin-wrapper">
       <Navbar />
@@ -480,6 +496,13 @@ export default function Admin() {
                     {adminMessageNotifications}
                   </span>
                 )}
+              </button>
+
+              <button
+                className={activeTab === "subscribers" ? "active" : ""}
+                onClick={() => setActiveTab("subscribers")}
+              >
+                <FaMailBulk /> Subscribers
               </button>
 
               <button
@@ -979,6 +1002,51 @@ export default function Admin() {
           )}
 
           {activeTab === "settings" && <AdminSettings />}
+
+          {activeTab === "subscribers" && (
+  <section className="admin-panel">
+    <div className="panel-head">
+      <div>
+        <h2>Email Subscribers</h2>
+        <p>
+          Users who subscribed from the home page newsletter.
+        </p>
+      </div>
+
+      <div className="admin-search-box">
+        <input
+          type="text"
+          placeholder="Search subscriber..."
+          value={subscriberSearch}
+          onChange={(e) =>
+            setSubscriberSearch(e.target.value)
+          }
+        />
+      </div>
+    </div>
+
+    {filteredSubscribers.length === 0 ? (
+      <p className="empty-msg">No subscribers found.</p>
+    ) : (
+      <div className="subscribers-grid">
+        {filteredSubscribers.map((item) => (
+          <div className="subscriber-card" key={item.id}>
+            <div>
+              <h3>{item.email}</h3>
+
+              <p>
+                {item.created_at || "New subscriber"}
+              </p>
+            </div>
+
+            <span>Subscribed</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+)}
+
         </main>
       </div>
 

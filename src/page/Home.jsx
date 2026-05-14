@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./Home.css";
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
 
 /* IMAGES */
 import cairoCover from "../assets/image/cairo.jpeg";
@@ -21,19 +22,31 @@ import customer2 from "../assets/image/ahmed.png";
 import customer3 from "../assets/image/lara.png";
 
 export default function Home() {
-  const [showButton, setShowButton] = useState(false);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+
+  const [showButton, setShowButton] = useState(false);
+  const [fromCountry, setFromCountry] = useState("Egypt");
+  const [toCountry, setToCountry] = useState("");
+  const [showFromDropdown, setShowFromDropdown] = useState(false);
+  const [showToDropdown, setShowToDropdown] = useState(false);
+  const [showTravellersDropdown, setShowTravellersDropdown] = useState(false);
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [subscriberEmail, setSubscriberEmail] = useState("");
+
+  const fromRef = useRef(null);
+  const toRef = useRef(null);
+  const travellersRef = useRef(null);
 
   const destinations = [
     { name: "Cairo", desc: "Explore Egypt", img: cairoCover },
     { name: "Dahab", desc: "Explore Egypt", img: dahabImg },
     { name: "Sharm El Sheikh", desc: "Explore Egypt", img: sharmImg },
     { name: "Luxor", desc: "Explore Egypt", img: LuxorImg },
-    
   ];
 
-  const packages = [{ name: "Uzbekistan", desc: "Explore Central Asia", img: uzbekistan },
+  const packages = [
+    { name: "Uzbekistan", desc: "Explore Central Asia", img: uzbekistan },
     { name: "Hurghada", desc: "Explore Egypt", img: hurghad },
     { name: "Turkey", desc: "Explore Turkey", img: turkey },
   ];
@@ -52,18 +65,22 @@ export default function Home() {
     "King Abdulaziz Airport – Jeddah, Saudi Arabia",
   ];
 
-  const [fromCountry, setFromCountry] = useState("Egypt");
-  const [toCountry, setToCountry] = useState("");
-  const [showFromDropdown, setShowFromDropdown] = useState(false);
-  const [showToDropdown, setShowToDropdown] = useState(false);
-  const [showTravellersDropdown, setShowTravellersDropdown] = useState(false);
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
 
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
+    if (!subscriberEmail.trim()) return;
 
-  const fromRef = useRef(null);
-  const toRef = useRef(null);
-  const travellersRef = useRef(null);
+    try {
+      await API.post("/subscribers", {
+        email: subscriberEmail,
+      });
+
+      alert("Thank you for subscribing!");
+      setSubscriberEmail("");
+    } catch (err) {
+      alert(err.response?.data?.error || "Subscription failed");
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -84,6 +101,7 @@ export default function Home() {
     }
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
@@ -93,12 +111,7 @@ export default function Home() {
 
       if (infoSection) {
         const rect = infoSection.getBoundingClientRect();
-
-        if (rect.top <= window.innerHeight / 1.25) {
-          setShowButton(true);
-        } else {
-          setShowButton(false);
-        }
+        setShowButton(rect.top <= window.innerHeight / 1.25);
       }
     };
 
@@ -112,26 +125,6 @@ export default function Home() {
     const temp = fromCountry;
     setFromCountry(toCountry);
     setToCountry(temp);
-  };
-
-  const increaseAdults = (e) => {
-    e.stopPropagation();
-    setAdults((prev) => prev + 1);
-  };
-
-  const decreaseAdults = (e) => {
-    e.stopPropagation();
-    setAdults((prev) => (prev > 1 ? prev - 1 : 1));
-  };
-
-  const increaseChildren = (e) => {
-    e.stopPropagation();
-    setChildren((prev) => prev + 1);
-  };
-
-  const decreaseChildren = (e) => {
-    e.stopPropagation();
-    setChildren((prev) => (prev > 0 ? prev - 1 : 0));
   };
 
   const handleBookNow = () => {
@@ -210,11 +203,11 @@ export default function Home() {
                       className="search-dropdown-item"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setToCountry(locations);
+                        setToCountry(location);
                         setShowToDropdown(false);
                       }}
                     >
-                      {locations}
+                      {location}
                     </div>
                   ))}
                 </div>
@@ -260,11 +253,25 @@ export default function Home() {
                     </div>
 
                     <div className="traveller-counter">
-                      <button type="button" onClick={decreaseAdults}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAdults((prev) => (prev > 1 ? prev - 1 : 1));
+                        }}
+                      >
                         −
                       </button>
+
                       <span>{adults}</span>
-                      <button type="button" onClick={increaseAdults}>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAdults((prev) => prev + 1);
+                        }}
+                      >
                         +
                       </button>
                     </div>
@@ -277,11 +284,25 @@ export default function Home() {
                     </div>
 
                     <div className="traveller-counter">
-                      <button type="button" onClick={decreaseChildren}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setChildren((prev) => (prev > 0 ? prev - 1 : 0));
+                        }}
+                      >
                         −
                       </button>
+
                       <span>{children}</span>
-                      <button type="button" onClick={increaseChildren}>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setChildren((prev) => prev + 1);
+                        }}
+                      >
                         +
                       </button>
                     </div>
@@ -313,7 +334,6 @@ export default function Home() {
                 <li>Language: Arabic</li>
                 <li>Currency: Egyptian Pound (EGP)</li>
               </ul>
-
               <button
                 className="read-btn"
                 onClick={(e) => {
@@ -335,7 +355,6 @@ export default function Home() {
                 <li>Famous for pyramids and pharaohs</li>
                 <li>Influenced by Greek, Roman, and Islamic cultures</li>
               </ul>
-
               <button
                 className="read-btn"
                 onClick={(e) => {
@@ -356,7 +375,6 @@ export default function Home() {
                 <li>Nile River is the main river</li>
                 <li>Includes Nile Valley, deserts, Sinai, Red Sea</li>
               </ul>
-
               <button
                 className="read-btn"
                 onClick={(e) => {
@@ -370,11 +388,7 @@ export default function Home() {
           </div>
 
           <div className="cinematic-card">
-            <img
-              src={cairoImg}
-              alt="Egypt statue"
-              className="cinematic-image"
-            />
+            <img src={cairoImg} alt="Egypt statue" className="cinematic-image" />
             <span className="cinematic-light"></span>
           </div>
 
@@ -391,7 +405,6 @@ export default function Home() {
                 <li>Aswan</li>
                 <li>Sharm El Sheikh</li>
               </ul>
-
               <button
                 className="read-btn"
                 onClick={(e) => {
@@ -414,7 +427,6 @@ export default function Home() {
                 <li>Diving in the Red Sea</li>
                 <li>Desert safari</li>
               </ul>
-
               <button
                 className="read-btn"
                 onClick={(e) => {
@@ -472,26 +484,14 @@ export default function Home() {
         <h2>Featured Packages</h2>
 
         <div className="featured-packages-grid">
-          <div className="featured-package-card">
-            <img src={packages[0].img} alt={packages[0].name} />
-            <h3>Cart 1</h3>
-            <h4>{packages[0].name} Trip</h4>
-            <button type="button">View details</button>
-          </div>
-
-          <div className="featured-package-card">
-            <img src={packages[1].img} alt={packages[1].name} />
-            <h3>Cart 2</h3>
-            <h4>{packages[1].name}</h4>
-            <button type="button">View details</button>
-          </div>
-
-          <div className="featured-package-card">
-            <img src={packages[2].img} alt={packages[2].name} />
-            <h3>Cart 3</h3>
-            <h4>{packages[2].name} Trip</h4>
-            <button type="button">View details</button>
-          </div>
+          {packages.map((item, index) => (
+            <div className="featured-package-card" key={index}>
+              <img src={item.img} alt={item.name} />
+              <h3>Cart {index + 1}</h3>
+              <h4>{item.name} Trip</h4>
+              <button type="button">View details</button>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -563,7 +563,7 @@ export default function Home() {
             </div>
             <p>
               Everything Was Perfectly Organized. The Team Made Our Trip Easy,
-              Safe, And Full Of Beautiful Moments. Highly Recommended !
+              Safe, And Full Of Beautiful Moments. Highly Recommended!
             </p>
           </div>
 
@@ -591,7 +591,7 @@ export default function Home() {
             </div>
             <p>
               I discovered Egypt in a completely new way. The planning, timing,
-              and professionalism were outstanding
+              and professionalism were outstanding.
             </p>
           </div>
         </div>
@@ -630,17 +630,22 @@ export default function Home() {
             <span className="route-plane">✈</span>
           </div>
 
-          <div className="newsletter-pro-subtitle">
-            Start Your Journey With Us
-          </div>
+          <div className="newsletter-pro-subtitle">Start Your Journey With Us</div>
 
           <p className="newsletter-pro-text">
             Get exclusive travel deals, hidden destinations, and expert tips
             straight to your inbox. Your next adventure starts here.
           </p>
 
-          <form className="newsletter-pro-form">
-            <input type="email" placeholder="Enter your email address..." />
+          <form className="newsletter-pro-form" onSubmit={handleSubscribe}>
+            <input
+              type="email"
+              placeholder="Enter your email address..."
+              value={subscriberEmail}
+              onChange={(e) => setSubscriberEmail(e.target.value)}
+              required
+            />
+
             <button type="submit">Subscribe</button>
           </form>
         </div>
@@ -654,40 +659,6 @@ export default function Home() {
               Discover Egypt with us. We offer the best travel experiences,
               luxury packages, and unforgettable adventures.
             </p>
-
-            <div className="footer-social">
-              <a
-                href="https://www.facebook.com/share/18deN5D3jr/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <i className="fab fa-facebook-f"></i>
-              </a>
-
-              <a
-                href="https://www.instagram.com/egyptholidaytravel0?igsh=OXVtdjM4YWF0N3Fz"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <i className="fab fa-instagram"></i>
-              </a>
-
-              <a
-                href="https://wa.me/201099999234"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <i className="fab fa-whatsapp"></i>
-              </a>
-
-              <a
-                href="https://www.tiktok.com/@egyptholiday.travel"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <i className="fab fa-tiktok"></i>
-              </a>
-            </div>
           </div>
 
           <div className="footer-col">
