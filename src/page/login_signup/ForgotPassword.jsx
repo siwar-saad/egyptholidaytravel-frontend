@@ -36,18 +36,14 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError("");
 
-    try {
-      await API.post("/auth/verify-reset-code", {
-        email,
-        code,
-      });
-
-      navigate("/reset-password", {
-        state: { email, code },
-      });
-    } catch (error) {
-      setError(error.response?.data?.error || "Invalid code. Please try again.");
+    if (!code) {
+      setError("Please enter the verification code");
+      return;
     }
+
+    navigate("/reset-password", {
+      state: { email, code },
+    });
   };
 
   const handleResend = async () => {
@@ -90,6 +86,7 @@ export default function ForgotPassword() {
               required
               value={code}
               onChange={(e) => setCode(e.target.value)}
+              maxLength="6"
             />
 
             {error && <span className="error-text">{error}</span>}
