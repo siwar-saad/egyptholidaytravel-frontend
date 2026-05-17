@@ -5,14 +5,11 @@
   justify-content: center;
   align-items: center;
   padding: 30px;
-}
-
-
-.auth-page {
   padding-top: 100px;
 }
 
 /* CARD */
+
 .auth-card {
   width: 100%;
   max-width: 1100px;
@@ -26,6 +23,7 @@
 }
 
 /* LEFT */
+
 .auth-left {
   position: relative;
   display: flex;
@@ -34,6 +32,7 @@
 }
 
 /* SHAPE */
+
 .auth-shape {
   position: absolute;
   width: 420px;
@@ -47,20 +46,22 @@
 }
 
 /* LOGO */
+
 .auth-brand-image {
   position: relative;
   z-index: 3;
   width: 250px;
   object-fit: contain;
-  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.25));
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.25));
 }
 
 /* ICONS */
+
 .auth-icon {
   position: absolute;
   width: 70px;
   z-index: 4;
-  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.25));
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.25));
   animation: floatIcon 4s ease-in-out infinite;
 }
 
@@ -81,17 +82,21 @@
   animation-delay: 1s;
 }
 
-/* FLOAT ANIMATION */
+/* FLOAT */
+
 @keyframes floatIcon {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-12px);
   }
 }
 
 /* RIGHT */
+
 .auth-right {
   padding: 70px;
   display: flex;
@@ -100,6 +105,7 @@
 }
 
 /* TITLE */
+
 .auth-right h2 {
   font-family: "Playfair Display", serif;
   font-size: 42px;
@@ -108,6 +114,7 @@
 }
 
 /* FORM */
+
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -115,6 +122,7 @@
 }
 
 /* INPUT */
+
 .auth-form input {
   height: 55px;
   border-radius: 20px;
@@ -122,16 +130,51 @@
   background: #efe6dc;
   padding: 0 15px;
   font-size: 15px;
+  outline: none;
 }
 
-/* FORGOT */
+/* REMEMBER */
+
+/* REMEMBER + FORGOT */
+
+.auth-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -3px;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.remember-box label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7b4a24;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.remember-box input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #935426;
+  cursor: pointer;
+}
+
 .forgot-password {
-  text-align: right;
-  font-size: 13px;
+  font-size: 14px;
   color: #935426;
   cursor: pointer;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #6f3a15;
   text-decoration: underline;
-  transition: 0.3s;
 }
 
 .forgot-password:hover {
@@ -139,6 +182,7 @@
 }
 
 /* BUTTON */
+
 .auth-form button {
   height: 55px;
   border-radius: 25px;
@@ -157,6 +201,7 @@
 }
 
 /* SWITCH */
+
 .auth-switch {
   text-align: center;
   font-size: 13px;
@@ -170,11 +215,12 @@
   text-decoration: underline;
 }
 
-/* overlay */
+/* SUCCESS POPUP */
+
 .success-popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
 
   display: flex;
   justify-content: center;
@@ -184,7 +230,6 @@
   padding: 20px;
 }
 
-/* popup */
 .success-popup {
   width: 100%;
   max-width: 420px;
@@ -195,12 +240,11 @@
   padding: 35px 28px;
   text-align: center;
 
-  box-shadow: 0 30px 80px rgba(0,0,0,0.18);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18);
 
   animation: popupShow 0.35s ease;
 }
 
-/* icon */
 .success-icon {
   width: 75px;
   height: 75px;
@@ -219,7 +263,6 @@
   justify-content: center;
 }
 
-/* title */
 .success-popup h2 {
   font-family: "Playfair Display", serif;
   font-size: 34px;
@@ -228,14 +271,12 @@
   margin-bottom: 10px;
 }
 
-/* text */
 .success-popup p {
   color: #6e5b4d;
   line-height: 1.6;
   margin-bottom: 24px;
 }
 
-/* button */
 .success-popup button {
   border: none;
   border-radius: 18px;
@@ -255,7 +296,8 @@
   transform: translateY(-3px);
 }
 
-/* animation */
+/* ANIMATION */
+
 @keyframes popupShow {
   from {
     opacity: 0;
@@ -269,16 +311,137 @@
 }
 
 /* RESPONSIVE */
+
 @media (max-width: 900px) {
+  .auth-page {
+    padding: 110px 16px 40px;
+  }
+
   .auth-card {
     grid-template-columns: 1fr;
+    min-height: auto;
+    border-radius: 24px;
   }
 
   .auth-left {
-    min-height: 250px;
+    min-height: 260px;
+    padding: 30px 20px;
+  }
+
+  .auth-shape {
+    width: 260px;
+    height: 260px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .auth-brand-image {
+    width: 180px;
+  }
+
+  .auth-icon {
+    width: 50px;
+  }
+
+  .icon-pyramid {
+    top: 30px;
+    left: 30px;
+  }
+
+  .icon-passport {
+    top: 40px;
+    right: 30px;
+  }
+
+  .icon-visa {
+    bottom: 30px;
+    right: 60px;
   }
 
   .auth-right {
-    padding: 40px 20px;
+    padding: 35px 22px;
+  }
+
+  .auth-right h2 {
+    font-size: 34px;
+    text-align: center;
+  }
+
+  .auth-form input,
+  .auth-form button {
+    height: 52px;
+    border-radius: 18px;
+  }
+
+  .forgot-password {
+    text-align: left;
+  }
+}
+
+@media (max-width: 550px) {
+  .auth-page {
+    padding: 95px 10px 25px;
+  }
+
+  .auth-card {
+    border-radius: 20px;
+  }
+
+  .auth-left {
+    min-height: 220px;
+  }
+
+  .auth-shape {
+    width: 200px;
+    height: 200px;
+  }
+
+  .auth-brand-image {
+    width: 140px;
+  }
+
+  .auth-icon {
+    width: 40px;
+  }
+
+  .auth-right {
+    padding: 28px 16px;
+  }
+
+  .auth-right h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  .auth-form {
+    gap: 12px;
+  }
+
+  .auth-form input,
+  .auth-form button {
+    height: 50px;
+    font-size: 14px;
+  }
+
+  .success-popup {
+    padding: 28px 18px;
+    border-radius: 22px;
+  }
+
+  .success-popup h2 {
+    font-size: 28px;
+  }
+
+  .success-popup p {
+    font-size: 14px;
+  }
+
+  .success-popup button {
+    width: 100%;
+  }
+
+  .remember-box label {
+    font-size: 12px;
   }
 }

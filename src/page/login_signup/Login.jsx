@@ -18,6 +18,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const [rememberMe, setRememberMe] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -28,8 +30,13 @@ export default function Login() {
         password,
       });
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      if (rememberMe) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      } else {
+        sessionStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("user", JSON.stringify(res.data.user));
+      }
 
       navigate("/");
     } catch (error) {
@@ -57,7 +64,13 @@ export default function Login() {
 
             <form className="auth-form" onSubmit={handleSubmit}>
               {error && (
-                <p style={{ color: "red", marginBottom: "10px", fontSize: "14px" }}>
+                <p
+                  style={{
+                    color: "red",
+                    marginBottom: "10px",
+                    fontSize: "14px",
+                  }}
+                >
                   {error}
                 </p>
               )}
@@ -78,12 +91,25 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              <span
-                className="forgot-password"
-                onClick={() => navigate("/forgot-password")}
-              >
-                Forgot Password?
-              </span>
+              <div className="auth-options">
+  <div className="remember-box">
+    <label>
+      <input
+        type="checkbox"
+        checked={rememberMe}
+        onChange={(e) => setRememberMe(e.target.checked)}
+      />
+      Remember Me
+    </label>
+  </div>
+
+  <span
+    className="forgot-password"
+    onClick={() => navigate("/forgot-password")}
+  >
+    Forgot Password?
+  </span>
+</div>
 
               <button type="submit">Log In</button>
 
