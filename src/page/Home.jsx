@@ -128,8 +128,8 @@ export default function Home() {
   };
 
   const handleBookNow = () => {
-    document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
-  };
+  navigate("/packages");
+};
 
   return (
     <div className="home-page">
