@@ -511,18 +511,44 @@ export default function Hotels() {
 
   const handleBookingSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/hotels/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          hotelName: selectedHotel.name,
-          hotelCity: selectedHotel.city,
-          mealPlan: selectedHotel.meal,
-          ...bookingData,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/hotels/reserve",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            hotel: {
+              name: selectedHotel.name,
+              city: selectedHotel.city,
+              mealPlan: selectedHotel.meal,
+              checkIn: bookingData.checkIn,
+              checkOut: bookingData.checkOut,
+              roomType: bookingData.roomType,
+            },
+
+            customerInfo: {
+              fullName: bookingData.fullName,
+              email: bookingData.email,
+              phone: bookingData.phone,
+              travelers: bookingData.travelers,
+              notes: bookingData.notes,
+            },
+
+            totalPrice:
+              selectedHotel.singleRoom ||
+              selectedHotel.doubleRoom ||
+              selectedHotel.price ||
+              0,
+
+            userRole:
+              JSON.parse(localStorage.getItem("user"))?.role,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -545,6 +571,7 @@ export default function Hotels() {
       });
 
       setShowBookingForm(false);
+
     } catch (error) {
       console.error(error);
       alert("Server error. Please try again.");
