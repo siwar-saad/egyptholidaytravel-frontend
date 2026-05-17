@@ -50,6 +50,8 @@ const UserProfile = () => {
 
   const [editForm, setEditForm] = useState(user);
 
+  const [bookingTab, setBookingTab] = useState("packages");
+
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -83,7 +85,7 @@ const UserProfile = () => {
         setMessages(clientMessages);
 
         setMessageNotifications(
-          clientMessages.filter((msg) => msg.reply).length
+          clientMessages.filter((msg) => msg.reply).length,
         );
 
         localStorage.setItem("user", JSON.stringify(profileData));
@@ -360,36 +362,68 @@ const UserProfile = () => {
             <section className="page-section">
               <h2>My Booking</h2>
 
-              <div className="booking-list">
-                {bookings.length === 0 && (
-                  <p className="empty-msg">No bookings yet.</p>
-                )}
+              <div className="booking-tabs">
+                <button
+                  className={bookingTab === "packages" ? "active" : ""}
+                  onClick={() => setBookingTab("packages")}
+                >
+                  Packages Reservations
+                </button>
 
-                {bookings.map((booking) => (
-                  <div className="booking-pro-card" key={booking.id}>
-                    <div>
-                      <h3>{booking.title || booking.name || "Booking"}</h3>
-                      <p>
-                        {booking.date || "No date"} •{" "}
-                        {booking.details || booking.status || "No details"}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`status ${
-                        booking.status === "Confirmed"
-                          ? "confirmed"
-                          : "pending"
-                      }`}
-                    >
-                      {booking.status || "Pending"}
-                    </span>
-                  </div>
-                ))}
+                <button
+                  className={bookingTab === "hotels" ? "active" : ""}
+                  onClick={() => setBookingTab("hotels")}
+                >
+                  Hotels Reservations
+                </button>
               </div>
+
+              <input
+                className="booking-search"
+                type="text"
+                placeholder="Search reservations by client, trip, hotel or date..."
+              />
+
+              {/* PACKAGES */}
+              {bookingTab === "packages" && (
+                <div className="booking-list">
+                  {bookings.length === 0 ? (
+                    <p className="empty-msg">No package reservations found.</p>
+                  ) : (
+                    bookings.map((booking) => (
+                      <div className="booking-pro-card" key={booking.id}>
+                        <div>
+                          <h3>{booking.title || booking.name || "Package"}</h3>
+
+                          <p>
+                            {booking.date || "No date"} •{" "}
+                            {booking.details || booking.status || "No details"}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`status ${
+                            booking.status === "Confirmed"
+                              ? "confirmed"
+                              : "pending"
+                          }`}
+                        >
+                          {booking.status || "Pending"}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* HOTELS */}
+              {bookingTab === "hotels" && (
+                <div className="booking-list">
+                  <p className="empty-msg">No hotel reservations found.</p>
+                </div>
+              )}
             </section>
           )}
-
           {activePage === "payment" && (
             <section className="page-section">
               <h2>Payment</h2>
