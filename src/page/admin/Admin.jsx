@@ -114,10 +114,24 @@ export default function Admin() {
     }
 
     try {
-      const reservationsRes = await API.get("/admin/reservations");
-      setBookings(reservationsRes.data || []);
+      const packageReservationsRes =
+        await API.get("/admin/reservations");
+
+      const hotelReservationsRes =
+        await API.get("/hotels/bookings");
+
+      const allBookings = [
+        ...(packageReservationsRes.data || []),
+        ...(hotelReservationsRes.data || []),
+      ];
+
+      setBookings(allBookings);
+
     } catch (err) {
-      console.log("Reservations error:", err.response?.data || err.message);
+      console.log(
+        "Reservations error:",
+        err.response?.data || err.message
+      );
     }
 
     try {
@@ -165,33 +179,29 @@ export default function Admin() {
   );
 
   const filteredPackages = packages.filter((item) =>
-    `${item.name || ""} ${item.title || ""} ${item.programme || ""} ${
-      item.price || ""
-    } ${item.visibility || ""}`
+    `${item.name || ""} ${item.title || ""} ${item.programme || ""} ${item.price || ""
+      } ${item.visibility || ""}`
       .toLowerCase()
       .includes(packageSearch.toLowerCase()),
   );
 
   const filteredHotels = hotels.filter((hotel) =>
-    `${hotel.name || ""} ${hotel.city || ""} ${hotel.mealPlan || ""} ${
-      hotel.singleRoom || ""
-    } ${hotel.doubleRoom || ""}`
+    `${hotel.name || ""} ${hotel.city || ""} ${hotel.mealPlan || ""} ${hotel.singleRoom || ""
+      } ${hotel.doubleRoom || ""}`
       .toLowerCase()
       .includes(hotelSearch.toLowerCase()),
   );
 
   const searchedPackageReservations = packageReservations.filter((booking) =>
-    `${booking.name || ""} ${booking.client || ""} ${
-      booking.packageName || ""
-    } ${booking.trip || ""} ${booking.date || ""} ${booking.status || ""}`
+    `${booking.name || ""} ${booking.client || ""} ${booking.packageName || ""
+      } ${booking.trip || ""} ${booking.date || ""} ${booking.status || ""}`
       .toLowerCase()
       .includes(reservationSearch.toLowerCase()),
   );
 
   const searchedHotelReservations = hotelReservations.filter((booking) =>
-    `${booking.name || ""} ${booking.client || ""} ${booking.hotelName || ""} ${
-      booking.checkIn || ""
-    } ${booking.checkOut || ""} ${booking.status || ""}`
+    `${booking.name || ""} ${booking.client || ""} ${booking.hotelName || ""} ${booking.checkIn || ""
+      } ${booking.checkOut || ""} ${booking.status || ""}`
       .toLowerCase()
       .includes(reservationSearch.toLowerCase()),
   );
@@ -417,8 +427,8 @@ export default function Admin() {
   ];
 
   const filteredSubscribers = subscribers.filter((item) =>
-  item.email?.toLowerCase().includes(subscriberSearch.toLowerCase())
-);
+    item.email?.toLowerCase().includes(subscriberSearch.toLowerCase())
+  );
 
   return (
     <div className="admin-wrapper">
@@ -608,11 +618,10 @@ export default function Admin() {
 
                       <div className="package-admin-actions">
                         <select
-                          className={`package-select ${
-                            item.visibility === "Published"
-                              ? "uploaded"
-                              : "missing"
-                          }`}
+                          className={`package-select ${item.visibility === "Published"
+                            ? "uploaded"
+                            : "missing"
+                            }`}
                           value={item.visibility || "Private"}
                           onChange={(e) => {
                             if (e.target.value === "Delete") {
@@ -763,13 +772,12 @@ export default function Admin() {
 
                             <td>
                               <select
-                                className={`status-select ${
-                                  booking.status === "Confirmed"
-                                    ? "confirmed"
-                                    : booking.status === "Cancelled"
-                                      ? "cancelled"
-                                      : "pending"
-                                }`}
+                                className={`status-select ${booking.status === "Confirmed"
+                                  ? "confirmed"
+                                  : booking.status === "Cancelled"
+                                    ? "cancelled"
+                                    : "pending"
+                                  }`}
                                 value={booking.status || "Pending"}
                                 onChange={(e) =>
                                   updateReservationStatus(
@@ -816,13 +824,12 @@ export default function Admin() {
 
                             <td>
                               <select
-                                className={`status-select ${
-                                  booking.status === "Confirmed"
-                                    ? "confirmed"
-                                    : booking.status === "Cancelled"
-                                      ? "cancelled"
-                                      : "pending"
-                                }`}
+                                className={`status-select ${booking.status === "Confirmed"
+                                  ? "confirmed"
+                                  : booking.status === "Cancelled"
+                                    ? "cancelled"
+                                    : "pending"
+                                  }`}
                                 value={booking.status || "Pending"}
                                 onChange={(e) =>
                                   updateReservationStatus(
@@ -1004,48 +1011,48 @@ export default function Admin() {
           {activeTab === "settings" && <AdminSettings />}
 
           {activeTab === "subscribers" && (
-  <section className="admin-panel">
-    <div className="panel-head">
-      <div>
-        <h2>Email Subscribers</h2>
-        <p>
-          Users who subscribed from the home page newsletter.
-        </p>
-      </div>
+            <section className="admin-panel">
+              <div className="panel-head">
+                <div>
+                  <h2>Email Subscribers</h2>
+                  <p>
+                    Users who subscribed from the home page newsletter.
+                  </p>
+                </div>
 
-      <div className="admin-search-box">
-        <input
-          type="text"
-          placeholder="Search subscriber..."
-          value={subscriberSearch}
-          onChange={(e) =>
-            setSubscriberSearch(e.target.value)
-          }
-        />
-      </div>
-    </div>
+                <div className="admin-search-box">
+                  <input
+                    type="text"
+                    placeholder="Search subscriber..."
+                    value={subscriberSearch}
+                    onChange={(e) =>
+                      setSubscriberSearch(e.target.value)
+                    }
+                  />
+                </div>
+              </div>
 
-    {filteredSubscribers.length === 0 ? (
-      <p className="empty-msg">No subscribers found.</p>
-    ) : (
-      <div className="subscribers-grid">
-        {filteredSubscribers.map((item) => (
-          <div className="subscriber-card" key={item.id}>
-            <div>
-              <h3>{item.email}</h3>
+              {filteredSubscribers.length === 0 ? (
+                <p className="empty-msg">No subscribers found.</p>
+              ) : (
+                <div className="subscribers-grid">
+                  {filteredSubscribers.map((item) => (
+                    <div className="subscriber-card" key={item.id}>
+                      <div>
+                        <h3>{item.email}</h3>
 
-              <p>
-                {item.created_at || "New subscriber"}
-              </p>
-            </div>
+                        <p>
+                          {item.created_at || "New subscriber"}
+                        </p>
+                      </div>
 
-            <span>Subscribed</span>
-          </div>
-        ))}
-      </div>
-    )}
-  </section>
-)}
+                      <span>Subscribed</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
         </main>
       </div>
