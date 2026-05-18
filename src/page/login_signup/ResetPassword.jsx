@@ -49,7 +49,11 @@ export default function ResetPassword() {
       // SAVE USER
       localStorage.setItem(
         "user",
-        JSON.stringify(loginRes.data.user)
+        JSON.stringify({
+          id: user.id,
+          role: user.role,
+          email: user.email,
+        })
       );
 
       // REDIRECT HOME

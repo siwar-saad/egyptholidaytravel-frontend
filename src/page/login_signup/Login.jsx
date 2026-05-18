@@ -30,15 +30,24 @@ export default function Login() {
         password,
       });
 
+      const loggedUser = {
+        id: res.data.user.id,
+        email: res.data.user.email,
+        role: res.data.user.role,
+      };
+
       if (rememberMe) {
         localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        localStorage.setItem("user", JSON.stringify(loggedUser));
       } else {
         sessionStorage.setItem("token", res.data.token);
-        sessionStorage.setItem("user", JSON.stringify(res.data.user));
+        sessionStorage.setItem("user", JSON.stringify(loggedUser));
+
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(loggedUser));
       }
 
-      navigate("/");
+      navigate(loggedUser.role === "admin" ? "/admin" : "/profile");
     } catch (error) {
       setError(error.response?.data?.error || "Login failed");
     }
@@ -92,24 +101,24 @@ export default function Login() {
               />
 
               <div className="auth-options">
-  <div className="remember-box">
-    <label>
-      <input
-        type="checkbox"
-        checked={rememberMe}
-        onChange={(e) => setRememberMe(e.target.checked)}
-      />
-      Remember Me
-    </label>
-  </div>
+                <div className="remember-box">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    Remember Me
+                  </label>
+                </div>
 
-  <span
-    className="forgot-password"
-    onClick={() => navigate("/forgot-password")}
-  >
-    Forgot Password?
-  </span>
-</div>
+                <span
+                  className="forgot-password"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot Password?
+                </span>
+              </div>
 
               <button type="submit">Log In</button>
 

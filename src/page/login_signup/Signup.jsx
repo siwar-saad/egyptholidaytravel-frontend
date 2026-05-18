@@ -23,10 +23,17 @@ export default function Signup() {
 
   const [error, setError] = useState("");
 
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const handleSignup = async (e) => {
     e.preventDefault();
 
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
     try {
       const response = await API.post("/auth/signup", {
@@ -34,7 +41,7 @@ export default function Signup() {
         lastName,
         email,
         password,
-        confirmPassword: password,
+        confirmPassword,
         phone,
       });
 
@@ -45,21 +52,7 @@ export default function Signup() {
           "user",
           JSON.stringify({
             id: response.data.user.id,
-            name:
-              response.data.user.name ||
-              `${response.data.user.firstName || ""} ${response.data.user.lastName || ""
-              }`.trim(),
-
             email: response.data.user.email,
-
-            phone: response.data.user.phone || "",
-
-            city: response.data.user.city || "Mansoura",
-
-            country: response.data.user.country || "Egypt",
-
-            avatar: response.data.user.avatar || "",
-
             role: response.data.user.role || "user",
           })
         );
@@ -71,7 +64,10 @@ export default function Signup() {
         }, 1000);
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Signup failed ❌");
+      setError(
+        err.response?.data?.error ||
+        "Signup failed ❌"
+      );
     }
   };
 
@@ -143,6 +139,12 @@ export default function Signup() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
 
               <input

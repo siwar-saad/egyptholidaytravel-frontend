@@ -71,9 +71,7 @@ export default function Home() {
     if (!subscriberEmail.trim()) return;
 
     try {
-      await API.post("/subscribers", {
-        email: subscriberEmail,
-      });
+      await API.post("/subscribe", { email });
 
       alert("Thank you for subscribing!");
       setSubscriberEmail("");
@@ -128,8 +126,8 @@ export default function Home() {
   };
 
   const handleBookNow = () => {
-  navigate("/packages");
-};
+    navigate("/packages");
+  };
 
   return (
     <div className="home-page">

@@ -316,8 +316,25 @@ export default function Admin() {
       return;
     }
 
-    setHotels([newHotel, ...hotels]);
+    const handleAddHotel = async () => {
+      try {
+        const response = await API.post("/hotels", hotelForm);
 
+        setHotels((prev) => [...prev, response.data]);
+
+        setHotelForm({
+          name: "",
+          city: "",
+          image: "",
+          description: "",
+          price: "",
+        });
+
+        setShowHotelPopup(false);
+      } catch (error) {
+        alert(error.response?.data?.error || "Unable to add hotel");
+      }
+    };
     setNewHotel({
       name: "",
       city: "",
@@ -334,14 +351,26 @@ export default function Admin() {
     showSuccess("Hotel added successfully.");
   };
 
-  const openAddClient = () => {
-    setEditingClient(null);
-    setClientForm({
-      name: "",
-      email: "",
-      phone: "",
-    });
-    setShowClientForm(true);
+  const handleAddClient = async () => {
+    try {
+      const response = await API.post(
+        "/admin/clients",
+        clientForm
+      );
+
+      setClients((prev) => [
+        ...prev,
+        response.data,
+      ]);
+
+      setShowClientPopup(false);
+
+    } catch (error) {
+      alert(
+        error.response?.data?.error ||
+        "Unable to add client"
+      );
+    }
   };
 
   const openEditClient = (client) => {
@@ -860,7 +889,7 @@ export default function Admin() {
                   <p>Manage your agency clients.</p>
                 </div>
 
-                <button onClick={openAddClient}>
+                <button onClick={handleAddClient}>
                   <FaPlus /> Add Client
                 </button>
               </div>
