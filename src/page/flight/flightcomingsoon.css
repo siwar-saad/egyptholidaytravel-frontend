@@ -1,0 +1,217 @@
+.flight-coming-page {
+  min-height: 100vh;
+  background: #f4f0ea;
+  overflow-x: hidden;
+}
+
+.flight-coming-hero {
+  min-height: 100vh;
+  padding: 130px 20px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.flight-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(147, 84, 38, 0.12);
+  z-index: 0;
+}
+
+.circle-1 {
+  width: 320px;
+  height: 320px;
+  top: 120px;
+  left: -110px;
+}
+
+.circle-2 {
+  width: 250px;
+  height: 250px;
+  bottom: 80px;
+  right: -90px;
+}
+
+.flight-coming-card {
+  width: 100%;
+  max-width: 850px;
+  background: #ffffff;
+  border-radius: 35px;
+  padding: 55px 45px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(147, 84, 38, 0.12);
+}
+
+.flight-icon {
+  width: 95px;
+  height: 95px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  box-shadow: 0 18px 35px rgba(147, 84, 38, 0.3);
+  animation: flightFloat 3s ease-in-out infinite;
+}
+
+@keyframes flightFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.flight-badge {
+  display: inline-block;
+  padding: 9px 20px;
+  border-radius: 30px;
+  background: #efe6dc;
+  color: #935426;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.flight-coming-card h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 52px;
+  color: #24160f;
+  margin: 0 0 18px;
+}
+
+.flight-coming-card p {
+  max-width: 630px;
+  margin: 0 auto;
+  color: #5d4a3d;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.flight-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin: 35px 0;
+}
+
+.flight-feature {
+  background: #faf6f1;
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  border-radius: 20px;
+  padding: 18px 12px;
+  color: #2b1c14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.flight-feature svg {
+  color: #935426;
+  font-size: 23px;
+}
+
+.flight-notify {
+  max-width: 530px;
+  margin: 0 auto 30px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: #fff7ed;
+  color: #7b4a24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.flight-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.flight-actions button {
+  border: none;
+  border-radius: 25px;
+  padding: 15px 28px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-shadow: 0 15px 30px rgba(147, 84, 38, 0.25);
+  transition: 0.3s ease;
+}
+
+.flight-actions button:hover {
+  transform: translateY(-3px);
+}
+
+.flight-actions .flight-secondary-btn {
+  background: #efe6dc;
+  color: #935426;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .flight-coming-hero {
+    padding: 110px 14px 40px;
+  }
+
+  .flight-coming-card {
+    padding: 40px 22px;
+    border-radius: 25px;
+  }
+
+  .flight-coming-card h1 {
+    font-size: 38px;
+  }
+
+  .flight-coming-card p {
+    font-size: 15px;
+  }
+
+  .flight-features {
+    grid-template-columns: 1fr;
+  }
+
+  .flight-notify {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  .flight-coming-card h1 {
+    font-size: 32px;
+  }
+
+  .flight-icon {
+    width: 78px;
+    height: 78px;
+    font-size: 30px;
+  }
+
+  .flight-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}

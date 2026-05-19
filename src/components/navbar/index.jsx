@@ -24,7 +24,7 @@ export default function Navbar() {
 
         <button
           className="nav-link-btn"
-          onClick={() => navigate("/#Flights")}
+          onClick={() => navigate("/flight")}
         >
           Flights
         </button>

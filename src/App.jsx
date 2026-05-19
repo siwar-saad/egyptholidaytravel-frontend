@@ -24,67 +24,50 @@ import Admin from "./page/admin/Admin";
 import UserProfile from "./page/client/profile/UserProfile";
 import Hotels from "./page/hotel/Hotels";
 
+import FlightComingSoon from "./page/flight/flightcomingsoon";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const token = localStorage.getItem("token");
 
-  const user = JSON.parse(
-    localStorage.getItem("user") || "null"
-  );
+  let user = null;
+
+  try {
+    user = JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    user = null;
+  }
 
   return (
     <BrowserRouter>
       <Routes>
-
         {/* PUBLIC ROUTES */}
-
         <Route
           path="/login"
-          element={
-            token && user ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Login />
-            )
-          }
+          element={token && user ? <Navigate to="/" replace /> : <Login />}
         />
 
         <Route
           path="/signup"
-          element={
-            token && user ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Signup />
-            )
-          }
+          element={token && user ? <Navigate to="/" replace /> : <Signup />}
         />
 
         <Route
           path="/forgot-password"
           element={
-            token && user ? (
-              <Navigate to="/" replace />
-            ) : (
-              <ForgotPassword />
-            )
+            token && user ? <Navigate to="/" replace /> : <ForgotPassword />
           }
         />
 
         <Route
           path="/reset-password"
           element={
-            token && user ? (
-              <Navigate to="/" replace />
-            ) : (
-              <ResetPassword />
-            )
+            token && user ? <Navigate to="/" replace /> : <ResetPassword />
           }
         />
 
         {/* MAIN PAGES */}
-
         <Route path="/" element={<Home />} />
 
         <Route path="/basic-facts" element={<BasicFacts />} />
@@ -96,6 +79,11 @@ function App() {
         <Route path="/packages" element={<Packages />} />
         <Route path="/hotels" element={<Hotels />} />
 
+        {/* FLIGHT PAGE */}
+        <Route path="/flight" element={<FlightComingSoon />} />
+        <Route path="/flights" element={<FlightComingSoon />} />
+
+        {/* USER PROFILE */}
         <Route
           path="/profile"
           element={
@@ -106,7 +94,6 @@ function App() {
         />
 
         {/* ADMIN */}
-
         <Route
           path="/admin"
           element={
@@ -117,12 +104,7 @@ function App() {
         />
 
         {/* FALLBACK */}
-
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
-
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
