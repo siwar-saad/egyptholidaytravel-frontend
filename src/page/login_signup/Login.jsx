@@ -1,124 +1,161 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import API from "../../api";
 import "./Login.css";
 
-import logoImg from "../../assets/image/login.png";
-import pyramid from "../../assets/image/pyramid.webp";
-import passport from "../../assets/image/passport.webp";
-import visa from "../../assets/image/visa.webp";
-
-import Navbar from "../../components/navbar";
-import api from "../../api";
+import queenImage from "../../assets/image/login.png";
+import pyramidIcon from "../../assets/image/pyramid.webp";
+import passportIcon from "../../assets/image/passport.webp";
+import visaIcon from "../../assets/image/visa.webp";
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
 
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
+    if (!form.email.trim() || !form.password.trim()) {
+      setError("Please enter email and password.");
+      return;
+    }
+
     try {
-      const res = await api.post("/auth/login", {
-        email,
-        password,
+      setLoading(true);
+
+      const res = await API.post("/auth/login", {
+        email: form.email.trim(),
+        password: form.password,
       });
 
-      if (rememberMe) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-      } else {
-        sessionStorage.setItem("token", res.data.token);
-        sessionStorage.setItem("user", JSON.stringify(res.data.user));
+      if (!res.data?.token) {
+        setError("Login failed. Token not found.");
+        return;
       }
 
-      navigate("/");
-    } catch (error) {
-      setError(error.response?.data?.error || "Login failed");
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.removeItem("rememberMe");
+      }
+
+      if (res.data.user?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      console.log("Login error:", err.response?.data || err.message);
+
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Email or password is incorrect."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <Navbar />
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-left">
+          <div className="auth-shape"></div>
 
-      <div className="auth-page">
-        <div className="auth-card">
-          <div className="auth-left">
-            <div className="auth-shape"></div>
+          <img
+            src={queenImage}
+            alt="Egypt Queen"
+            className="auth-brand-image"
+          />
 
-            <img src={logoImg} alt="logo" className="auth-brand-image" />
-            <img src={pyramid} alt="" className="auth-icon icon-pyramid" />
-            <img src={passport} alt="" className="auth-icon icon-passport" />
-            <img src={visa} alt="" className="auth-icon icon-visa" />
-          </div>
+          <img
+            src={pyramidIcon}
+            alt="Pyramid"
+            className="auth-icon icon-pyramid"
+          />
 
-          <div className="auth-right">
+          <img
+            src={passportIcon}
+            alt="Passport"
+            className="auth-icon icon-passport"
+          />
+
+          <img
+            src={visaIcon}
+            alt="Visa"
+            className="auth-icon icon-visa"
+          />
+        </div>
+
+        <div className="auth-right">
+          <form className="auth-form" onSubmit={handleLogin}>
             <h2>Log In</h2>
 
-            <form className="auth-form" onSubmit={handleSubmit}>
-              {error && (
-                <p
-                  style={{
-                    color: "red",
-                    marginBottom: "10px",
-                    fontSize: "14px",
-                  }}
-                >
-                  {error}
-                </p>
-              )}
+            {error && <div className="auth-error">{error}</div>}
 
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              autoComplete="email"
+            />
 
-              <input
-                type="password"
-                placeholder="Password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+              autoComplete="current-password"
+            />
 
-              <div className="auth-options">
-  <div className="remember-box">
-    <label>
-      <input
-        type="checkbox"
-        checked={rememberMe}
-        onChange={(e) => setRememberMe(e.target.checked)}
-      />
-      Remember Me
-    </label>
-  </div>
+            <div className="auth-options">
+              <div className="remember-box">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  Remember Me
+                </label>
+              </div>
 
-  <span
-    className="forgot-password"
-    onClick={() => navigate("/forgot-password")}
-  >
-    Forgot Password?
-  </span>
-</div>
+              <Link to="/forgot-password" className="forgot-password">
+                Forgot Password?
+              </Link>
+            </div>
 
-              <button type="submit">Log In</button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Logging in..." : "Log In"}
+            </button>
 
-              <p className="auth-switch">
-                Don’t have an account?{" "}
-                <span onClick={() => navigate("/signup")}>Sign up</span>
-              </p>
-            </form>
-          </div>
+            <p className="auth-switch">
+              Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+            </p>
+          </form>
         </div>
       </div>
     </div>
