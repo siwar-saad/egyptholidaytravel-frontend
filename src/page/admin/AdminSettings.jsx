@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import API from "../../api";
 import "./Admin.css";
 
 export default function AdminSettings() {
   const [activePopup, setActivePopup] = useState(null);
 
   const [agency, setAgency] = useState({
-    name: "Egypt Holiday Travel",
-    email: "egyptholidaytravel@gmail.com",
-    address: "Mansoura, Egypt",
+    name: "",
+    email: "",
+    address: "",
     facebook: "",
     instagram: "",
   });
@@ -18,37 +19,59 @@ export default function AdminSettings() {
     confirmPassword: "",
   });
 
-  const [contacts, setContacts] = useState([
-    "01099999234",
-    "01050971444",
-    "01050383173",
-  ]);
-
+  const [contacts, setContacts] = useState([]);
   const [newContact, setNewContact] = useState("");
 
-  const saveAgency = () => {
-    alert("Agency information updated successfully");
-    setActivePopup(null);
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const response = await API.get("/admin/settings");
+      setAgency(response.data.agency);
+      setContacts(response.data.contacts);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const savePassword = () => {
+  const saveAgency = async () => {
+    try {
+      await API.put("/admin/settings/agency", agency);
+      alert("Agency information updated successfully");
+      setActivePopup(null);
+    } catch (error) {
+      alert(error.response?.data?.error || "Unable to update agency");
+    }
+  };
+
+  const savePassword = async () => {
     if (password.newPassword !== password.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
-    alert("Password updated successfully");
-    setPassword({
-      oldPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setActivePopup(null);
+    try {
+      await API.put("/admin/settings/password", password);
+
+      alert("Password updated successfully");
+
+      setPassword({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+
+      setActivePopup(null);
+    } catch (error) {
+      alert(error.response?.data?.error || "Unable to update password");
+    }
   };
 
   const addContact = () => {
     if (!newContact.trim()) return;
-    setContacts([...contacts, newContact]);
+    setContacts([...contacts, newContact.trim()]);
     setNewContact("");
   };
 
@@ -56,9 +79,15 @@ export default function AdminSettings() {
     setContacts(contacts.filter((_, i) => i !== index));
   };
 
-  const saveContacts = () => {
-    alert("Contacts updated successfully");
-    setActivePopup(null);
+  const saveContacts = async () => {
+    try {
+      await API.put("/admin/settings/contacts", { contacts });
+
+      alert("Contacts updated successfully");
+      setActivePopup(null);
+    } catch (error) {
+      alert(error.response?.data?.error || "Unable to update contacts");
+    }
   };
 
   return (
@@ -78,9 +107,7 @@ export default function AdminSettings() {
           <span className="settings-icon-pro">🏢</span>
           <span className="settings-text-pro">
             <strong>Agency Information</strong>
-            <small>
-              Update agency profile, email, address and social media.
-            </small>
+            <small>Update agency profile, email, address and social media.</small>
           </span>
           <span className="settings-arrow-pro">→</span>
         </button>
@@ -133,27 +160,21 @@ export default function AdminSettings() {
               type="text"
               placeholder="Agency Address"
               value={agency.address}
-              onChange={(e) =>
-                setAgency({ ...agency, address: e.target.value })
-              }
+              onChange={(e) => setAgency({ ...agency, address: e.target.value })}
             />
 
             <input
               type="text"
               placeholder="Facebook Link"
               value={agency.facebook}
-              onChange={(e) =>
-                setAgency({ ...agency, facebook: e.target.value })
-              }
+              onChange={(e) => setAgency({ ...agency, facebook: e.target.value })}
             />
 
             <input
               type="text"
               placeholder="Instagram Link"
               value={agency.instagram}
-              onChange={(e) =>
-                setAgency({ ...agency, instagram: e.target.value })
-              }
+              onChange={(e) => setAgency({ ...agency, instagram: e.target.value })}
             />
 
             <div className="settings-popup-actions">
