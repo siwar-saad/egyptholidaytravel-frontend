@@ -10,6 +10,7 @@ import {
 
 import Navbar from "../../components/navbar";
 import "./flightcomingsoon.css";
+import Footer from "../../components/footer";
 
 export default function FlightComingSoon() {
   const navigate = useNavigate();
@@ -74,6 +75,7 @@ export default function FlightComingSoon() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

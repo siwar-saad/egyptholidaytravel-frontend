@@ -162,7 +162,8 @@
   gap: 15px;
 }
 
-.auth-form h2 {
+.auth-form h2,
+.auth-right > h2 {
   font-family: "Playfair Display", serif;
   font-size: 44px;
   line-height: 1.1;
@@ -198,7 +199,8 @@
 
 /* ================= ERROR ================= */
 
-.auth-error {
+.auth-error,
+.error-text {
   background: rgba(217, 48, 37, 0.08);
   color: #b42318;
   border: 1px solid rgba(217, 48, 37, 0.16);
@@ -207,9 +209,10 @@
   font-size: 13.5px;
   font-weight: 700;
   line-height: 1.5;
+  text-align: left;
 }
 
-/* ================= OPTIONS ================= */
+/* ================= LOGIN OPTIONS ================= */
 
 .auth-options {
   display: flex;
@@ -252,7 +255,7 @@
   text-decoration: underline;
 }
 
-/* ================= BUTTON ================= */
+/* ================= MAIN BUTTON ================= */
 
 .auth-form button {
   width: 100%;
@@ -294,10 +297,413 @@
   line-height: 1.6;
 }
 
-.auth-switch a {
+.auth-switch a,
+.auth-switch span {
   color: #935426;
   font-weight: 900;
   text-decoration: underline;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.auth-switch a:hover,
+.auth-switch span:hover {
+  color: #6f3a15;
+}
+
+/* ================= SIGNUP PAGE ================= */
+
+.signup-card {
+  grid-template-columns: 1fr 1.05fr;
+  min-height: 640px;
+  overflow: visible;
+}
+
+.signup-right {
+  padding: 54px 66px;
+  position: relative;
+  z-index: 5;
+}
+
+.signup-form {
+  max-width: 520px;
+  gap: 13px;
+  position: relative;
+}
+
+.signup-title-box {
+  margin-bottom: 8px;
+}
+
+.signup-title-box span {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: #efe6dc;
+  color: #935426;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.signup-title-box h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 42px;
+  line-height: 1.05;
+  margin: 0 0 8px;
+  color: #24160f;
+}
+
+.signup-title-box p {
+  color: #6e5b4d;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+
+.signup-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+}
+
+/* ================= CUSTOM COUNTRY + PHONE FIELD ================= */
+
+.phone-field {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 13px;
+  position: relative;
+}
+
+.custom-country {
+  position: relative;
+  width: 100%;
+  z-index: 50;
+}
+
+.custom-country.active {
+  z-index: 99999;
+}
+
+/* fix باش country button ما ياخذش style متاع .auth-form button */
+.auth-form .custom-country-btn {
+  width: 100%;
+  height: 58px;
+  border: 1px solid rgba(147, 84, 38, 0.1);
+  border-radius: 22px;
+  background: #efe6dc;
+  color: #24160f;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+  transition: 0.3s ease;
+}
+
+.auth-form .custom-country-btn:hover,
+.custom-country.active .custom-country-btn {
+  background: #ffffff;
+  border-color: #935426;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1);
+  transform: none;
+}
+
+.country-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.country-flag {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffffff;
+  padding: 3px;
+  box-shadow: 0 6px 14px rgba(147, 84, 38, 0.12);
+}
+
+.country-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.country-left small {
+  display: block;
+  color: #9a826f;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.country-left strong {
+  display: block;
+  color: #24160f;
+  font-size: 13.5px;
+  font-weight: 900;
+  line-height: 1.2;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.country-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.country-right span {
+  height: 32px;
+  min-width: 54px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.country-right svg {
+  color: #935426;
+  font-size: 12px;
+  transition: 0.3s ease;
+}
+
+.custom-country.active .country-right svg {
+  transform: rotate(180deg);
+}
+
+.country-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 100%;
+  max-height: 245px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 22px;
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  box-shadow: 0 22px 55px rgba(60, 38, 22, 0.2);
+  padding: 8px;
+  z-index: 99999;
+}
+
+/* scrollbar */
+.country-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.country-menu::-webkit-scrollbar-track {
+  background: #f3ebe3;
+  border-radius: 999px;
+}
+
+.country-menu::-webkit-scrollbar-thumb {
+  background: #935426;
+  border-radius: 999px;
+}
+
+/* fix باش options ما ياخذوش style متاع submit button */
+.auth-form .country-option {
+  width: 100%;
+  height: auto;
+  min-height: 48px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: #24160f;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: none;
+  transform: none;
+  text-align: left;
+  transition: 0.25s ease;
+}
+
+.auth-form .country-option:hover,
+.auth-form .country-option.selected {
+  background: #efe6dc;
+  color: #24160f;
+  box-shadow: none;
+  transform: none;
+}
+
+.country-option-flag {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff7ef;
+  padding: 2px;
+  box-shadow: 0 5px 12px rgba(147, 84, 38, 0.1);
+}
+
+.country-option-name {
+  color: #24160f;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.country-option-code {
+  color: #935426;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* PHONE INPUT */
+
+.phone-input-box {
+  width: 100%;
+  height: 58px;
+  border-radius: 22px;
+  background: #efe6dc;
+  border: 1px solid rgba(147, 84, 38, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  transition: 0.3s ease;
+}
+
+.phone-input-box:focus-within {
+  background: #ffffff;
+  border-color: #935426;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1);
+}
+
+.phone-input-box svg {
+  color: #935426;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.phone-input-box input {
+  width: 100%;
+  height: 100%;
+  border: none !important;
+  outline: none;
+  background: transparent !important;
+  padding: 0 !important;
+  color: #24160f;
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: none !important;
+}
+
+.phone-input-box input::placeholder {
+  color: #8b786b;
+}
+
+.phone-input-box input:focus {
+  box-shadow: none !important;
+}
+
+/* ================= SUCCESS POPUP ================= */
+
+.success-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 15, 10, 0.55);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 20px;
+}
+
+.success-popup {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border-radius: 30px;
+  padding: 35px 28px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  animation: popupShow 0.35s ease;
+}
+
+.success-icon {
+  width: 75px;
+  height: 75px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 16px 32px rgba(147, 84, 38, 0.28);
+}
+
+.success-popup h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 34px;
+  color: #24160f;
+  margin-bottom: 10px;
+}
+
+.success-popup p {
+  color: #6e5b4d;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.success-popup button {
+  width: 100%;
+  border: none;
+  border-radius: 18px;
+  padding: 14px 30px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.success-popup button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px rgba(147, 84, 38, 0.28);
+}
+
+@keyframes popupShow {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ================= TABLET ================= */
@@ -325,8 +731,17 @@
     padding: 55px 46px;
   }
 
-  .auth-form h2 {
+  .auth-form h2,
+  .auth-right > h2 {
     font-size: 40px;
+  }
+
+  .signup-right {
+    padding: 48px 42px;
+  }
+
+  .signup-form {
+    max-width: 500px;
   }
 }
 
@@ -338,7 +753,8 @@
     align-items: flex-start;
   }
 
-  .auth-card {
+  .auth-card,
+  .signup-card {
     grid-template-columns: 1fr;
     min-height: auto;
     border-radius: 28px;
@@ -381,23 +797,34 @@
     right: 86px;
   }
 
-  .auth-right {
+  .auth-right,
+  .signup-right {
     padding: 38px 24px 46px;
   }
 
-  .auth-form {
-    max-width: 520px;
+  .auth-form,
+  .signup-form {
+    max-width: 560px;
   }
 
-  .auth-form h2 {
+  .auth-form h2,
+  .auth-right > h2 {
     text-align: center;
     font-size: 37px;
+  }
+
+  .signup-title-box {
+    text-align: center;
+  }
+
+  .signup-title-box h2 {
+    font-size: 36px;
   }
 }
 
 /* ================= MOBILE ================= */
 
-@media (max-width: 550px) {
+@media (max-width: 600px) {
   .auth-page {
     padding: 88px 10px 24px;
     align-items: flex-start;
@@ -440,17 +867,28 @@
     right: 48px;
   }
 
-  .auth-right {
+  .auth-right,
+  .signup-right {
     padding: 30px 16px 36px;
   }
 
-  .auth-form {
+  .auth-form,
+  .signup-form {
     gap: 12px;
   }
 
-  .auth-form h2 {
+  .auth-form h2,
+  .auth-right > h2 {
     font-size: 32px;
     margin-bottom: 12px;
+  }
+
+  .signup-title-box h2 {
+    font-size: 31px;
+  }
+
+  .signup-title-box p {
+    font-size: 13px;
   }
 
   .auth-form input,
@@ -458,6 +896,51 @@
     height: 50px;
     border-radius: 17px;
     font-size: 14px;
+  }
+
+  .signup-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .phone-field {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .auth-form .custom-country-btn,
+  .phone-input-box {
+    height: 52px;
+    border-radius: 18px;
+  }
+
+  .country-flag {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+
+  .country-left strong {
+    max-width: 190px;
+    font-size: 13px;
+  }
+
+  .country-left small {
+    font-size: 10px;
+  }
+
+  .country-right span {
+    min-width: 50px;
+    height: 30px;
+    font-size: 11px;
+  }
+
+  .country-menu {
+    max-height: 220px;
+  }
+
+  .phone-input-box input {
+    font-size: 13px;
   }
 
   .auth-options {
@@ -473,6 +956,15 @@
 
   .auth-switch {
     font-size: 12px;
+  }
+
+  .success-popup {
+    padding: 30px 22px;
+    border-radius: 26px;
+  }
+
+  .success-popup h2 {
+    font-size: 28px;
   }
 }
 
@@ -513,8 +1005,22 @@
     align-items: flex-start;
   }
 
-  .auth-form h2 {
+  .auth-form h2,
+  .auth-right > h2 {
     font-size: 29px;
+  }
+
+  .signup-title-box h2 {
+    font-size: 28px;
+  }
+
+  .signup-title-box span {
+    font-size: 11px;
+  }
+
+  .country-left strong {
+    max-width: 155px;
+    font-size: 12.5px;
   }
 }
 
@@ -532,7 +1038,8 @@
     width: 130px;
   }
 
-  .auth-right {
+  .auth-right,
+  .signup-right {
     padding: 26px 13px 32px;
   }
 
@@ -540,4 +1047,208 @@
   .auth-form button {
     height: 48px;
   }
+
+  .country-left strong {
+    max-width: 125px;
+    font-size: 12px;
+  }
+}
+
+/* ================= FIX EQUAL COUNTRY + PHONE CARDS ================= */
+
+.phone-field {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 13px !important;
+  width: 100%;
+}
+
+.custom-country,
+.phone-input-box {
+  width: 100% !important;
+}
+
+.auth-form .custom-country-btn,
+.phone-input-box {
+  width: 100% !important;
+  height: 58px !important;
+  min-height: 58px !important;
+  border-radius: 22px !important;
+}
+
+/* باش النص ما يخرجش من country card */
+.country-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.country-text {
+  min-width: 0;
+}
+
+.country-left strong {
+  max-width: 115px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* phone input نفس تنظيم country */
+.phone-input-box {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.phone-input-box input {
+  width: 100% !important;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .phone-field {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .auth-form .custom-country-btn,
+  .phone-input-box {
+    height: 52px !important;
+    min-height: 52px !important;
+    border-radius: 18px !important;
+  }
+
+  .country-left strong {
+    max-width: 190px;
+  }
+} /* ================= PHONE CODE INSIDE PHONE INPUT ================= */
+
+.phone-country-code {
+  height: 32px;
+  min-width: 54px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #935426;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(147, 84, 38, 0.1);
+}
+
+.phone-input-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.phone-input-box input {
+  flex: 1;
+  min-width: 0;
+}
+
+
+.country-right span {
+  min-width: 48px;
+  height: 30px;
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .phone-country-code {
+    height: 30px;
+    min-width: 50px;
+    font-size: 11px;
+  }
+}
+
+/* ================= REMOVE CODE FROM COUNTRY CARD ================= */
+
+.country-right {
+  width: 28px;
+  min-width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.country-right span {
+  display: none !important;
+}
+
+.country-right svg {
+  color: #935426;
+  font-size: 13px;
+}
+
+/* code يظهر كان في phone input */
+.phone-country-code {
+  height: 32px;
+  min-width: 54px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #935426;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(147, 84, 38, 0.1);
+}
+
+.phone-input-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.phone-input-box input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ================= OPEN COUNTRY DROPDOWN TO TOP ================= */
+
+.signup-card,
+.signup-right,
+.signup-form,
+.phone-field,
+.custom-country {
+  overflow: visible !important;
+}
+
+.custom-country {
+  position: relative;
+  z-index: 9999;
+}
+
+.custom-country.active {
+  z-index: 99999;
+}
+
+.country-menu {
+  top: auto !important;
+  bottom: calc(100% + 10px) !important;
+  left: 0 !important;
+  z-index: 999999 !important;
+  max-height: 245px;
+  transform-origin: bottom center;
+}
+/* ================= REMOVE SIGNUP BADGE SPACE ================= */
+
+.signup-title-box {
+  margin-bottom: 18px;
+}
+
+.signup-title-box h2 {
+  margin-top: 0;
+}
+
+.signup-title-box span {
+  display: none !important;
 }

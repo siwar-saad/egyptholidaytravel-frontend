@@ -5,7 +5,7 @@ export default function UserHero({ user, onPhotoChange }) {
     <section className="user-hero">
       <div className="user-main-info">
         <div className="profile-avatar">
-          {user.avatar ? <img src={user.avatar} alt="profile" /> : initials}
+          {user.avatar ? <img src={user.avatar} alt="profile"  loading="lazy" /> : initials}
         </div>
 
         <div>

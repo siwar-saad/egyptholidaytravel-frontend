@@ -31,6 +31,7 @@ export default function Home() {
   const [showButton, setShowButton] = useState(false);
   const [subscriberEmail, setSubscriberEmail] = useState("");
   const [selectedInfo, setSelectedInfo] = useState(null);
+  const [openWhy, setOpenWhy] = useState(null);
 
   const destinations = [
     { name: "Cairo", desc: "Explore Egypt", img: cairoCover },
@@ -87,7 +88,7 @@ export default function Home() {
       <section className="hero-section" id="hero">
         <Navbar />
 
-        <img src={bgImg} alt="Egypt" className="hero-image" />
+        <img src={bgImg} alt="Egypt"  loading="lazy"  className="hero-image" />
         <div className="hero-overlay"></div>
       </section>
 
@@ -99,7 +100,7 @@ export default function Home() {
         <div className="destinations-grid">
           {destinations.map((item, index) => (
             <div key={index} className="destination-card-new">
-              <img src={item.img} alt={item.name} />
+              <img src={item.img} alt={item.name}  loading="lazy" />
               <div className="card-overlay"></div>
 
               <div className="card-text">
@@ -117,7 +118,7 @@ export default function Home() {
         <div className="featured-packages-grid">
           {packages.map((item, index) => (
             <div className="featured-package-card" key={index}>
-              <img src={item.img} alt={item.name} />
+              <img src={item.img}  loading="lazy" alt={item.name} />
               <h3>Cart {index + 1}</h3>
               <h4>{item.name} Trip</h4>
               <button type="button">View details</button>
@@ -158,29 +159,51 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="why-section">
-        <div className="why-left">
-          <h2>Why Visit Egypt?</h2>
+     <section className="why-section">
+  <div className="why-left why-accordion">
+    <div className={`why-accordion-item ${openWhy === "visit" ? "active" : ""}`}>
+      <button
+        type="button"
+        className="why-accordion-title"
+        onClick={() => setOpenWhy(openWhy === "visit" ? null : "visit")}
+      >
+        <span>Why Visit Egypt?</span>
+        <span className="why-arrow">⌄</span>
+      </button>
 
-          <p>
-            Egypt offers history, beaches, and adventure at an affordable price,
-            making it a unique travel destination.
-          </p>
+      <div className="why-accordion-content">
+        <p>
+          Egypt offers history, beaches, and adventure at an affordable price,
+          making it a unique travel destination.
+        </p>
+      </div>
+    </div>
 
-          <h2>Why Choose Us</h2>
+    <div className={`why-accordion-item ${openWhy === "choose" ? "active" : ""}`}>
+      <button
+        type="button"
+        className="why-accordion-title"
+        onClick={() => setOpenWhy(openWhy === "choose" ? null : "choose")}
+      >
+        <span>Why Choose Us</span>
+        <span className="why-arrow">⌄</span>
+      </button>
 
-          <ul>
-            <li>1 - Experienced travel experts</li>
-            <li>2 - Personalized travel packages</li>
-            <li>3 - Professional and friendly team</li>
-            <li>4 - Attention to every detail for a perfect trip</li>
-          </ul>
-        </div>
+      <div className="why-accordion-content">
+        <ul>
+          <li>Experienced travel experts</li>
+          <li>Personalized travel packages</li>
+          <li>Professional and friendly team</li>
+          <li>Attention to every detail for a perfect trip</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
-        <div className="why-right">
-          <img src={dahabImg} alt="Travel" />
-        </div>
-      </section>
+  <div className="why-right">
+    <img src={dahabImg}  loading="lazy" alt="Travel" />
+  </div>
+</section>
 
       <section className="testimonials-section">
         <h2>Customers Say</h2>
@@ -188,7 +211,7 @@ export default function Home() {
         <div className="testimonials-grid">
           <div className="testimonial-card">
             <div className="testimonial-top">
-              <img src={customer1} alt="Sarah M." className="customer-img" />
+              <img src={customer1} alt="Sarah M."  loading="lazy" className="customer-img" />
 
               <div className="testimonial-user-info">
                 <h4>Sarah M.</h4>
@@ -204,7 +227,7 @@ export default function Home() {
 
           <div className="testimonial-card">
             <div className="testimonial-top">
-              <img src={customer2} alt="Ahmed K" className="customer-img" />
+              <img src={customer2} alt="Ahmed K"  loading="lazy"  className="customer-img" />
 
               <div className="testimonial-user-info">
                 <h4>Ahmed K</h4>
@@ -220,7 +243,7 @@ export default function Home() {
 
           <div className="testimonial-card">
             <div className="testimonial-top">
-              <img src={customer3} alt="Laura P." className="customer-img" />
+              <img src={customer3} alt="Laura P."  loading="lazy" className="customer-img" />
 
               <div className="testimonial-user-info">
                 <h4>Laura P.</h4>
@@ -238,7 +261,7 @@ export default function Home() {
 
       <section className="newsletter-pro">
         <div className="newsletter-pro-left">
-          <img src={pyra} alt="Pyramids" className="newsletter-pro-image" />
+          <img src={pyra} alt="Pyramids"  loading="lazy" className="newsletter-pro-image" />
         </div>
 
         <div className="newsletter-pro-right">

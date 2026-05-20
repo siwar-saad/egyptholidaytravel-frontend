@@ -1,5 +1,6 @@
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import { useEffect } from "react";
 import "./Packages.css";
 
 import {
@@ -15,6 +16,12 @@ import {
 } from "react-icons/fa";
 
 export default function Packages() {
+  useEffect(() => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}, []);
   return (
     <div className="packages-page">
       <Navbar />

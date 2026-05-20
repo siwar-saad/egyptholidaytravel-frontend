@@ -40,7 +40,7 @@ export default function HomeInfoSection({ onOpen }) {
         <div className="info-side left-side">{leftItems.map(renderCard)}</div>
 
         <div className="cinematic-card">
-          <img src={cairoImg} alt="Egypt statue" className="cinematic-image" />
+          <img src={cairoImg} alt="Egypt statue"  loading="lazy" className="cinematic-image" />
           <span className="cinematic-light"></span>
         </div>
 

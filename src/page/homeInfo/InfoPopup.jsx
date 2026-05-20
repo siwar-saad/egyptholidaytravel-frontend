@@ -70,6 +70,7 @@ export default function InfoPopup({ item, onClose }) {
           {images.length > 0 && (
             <img
               src={images[imageIndex]}
+               loading="lazy"
               alt={item.popupTitle || "Egypt information"}
             />
           )}

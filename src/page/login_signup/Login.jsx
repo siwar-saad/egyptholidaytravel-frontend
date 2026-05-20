@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import API from "../../api";
 import "./Login.css";
+
+import Navbar from "../../components/navbar";
 
 import queenImage from "../../assets/image/login.png";
 import pyramidIcon from "../../assets/image/pyramid.webp";
@@ -77,87 +80,97 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-left">
-          <div className="auth-shape"></div>
+    <>
+      <Navbar />
 
-          <img
-            src={queenImage}
-            alt="Egypt Queen"
-            className="auth-brand-image"
-          />
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className="auth-left">
+            <div className="auth-shape"></div>
 
-          <img
-            src={pyramidIcon}
-            alt="Pyramid"
-            className="auth-icon icon-pyramid"
-          />
-
-          <img
-            src={passportIcon}
-            alt="Passport"
-            className="auth-icon icon-passport"
-          />
-
-          <img
-            src={visaIcon}
-            alt="Visa"
-            className="auth-icon icon-visa"
-          />
-        </div>
-
-        <div className="auth-right">
-          <form className="auth-form" onSubmit={handleLogin}>
-            <h2>Log In</h2>
-
-            {error && <div className="auth-error">{error}</div>}
-
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              autoComplete="email"
+            <img
+              src={queenImage}
+              alt="Egypt Queen"
+              loading="lazy"
+              className="auth-brand-image"
             />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              autoComplete="current-password"
+            <img
+              src={pyramidIcon}
+              alt="Pyramid"
+              loading="lazy"
+              className="auth-icon icon-pyramid"
             />
 
-            <div className="auth-options">
-              <div className="remember-box">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  Remember Me
-                </label>
+            <img
+              src={passportIcon}
+              alt="Passport"
+              className="auth-icon icon-passport"
+            />
+
+            <img
+              src={visaIcon}
+              alt="Visa"
+              loading="lazy"
+              className="auth-icon icon-visa"
+            />
+          </div>
+
+          <div className="auth-right">
+            <form className="auth-form" onSubmit={handleLogin}>
+              <h2>Log In</h2>
+
+              {error && <div className="auth-error">{error}</div>}
+
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={form.email}
+                onChange={handleChange}
+                autoComplete="email"
+                required
+              />
+
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={form.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                required
+              />
+
+              <div className="auth-options">
+                <div className="remember-box">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    Remember Me
+                  </label>
+                </div>
+
+                <Link to="/forgot-password" className="forgot-password">
+                  Forgot Password?
+                </Link>
               </div>
 
-              <Link to="/forgot-password" className="forgot-password">
-                Forgot Password?
-              </Link>
-            </div>
+              <button type="submit" disabled={loading}>
+                {loading ? "Logging in..." : "Log In"}
+              </button>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Logging in..." : "Log In"}
-            </button>
-
-            <p className="auth-switch">
-              Don&apos;t have an account? <Link to="/signup">Sign up</Link>
-            </p>
-          </form>
+              <p className="auth-switch">
+                Don&apos;t have an account?{" "}
+                <Link to="/signup">Sign up</Link>
+              </p>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
