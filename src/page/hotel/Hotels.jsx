@@ -6,6 +6,17 @@ import "./Hotels.css";
 
 import heroImg from "../../assets/image/bghotel.jpg";
 
+const apiOrigin =
+  (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") ||
+  "";
+
+const getImageUrl = (src) => {
+  if (!src) return "";
+  if (/^(https?:|data:|blob:)/i.test(src)) return src;
+  if (src.startsWith("/images/")) return `${apiOrigin}${src}`;
+  return src;
+};
+
 export default function Hotels() {
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(null);
@@ -42,6 +53,23 @@ export default function Hotels() {
     setShowBookingForm(false);
   };
 
+  const hotelGroups = hotels.reduce((groups, hotel) => {
+    const title = hotel.group_title || "Our Hotels";
+    const subtitle =
+      hotel.group_subtitle || "Discover our best hotels across Egypt";
+
+    if (!groups[title]) {
+      groups[title] = {
+        title,
+        subtitle,
+        hotels: [],
+      };
+    }
+
+    groups[title].hotels.push(hotel);
+    return groups;
+  }, {});
+
   const closeHotel = () => {
     setSelectedHotel(null);
     setMainImage(null);
@@ -64,8 +92,8 @@ export default function Hotels() {
     }
 
     try {
-      const response = await API.post("/hotels/reserve", {
-        hotel: {
+      const response = await API.post("/hotels_reservation/reserve", {
+        selected_hotel: {
           name: selectedHotel.name,
           city: selectedHotel.city,
           mealPlan: selectedHotel.meal,
@@ -74,7 +102,7 @@ export default function Hotels() {
           roomType: bookingData.roomType,
         },
 
-        customerInfo: {
+        customer_info: {
           fullName: bookingData.fullName,
           email: bookingData.email,
           phone: bookingData.phone,
@@ -134,12 +162,15 @@ export default function Hotels() {
           </p>
         </section>
 
-        <HotelSection
-          title="Our Hotels"
-          subtitle="Discover our best hotels across Egypt"
-          hotels={hotels}
-          onSelect={openHotel}
-        />
+        {Object.values(hotelGroups).map((group) => (
+          <HotelSection
+            key={group.title}
+            title={group.title}
+            subtitle={group.subtitle}
+            hotels={group.hotels}
+            onSelect={openHotel}
+          />
+        ))}
 
         {selectedHotel && (
           <HotelModal
@@ -186,7 +217,7 @@ function HotelSection({ title, subtitle, hotels, onSelect }) {
               key={hotel.id || hotel._id || `${hotel.name}-${index}`}
               onClick={() => onSelect(hotel)}
             >
-              <img src={hotel.image} alt={hotel.name || "Hotel"} />
+              <img src={getImageUrl(hotel.image)} alt={hotel.name || "Hotel"} />
 
               <div className="hotel-cover-overlay">
                 <span>{hotel.city || "Egypt"}</span>
@@ -213,7 +244,10 @@ function HotelModal({ hotel, mainImage, setMainImage, onClose, onBook }) {
         </button>
 
         <div className="modal-img">
-          <img src={mainImage || hotel.image} alt={hotel.name || "Hotel"} />
+          <img
+            src={getImageUrl(mainImage || hotel.image)}
+            alt={hotel.name || "Hotel"}
+          />
         </div>
 
         <div className="modal-content">
@@ -226,7 +260,7 @@ function HotelModal({ hotel, mainImage, setMainImage, onClose, onBook }) {
               {gallery.map((img, index) => (
                 <img
                   key={`${hotel.name}-gallery-${index}`}
-                  src={img}
+                  src={getImageUrl(img)}
                   alt={hotel.name || "Hotel gallery"}
                   onClick={() => setMainImage(img)}
                   className={(mainImage || hotel.image) === img ? "active-thumb" : ""}
