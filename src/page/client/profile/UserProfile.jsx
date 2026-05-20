@@ -18,10 +18,19 @@ import MessageSuccessPopup from "./MessageSuccessPopup";
 
 function getStoredUser() {
   try {
-    return JSON.parse(localStorage.getItem("user") || "{}");
+    return JSON.parse(
+      localStorage.getItem("user") ||
+        sessionStorage.getItem("user") ||
+        "{}"
+    );
   } catch {
     return {};
   }
+}
+
+function setStoredUser(user) {
+  const storage = localStorage.getItem("token") ? localStorage : sessionStorage;
+  storage.setItem("user", JSON.stringify(user));
 }
 
 export default function UserProfile() {
@@ -91,7 +100,7 @@ export default function UserProfile() {
         setMessages(clientMessages);
         setMessageNotifications(clientMessages.filter((msg) => msg.reply).length);
 
-        localStorage.setItem("user", JSON.stringify(profileData));
+        setStoredUser(profileData);
       } catch (err) {
         console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
       }
@@ -118,7 +127,7 @@ export default function UserProfile() {
 
       setUser(updatedUser);
       setEditForm(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setStoredUser(updatedUser);
       setShowEdit(false);
     } catch (err) {
       alert(err.response?.data?.error || err.message || "Update profile error");
@@ -218,7 +227,7 @@ export default function UserProfile() {
 
         setUser(updatedUser);
         setEditForm(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setStoredUser(updatedUser);
       } catch (err) {
         console.log("Photo update failed:", err.response?.data || err.message);
         alert("Photo update failed");
@@ -232,6 +241,8 @@ export default function UserProfile() {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     window.location.href = "/login";
   };
 

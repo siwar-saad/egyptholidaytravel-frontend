@@ -7,7 +7,17 @@ import { Link } from "react-router-dom";
 export default function Navbar() {
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  let user = null;
+
+  try {
+    user = JSON.parse(
+      localStorage.getItem("user") ||
+        sessionStorage.getItem("user") ||
+        "null"
+    );
+  } catch {
+    user = null;
+  }
 
   return (
     <header className="navbar">

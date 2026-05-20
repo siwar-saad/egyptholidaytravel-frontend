@@ -41,7 +41,7 @@ export default function Login() {
 
       const res = await API.post("/auth/login", {
         email: form.email.trim(),
-        password: form.password,
+        password: form.password.trim(),
       });
 
       if (!res.data?.token) {
@@ -49,27 +49,41 @@ export default function Login() {
         return;
       }
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const userToStore = {
+        id: res.data.user.id,
+        email: res.data.user.email,
+        role: res.data.user.role,
+        name: res.data.user.name,
+      };
 
       if (rememberMe) {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(userToStore));
         localStorage.setItem("rememberMe", "true");
+
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
       } else {
+        sessionStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("user", JSON.stringify(userToStore));
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         localStorage.removeItem("rememberMe");
       }
 
       if (res.data.user?.role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/");
+        navigate("/profile");
       }
     } catch (err) {
       console.log("Login error:", err.response?.data || err.message);
 
       setError(
         err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Email or password is incorrect."
+        err.response?.data?.error ||
+        "Email or password is incorrect."
       );
     } finally {
       setLoading(false);

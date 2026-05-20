@@ -20,7 +20,7 @@ export default function Reservations({ showSuccess }) {
     const fetchReservations = async () => {
       try {
         const packageReservationsRes = await API.get("/admin/reservations");
-        const hotelReservationsRes = await API.get("/hotels/bookings");
+        const hotelReservationsRes = await API.get("/admin/hotels/reservations");
 
         const packageBookings = (packageReservationsRes.data || []).map(
           (item) => ({
@@ -52,19 +52,16 @@ export default function Reservations({ showSuccess }) {
   );
 
   const searchedPackageReservations = packageReservations.filter((booking) =>
-    `${booking.name || ""} ${booking.client || ""} ${
-      booking.packageName || ""
-    } ${booking.trip || ""} ${booking.date || ""} ${booking.status || ""}`
+    `${booking.name || ""} ${booking.client || ""} ${booking.packageName || ""
+      } ${booking.trip || ""} ${booking.date || ""} ${booking.status || ""}`
       .toLowerCase()
       .includes(reservationSearch.toLowerCase())
   );
 
   const searchedHotelReservations = hotelReservations.filter((booking) =>
-    `${booking.name || ""} ${booking.client || ""} ${
-      booking.hotelName || ""
-    } ${booking.checkIn || ""} ${booking.checkOut || ""} ${
-      booking.status || ""
-    }`
+    `${booking.name || ""} ${booking.client || ""} ${booking.hotelName || ""
+      } ${booking.checkIn || ""} ${booking.checkOut || ""} ${booking.status || ""
+      }`
       .toLowerCase()
       .includes(reservationSearch.toLowerCase())
   );
@@ -79,7 +76,7 @@ export default function Reservations({ showSuccess }) {
 
     try {
       if (booking.type === "hotel" || booking.hotelName) {
-        await API.put(`/hotels/bookings/${id}/status`, { status });
+        await API.put(`/admin/hotels/reservations/${id}/status`, { status });
       } else {
         await API.put(`/admin/reservations/${id}/status`, { status });
       }
@@ -162,13 +159,12 @@ export default function Reservations({ showSuccess }) {
 
                       <td>
                         <select
-                          className={`status-select ${
-                            booking.status === "Confirmed"
+                          className={`status-select ${booking.status === "Confirmed"
                               ? "confirmed"
                               : booking.status === "Cancelled"
-                              ? "cancelled"
-                              : "pending"
-                          }`}
+                                ? "cancelled"
+                                : "pending"
+                            }`}
                           value={booking.status || "Pending"}
                           onChange={(e) =>
                             updateReservationStatus(booking, e.target.value)
@@ -216,13 +212,12 @@ export default function Reservations({ showSuccess }) {
 
                       <td>
                         <select
-                          className={`status-select ${
-                            booking.status === "Confirmed"
+                          className={`status-select ${booking.status === "Confirmed"
                               ? "confirmed"
                               : booking.status === "Cancelled"
-                              ? "cancelled"
-                              : "pending"
-                          }`}
+                                ? "cancelled"
+                                : "pending"
+                            }`}
                           value={booking.status || "Pending"}
                           onChange={(e) =>
                             updateReservationStatus(booking, e.target.value)
