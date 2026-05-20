@@ -1,83 +1,122 @@
 import Navbar from "../components/navbar";
+import Footer from "../components/footer";
 import "./Packages.css";
 
-
-import hurghadaImg from "../assets/image/hurghad.jpg";
-import dahabImg from "../assets/image/dahab1.jpg";
-import sahelImg from "../assets/image/sahel.png";
-import turkeyImg from "../assets/image/turkey.jpg";
-import luxorImg from "../assets/image/Lux.jpg";
-import sharmImg from "../assets/image/sharm.jpeg";
-import uzbekistanImg from "../assets/image/uzbekistan.jpg";
-import fayoumImg from "../assets/image/fayoum.jpg";
-import cairoImg from "../assets/image/cai.jpg";
-import alexandriaImg from "../assets/image/alexandria.png";
-import aswanImg from "../assets/image/aswan.png";
-import siwaImg from "../assets/image/siwa.jpg";
-import sokhnaImg from "../assets/image/ainsokhna.jpg";
-import marsaImg from "../assets/image/marsaalam.jpg";
+import {
+  FaSuitcaseRolling,
+  FaClock,
+  FaEnvelope,
+  FaPhoneAlt,
+  FaBell,
+  FaArrowLeft,
+  FaCheckCircle,
+  FaHeadset,
+  FaPlaneDeparture,
+} from "react-icons/fa";
 
 export default function Packages() {
-  const packages = [
-    { title: "Hurghada", img: hurghadaImg, pdf: "/pdf/HURGHADA.pdf" },
-    { title: "Dahab", img: dahabImg, pdf: "/pdf/DAHAB.pdf" },
-    { title: "Sahel", img: sahelImg, pdf: "/pdf/sahel.pdf" },
-    { title: "Turkey Trip", img: turkeyImg, pdf: "/pdf/turkey.pdf" },
-    { title: "Luxor", img: luxorImg, pdf: "/pdf/LUXOR.pdf" },
-    { title: "Sharm El Sheikh", img: sharmImg, pdf: "/pdf/sharmelsheikh.pdf" },
-    { title: "Uzbekistan Trip", img: uzbekistanImg, pdf: "/pdf/Uzbekistan.pdf" },
-    { title: "Fayoum", img: fayoumImg, pdf: "/pdf/Fayoum.pdf" },
-    { title: "Cairo", img: cairoImg, pdf: "/pdf/Cairo.pdf" },
-    { title: "Alexandria", img: alexandriaImg, pdf: "/pdf/Alexandria.pdf" },
-    { title: "Aswan", img: aswanImg, pdf: "/pdf/ASWAN.pdf" },
-    { title: "Siwa Oasis", img: siwaImg, pdf: "/pdf/SIWA.pdf" },
-    { title: "Ain Sokhna", img: sokhnaImg, pdf: "/pdf/AINSOKHNA.pdf" },
-    { title: "Marsa Alam", img: marsaImg, pdf: "/pdf/MARSAALAM.pdf" },
-  ];
-
   return (
     <div className="packages-page">
       <Navbar />
 
-      <section className="packages-hero">
-        <div className="packages-hero-content">
-          <span>Egypt Holiday Travel</span>
-          <h1>Our Travel Packages</h1>
-          <p>
-            Choose your perfect trip and open the full PDF program with all details.
-          </p>
-        </div>
-      </section>
+      <main className="packages-soon-page">
+        <section className="packages-soon-hero">
+          <span className="packages-circle packages-circle-1"></span>
+          <span className="packages-circle packages-circle-2"></span>
+          <span className="packages-circle packages-circle-3"></span>
 
-      <section className="packages-section">
-        <h2>Choose Your Package</h2>
+          <div className="packages-soon-card">
+            <div className="packages-top-icon">
+              <FaSuitcaseRolling />
+            </div>
 
-        <div className="packages-grid">
-          {packages.map((item, index) => (
-            <div className="package-card" key={index}>
-              <div className="package-img-box">
-                <img src={item.img} alt={item.title} />
+            <span className="packages-small-badge">Egypt Holiday Travel</span>
+
+            <h1>Travel Packages Coming Soon</h1>
+
+            <p className="packages-main-text">
+              Our packages page is currently being prepared to offer you a more
+              elegant, clear, and professional travel booking experience.
+            </p>
+
+            <div className="packages-status-box">
+              <FaBell />
+              <span>
+                New travel packages will be available soon. For current package
+                details, contact our team directly.
+              </span>
+            </div>
+
+            <div className="packages-mini-grid">
+              <div className="packages-mini-card">
+                <FaClock />
+                <h3>Coming Soon</h3>
+                <p>We are updating our travel offers.</p>
               </div>
 
-              <div className="package-content">
-                <h3>{item.title}</h3>
-                <p>
-                  Discover the full travel program, hotels, activities, and trip details.
-                </p>
+              <div className="packages-mini-card">
+                <FaPlaneDeparture />
+                <h3>Better Trips</h3>
+                <p>More organized and clear programs.</p>
+              </div>
 
-                <a
-                  href={item.pdf}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="package-btn"
-                >
-                  View PDF
+              <div className="packages-mini-card">
+                <FaHeadset />
+                <h3>Direct Support</h3>
+                <p>Contact us for available packages.</p>
+              </div>
+            </div>
+
+            <div className="packages-contact-panel">
+              <div className="packages-contact-header">
+                <FaCheckCircle />
+                <div>
+                  <h2>Need Package Information?</h2>
+                  <p>
+                    Contact us now and our team will help you with the available
+                    packages.
+                  </p>
+                </div>
+              </div>
+
+              <div className="packages-contact-links">
+                <a href="mailto:amr@egyptholiday-travel.com">
+                  <span className="packages-contact-icon">
+                    <FaEnvelope />
+                  </span>
+
+                  <div>
+                    <small>Email Us</small>
+                    <strong>amr@egyptholiday-travel.com</strong>
+                  </div>
+                </a>
+
+                <a href="tel:01099959949">
+                  <span className="packages-contact-icon">
+                    <FaPhoneAlt />
+                  </span>
+
+                  <div>
+                    <small>Call Us</small>
+                    <strong>01099959949</strong>
+                  </div>
                 </a>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+
+            <div className="packages-actions">
+              <a href="/" className="packages-back-btn">
+                <FaArrowLeft />
+                Back Home
+              </a>
+
+             
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
   );
 }

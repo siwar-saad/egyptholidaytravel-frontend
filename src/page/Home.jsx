@@ -3,17 +3,11 @@ import "./Home.css";
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
+import Footer from "../components/footer";
 
 import HomeInfoSection from "./homeInfo/HomeInfoSection";
 import InfoPopup from "./homeInfo/InfoPopup";
 
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaWhatsapp,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-} from "react-icons/fa";
 
 /* IMAGES */
 import cairoCover from "../assets/image/cairo.jpeg";
@@ -298,97 +292,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="footer-section">
-        <div className="footer-container">
-          <div className="footer-col footer-about">
-            <h2 className="footer-logo">Egypt Holiday</h2>
-
-            <p className="footer-desc">
-              Discover Egypt with us. We offer the best travel experiences,
-              luxury packages, and unforgettable adventures.
-            </p>
-
-            <div className="footer-socials">
-              <a href="https://facebook.com" target="_blank" rel="noreferrer">
-                <FaFacebookF />
-              </a>
-
-              <a href="https://instagram.com" target="_blank" rel="noreferrer">
-                <FaInstagram />
-              </a>
-
-              <a
-                href="https://wa.me/201099999234"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <FaWhatsapp />
-              </a>
-            </div>
-          </div>
-
-          <div className="footer-col">
-            <h3>Company</h3>
-            <a href="#hero">Home</a>
-            <a href="/packages">Packages</a>
-            <a href="/hotels">Hotels</a>
-            <a href="/flights">Flights</a>
-          </div>
-
-          <div className="footer-col">
-            <h3>Support</h3>
-            <a href="#">Reservation Info</a>
-            <a href="#">Cancellation Policy</a>
-            <a href="#">Terms & Conditions</a>
-          </div>
-
-          <div className="footer-col contact-col">
-            <h3>Contact</h3>
-
-            <div className="contact-card">
-              <div className="contact-icon">
-                <FaPhoneAlt />
-              </div>
-
-              <div className="contact-info">
-                <h4>Phone Numbers</h4>
-                <a href="tel:01099999234">01099999234</a>
-                <a href="tel:01050971444">01050971444</a>
-                <a href="tel:01050383173">01050383173</a>
-                <a href="tel:0111787867">0111787867</a>
-              </div>
-            </div>
-
-            <div className="contact-card">
-              <div className="contact-icon">
-                <FaMapMarkerAlt />
-              </div>
-
-              <div className="contact-info">
-                <h4>Mansoura Branch</h4>
-                <p>El-Siiz Area, next to El-Eman Mosque.</p>
-              </div>
-            </div>
-
-            <div className="contact-card">
-              <div className="contact-icon">
-                <FaMapMarkerAlt />
-              </div>
-
-              <div className="contact-info">
-                <h4>Cairo Branch</h4>
-                <p>22 Abou Dawoud El Zahery Street.</p>
-                <p>Next to Arab Investment Bank.</p>
-                <p>Nasr City, Cairo, Egypt.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          © 2026 Egypt Holiday Travel — All rights reserved
-        </div>
-      </footer>
+          <Footer />
 
       {showButton && (
         <button className="book-now-btn" type="button" onClick={handleBookNow}>

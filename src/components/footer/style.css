@@ -1,0 +1,324 @@
+@import url("https://fonts.googleapis.com/css2?family=Inika:wght@400;700&family=Playfair+Display:wght@500;600;700&display=swap");
+
+/* ================= FOOTER ================= */
+
+.footer-section {
+  width: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #fbf7f2 100%);
+  padding: 70px 50px 25px;
+  border-top: 1px solid rgba(147, 84, 38, 0.12);
+  color: #24160f;
+  font-family: "Inika", serif;
+}
+
+.footer-container {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.9fr 1.6fr;
+  gap: 45px;
+  align-items: flex-start;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ================= ABOUT ================= */
+
+.footer-about {
+  background: #ffffff;
+  padding: 26px;
+  border-radius: 26px;
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  box-shadow: 0 18px 45px rgba(147, 84, 38, 0.08);
+}
+
+.footer-logo {
+  font-family: "Playfair Display", serif;
+  font-size: 32px;
+  color: #24160f;
+  margin-bottom: 10px;
+}
+
+.footer-desc {
+  max-width: 320px;
+  color: #4d3b31;
+  line-height: 1.75;
+  font-size: 15px;
+}
+
+/* ================= COLUMNS ================= */
+
+.footer-col h3 {
+  color: #935426;
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-family: "Playfair Display", serif;
+}
+
+.footer-col a {
+  width: fit-content;
+  color: #2b1c14;
+  text-decoration: none;
+  font-size: 15px;
+  transition: 0.3s ease;
+}
+
+.footer-col a:hover {
+  color: #935426;
+  transform: translateX(5px);
+}
+
+/* ================= SOCIAL ICONS ================= */
+
+.footer-socials {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-socials a {
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  background: #efe6dc;
+  color: #935426;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  transition: 0.3s ease;
+  box-shadow: 0 10px 22px rgba(147, 84, 38, 0.12);
+}
+
+.footer-socials a:hover {
+  color: #ffffff;
+  transform: translateY(-5px) scale(1.06);
+}
+
+/* Facebook */
+.footer-socials a:nth-child(1):hover {
+  background: #1877f2;
+}
+
+/* Instagram */
+.footer-socials a:nth-child(2):hover {
+  background: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+}
+
+/* WhatsApp */
+.footer-socials a:nth-child(3):hover {
+  background: #25d366;
+}
+
+/* TikTok */
+.footer-socials a:nth-child(4):hover,
+.footer-socials .tiktok-link:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+.footer-socials a:nth-child(4):hover svg,
+.footer-socials .tiktok-link:hover svg {
+  filter:
+    drop-shadow(-1.5px 0 #25f4ee)
+    drop-shadow(1.5px 0 #fe2c55);
+}
+
+/* ================= CONTACT ================= */
+
+.contact-col {
+  gap: 15px;
+}
+
+.contact-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  box-shadow: 0 14px 34px rgba(147, 84, 38, 0.07);
+  transition: 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(147, 84, 38, 0.12);
+}
+
+.contact-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.contact-info h4 {
+  margin: 0 0 8px;
+  color: #24160f;
+  font-size: 15px;
+}
+
+.contact-info p,
+.contact-info a {
+  display: block;
+  width: fit-content;
+  margin: 0 0 5px;
+  color: #4d3b31;
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.contact-info a:hover {
+  color: #935426;
+  transform: none;
+}
+
+/* ================= BOTTOM ================= */
+
+.footer-bottom {
+  width: min(1200px, 100%);
+  margin: 40px auto 0;
+  padding-top: 22px;
+  border-top: 1px solid rgba(147, 84, 38, 0.15);
+  text-align: center;
+  color: #6e5b4d;
+  font-size: 14px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1050px) {
+  .footer-section {
+    padding: 60px 28px 24px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  .footer-about {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .footer-section {
+    padding: 45px 16px 22px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .footer-about {
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .footer-logo {
+    font-size: 28px;
+  }
+
+  .footer-desc {
+    max-width: 100%;
+    font-size: 14px;
+  }
+
+  .footer-col h3 {
+    font-size: 19px;
+  }
+
+  .footer-socials {
+    gap: 10px;
+  }
+
+  .footer-socials a {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .contact-card {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .footer-bottom {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 380px) {
+  .footer-about {
+    padding: 18px;
+  }
+
+  .footer-logo {
+    font-size: 25px;
+  }
+
+  .footer-socials a {
+    width: 38px;
+    height: 38px;
+  }
+
+  .contact-card {
+    gap: 11px;
+  }
+
+  .contact-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* ================= FOOTER SOCIALS MOBILE FIX ================= */
+
+@media (max-width: 650px) {
+  .footer-socials {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 42px);
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .footer-socials a {
+    width: 42px;
+    height: 42px;
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 380px) {
+  .footer-socials {
+    grid-template-columns: repeat(4, 38px);
+    gap: 10px;
+  }
+
+  .footer-socials a {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+  }
+}
