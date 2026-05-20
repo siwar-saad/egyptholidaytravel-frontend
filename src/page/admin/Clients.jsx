@@ -7,6 +7,7 @@ export default function Clients({ showSuccess }) {
   const [clientSearch, setClientSearch] = useState("");
   const [showClientForm, setShowClientForm] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
+  const [savingClient, setSavingClient] = useState(false);
 
   const [clientForm, setClientForm] = useState({
     name: "",
@@ -18,6 +19,20 @@ export default function Clients({ showSuccess }) {
     if (typeof showSuccess === "function") {
       showSuccess(message);
     }
+  };
+
+  const getClientName = (client) =>
+    client.name ||
+    `${client.first_name || ""} ${client.last_name || ""}`.trim();
+
+  const splitClientName = (name) => {
+    const parts = name.trim().split(/\s+/);
+    const firstName = parts.shift() || "";
+
+    return {
+      first_name: firstName,
+      last_name: parts.join(" "),
+    };
   };
 
   useEffect(() => {
@@ -34,7 +49,7 @@ export default function Clients({ showSuccess }) {
   }, []);
 
   const filteredClients = clients.filter((client) =>
-    `${client.name || ""} ${client.email || ""} ${client.phone || ""}`
+    `${getClientName(client)} ${client.email || ""} ${client.phone || ""}`
       .toLowerCase()
       .includes(clientSearch.toLowerCase())
   );
@@ -52,14 +67,14 @@ export default function Clients({ showSuccess }) {
   const openEditClient = (client) => {
     setEditingClient(client);
     setClientForm({
-      name: client.name || "",
+      name: getClientName(client),
       email: client.email || "",
       phone: client.phone || "",
     });
     setShowClientForm(true);
   };
 
-  const saveClient = () => {
+  const saveClient = async () => {
     const name = clientForm.name.trim();
     const email = clientForm.email.trim();
     const phone = clientForm.phone.trim();
@@ -69,49 +84,62 @@ export default function Clients({ showSuccess }) {
       return;
     }
 
-    if (editingClient) {
-      setClients((prevClients) =>
-        prevClients.map((client) =>
-          client.id === editingClient.id
-            ? {
-                ...client,
-                name,
-                email,
-                phone,
-              }
-            : client
-        )
-      );
+    const payload = {
+      ...splitClientName(name),
+      email,
+      phone,
+      country: editingClient?.country || "Egypt",
+      city: editingClient?.city || "",
+      role: editingClient?.role || "user",
+    };
 
-      notify("Client updated successfully.");
-    } else {
-      const newClient = {
-        id: Date.now(),
-        name,
-        email,
-        phone,
-      };
+    try {
+      setSavingClient(true);
 
-      setClients((prevClients) => [newClient, ...prevClients]);
-      notify("Client added successfully.");
+      if (editingClient) {
+        const res = await API.put(`/admin/clients/${editingClient.id}`, payload);
+
+        setClients((prevClients) =>
+          prevClients.map((client) =>
+            client.id === editingClient.id ? res.data : client
+          )
+        );
+
+        notify("Client updated successfully.");
+      } else {
+        const res = await API.post("/admin/clients", payload);
+
+        setClients((prevClients) => [res.data.user, ...prevClients]);
+        notify("Client created successfully. A password was sent by email.");
+      }
+
+      setShowClientForm(false);
+      setEditingClient(null);
+
+      setClientForm({
+        name: "",
+        email: "",
+        phone: "",
+      });
+    } catch (err) {
+      notify(err.response?.data?.error || "Unable to save client.");
+    } finally {
+      setSavingClient(false);
     }
-
-    setShowClientForm(false);
-    setEditingClient(null);
-
-    setClientForm({
-      name: "",
-      email: "",
-      phone: "",
-    });
   };
 
-  const deleteClient = (id) => {
-    setClients((prevClients) =>
-      prevClients.filter((client) => client.id !== id)
-    );
+  const deleteClient = async (id) => {
+    try {
+      await API.delete(`/admin/clients/${id}`);
 
-    notify("Client deleted successfully.");
+      setClients((prevClients) =>
+        prevClients.filter((client) => client.id !== id)
+      );
+
+      notify("Client deleted successfully.");
+    } catch (err) {
+      notify(err.response?.data?.error || "Unable to delete client.");
+    }
   };
 
   return (
@@ -144,7 +172,7 @@ export default function Clients({ showSuccess }) {
             {filteredClients.map((client) => (
               <div className="client-card" key={client.id || client.email}>
                 <div>
-                  <h3>{client.name}</h3>
+                  <h3>{getClientName(client) || "Client"}</h3>
                   <p>{client.email}</p>
                   <span>{client.phone || "No phone"}</span>
                 </div>
@@ -216,7 +244,11 @@ export default function Clients({ showSuccess }) {
 
               <div className="package-popup-actions">
                 <button type="button" onClick={saveClient}>
-                  {editingClient ? "Save Changes" : "Add Client"}
+                  {savingClient
+                    ? "Saving..."
+                    : editingClient
+                    ? "Save Changes"
+                    : "Add Client"}
                 </button>
 
                 <button

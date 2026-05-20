@@ -22,12 +22,18 @@ import UserProfile from "./page/client/profile/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem("token") ||
+    sessionStorage.getItem("token");
 
   let user = null;
 
   try {
-    user = JSON.parse(localStorage.getItem("user") || "null");
+    user = JSON.parse(
+      localStorage.getItem("user") ||
+        sessionStorage.getItem("user") ||
+        "null"
+    );
   } catch {
     user = null;
   }
@@ -38,7 +44,7 @@ function App() {
         {/* AUTH */}
         <Route
           path="/login"
-          element={token && user ? <Navigate to="/" replace /> : <Login />}
+          element={<Login />}
         />
 
         <Route
