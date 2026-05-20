@@ -16,7 +16,9 @@ export default function Login() {
     password: "",
   });
 
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(
+    localStorage.getItem("rememberMe") === "true"
+  );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -42,6 +44,7 @@ export default function Login() {
       const res = await API.post("/auth/login", {
         email: form.email.trim(),
         password: form.password.trim(),
+        rememberMe,
       });
 
       if (!res.data?.token) {

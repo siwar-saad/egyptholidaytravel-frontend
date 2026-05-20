@@ -238,9 +238,16 @@ export default function UserProfile() {
     e.target.value = "";
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await API.post("/auth/logout");
+    } catch (err) {
+      console.log("Logout error:", err.response?.data || err.message);
+    }
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("rememberMe");
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
     window.location.href = "/login";
