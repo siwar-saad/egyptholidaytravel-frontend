@@ -49,8 +49,8 @@ export default function Admin() {
   useEffect(() => {
     const loadMessageNotifications = async () => {
       try {
-        const res = await API.get("/admin/messages");
-        setAdminMessageNotifications(Array.isArray(res.data) ? res.data.length : 0);
+        const res = await API.get("/admin/messages/unread-count");
+        setAdminMessageNotifications(Number(res.data?.count || 0));
       } catch (err) {
         console.log(
           "Messages notification error:",
@@ -64,10 +64,6 @@ export default function Admin() {
 
   const openTab = (tab) => {
     setActiveTab(tab);
-
-    if (tab === "messages") {
-      setAdminMessageNotifications(0);
-    }
   };
 
   const renderContent = () => {
@@ -91,7 +87,12 @@ export default function Admin() {
       return <Payments />;
 
     case "messages":
-      return <Messages showSuccess={showSuccess} />;
+      return (
+        <Messages
+          showSuccess={showSuccess}
+          onUnreadChange={setAdminMessageNotifications}
+        />
+      );
 
     case "subscribers":
       return <Subscribers />;

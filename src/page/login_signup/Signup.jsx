@@ -14,7 +14,7 @@ import Navbar from "../../components/navbar";
 const COUNTRIES = [
   {
     flag: "https://flagcdn.com/fr.svg",
-    name: "Paris / France",
+    name: "France",
     dialCode: "+33",
   },
   {
@@ -104,6 +104,7 @@ export default function Signup() {
         password,
         confirmPassword,
         phone: fullPhone,
+        country: selectedCountry.name,
       });
 
       if (response.data.success) {
@@ -115,6 +116,7 @@ export default function Signup() {
             id: response.data.user.id,
             email: response.data.user.email,
             role: response.data.user.role || "user",
+            country: response.data.user.country || selectedCountry.name,
           }),
         );
 

@@ -12,15 +12,10 @@ export default function ProfileSidebar({
   activePage,
   setActivePage,
   messageNotifications,
-  setMessageNotifications,
   onLogout,
 }) {
   const openPage = (page) => {
     setActivePage(page);
-
-    if (page === "messages") {
-      setMessageNotifications(0);
-    }
   };
 
   return (

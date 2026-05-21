@@ -47,7 +47,7 @@ const formatConversationTime = (msg) => {
   return formatChatDate(date);
 };
 
-export default function Messages({ showSuccess }) {
+export default function Messages({ showSuccess, onUnreadChange }) {
   const [messages, setMessages] = useState([]);
   const [replyDrafts, setReplyDrafts] = useState({});
   const [selectedConversationKey, setSelectedConversationKey] = useState(null);
@@ -155,6 +155,42 @@ export default function Messages({ showSuccess }) {
     selectedConversation?.messages?.find((msg) => !msg.reply) || lastMessage;
   const replyTargetId = replyTarget ? getMessageId(replyTarget) : null;
 
+  const markConversationAsRead = async (conversation) => {
+    if (!conversation?.email) return;
+
+    const unreadCount = conversation.messages.filter(
+      (msg) => (msg.sender || "client") !== "admin" && !msg.isRead
+    ).length;
+
+    if (unreadCount === 0) return;
+
+    try {
+      await API.put("/admin/messages/read", {
+        email: conversation.email,
+      });
+
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          (msg.sender || "client") !== "admin" &&
+          !msg.isRead &&
+          msg.email?.toLowerCase() === conversation.email.toLowerCase()
+            ? { ...msg, isRead: true }
+            : msg
+        )
+      );
+
+      if (typeof onUnreadChange === "function") {
+        onUnreadChange((current) => Math.max(0, current - unreadCount));
+      }
+    } catch (err) {
+      console.log("Read messages error:", err.response?.data || err.message);
+    }
+  };
+
+  useEffect(() => {
+    markConversationAsRead(selectedConversation);
+  }, [selectedConversation?.key]);
+
   const replyMessage = async () => {
     if (!replyTargetId) return;
 
@@ -179,6 +215,7 @@ export default function Messages({ showSuccess }) {
           email: selectedConversation?.email || "",
           phone: selectedConversation?.phone || "",
           sender: "admin",
+          isRead: true,
           message: cleanReply,
           reply: "",
           createdAt: savedMessage?.created_at || new Date().toISOString(),
@@ -253,11 +290,9 @@ export default function Messages({ showSuccess }) {
               filteredConversations.map((conversation) => {
                 const latest =
                   conversation.messages[conversation.messages.length - 1];
-                const needsReply =
-                  latest?.sender !== "admin" &&
-                  conversation.messages.some(
-                    (msg) => (msg.sender || "client") !== "admin"
-                  );
+                const unreadCount = conversation.messages.filter(
+                  (msg) => (msg.sender || "client") !== "admin" && !msg.isRead
+                ).length;
 
                 return (
                   <button
@@ -278,7 +313,13 @@ export default function Messages({ showSuccess }) {
                       <strong>{conversation.name || "Visitor"}</strong>
                       <small>{conversation.email || "No email"}</small>
                       <small>{conversation.phone || "No phone"}</small>
-                      <em>{needsReply ? "Needs reply" : "Replied"}</em>
+                      <em>
+                        {unreadCount > 0
+                          ? `${unreadCount} new`
+                          : latest?.sender === "admin"
+                          ? "Replied"
+                          : "Opened"}
+                      </em>
                     </span>
 
                     <span className="admin-mail-date">

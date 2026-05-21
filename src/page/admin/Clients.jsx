@@ -5,7 +5,7 @@ import API from "../../api";
 const COUNTRIES = [
   {
     flag: "https://flagcdn.com/fr.svg",
-    name: "Paris / France",
+    name: "France",
     dialCode: "+33",
   },
   {
@@ -122,6 +122,16 @@ export default function Clients({ showSuccess }) {
     };
   };
 
+  const getCountryFromClient = (client, fallbackCountry) => {
+    return (
+      COUNTRIES.find(
+        (country) =>
+          country.name.toLowerCase() ===
+          (client?.country || "").trim().toLowerCase()
+      ) || fallbackCountry
+    );
+  };
+
   const fetchClients = async () => {
     try {
       const res = await API.get("/admin/clients");
@@ -156,6 +166,7 @@ export default function Clients({ showSuccess }) {
     const clientName = getClientName(client);
     const { firstName, lastName } = splitName(clientName);
     const phoneData = splitPhone(client?.phone || "");
+    const clientCountry = getCountryFromClient(client, phoneData.country);
 
     setEditingClient(client);
 
@@ -166,7 +177,7 @@ export default function Clients({ showSuccess }) {
       phone: phoneData.phone,
     });
 
-    setSelectedCountry(phoneData.country);
+    setSelectedCountry(clientCountry);
     setOpenCountry(false);
     setShowClientForm(true);
   };
@@ -214,6 +225,7 @@ export default function Clients({ showSuccess }) {
       name: `${firstName} ${lastName}`,
       email,
       phone: fullPhone,
+      country: selectedCountry.name,
       role: "user",
     };
 
@@ -331,6 +343,7 @@ export default function Clients({ showSuccess }) {
                     <h3>{getClientName(client) || "Client"}</h3>
                     <p>{client?.email || "No email"}</p>
                     <span>{client?.phone || "No phone"}</span>
+                    <span>{client?.country || "No country"}</span>
                   </div>
 
                   <div className="client-actions">

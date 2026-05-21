@@ -97,7 +97,11 @@ export default function UserProfile() {
         setBookings(bookingsRes.data || []);
         setPayments(paymentsRes.data || []);
         setMessages(clientMessages);
-        setMessageNotifications(clientMessages.filter((msg) => msg.reply).length);
+        setMessageNotifications(
+          clientMessages.filter(
+            (msg) => (msg.sender || "client") === "admin" && !msg.isRead
+          ).length
+        );
 
         setStoredUser(profileData);
       } catch (err) {
@@ -107,6 +111,58 @@ export default function UserProfile() {
 
     loadClientData();
   }, []);
+
+  useEffect(() => {
+    if (activePage === "messages") {
+      setMessageNotifications(0);
+      return undefined;
+    }
+
+    const loadUnreadMessages = async () => {
+      try {
+        const res = await API.get("/client/messages/unread-count");
+        setMessageNotifications(Number(res.data?.count || 0));
+      } catch (err) {
+        console.log(
+          "Client message notification error:",
+          err.response?.data || err.message
+        );
+      }
+    };
+
+    loadUnreadMessages();
+
+    const unreadTimer = setInterval(loadUnreadMessages, 5000);
+
+    return () => clearInterval(unreadTimer);
+  }, [activePage]);
+
+  useEffect(() => {
+    const markMessagesRead = async () => {
+      if (activePage !== "messages") return;
+
+      try {
+        await API.put("/client/messages/read");
+
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            (msg.sender || "client") === "admin"
+              ? { ...msg, isRead: true }
+              : msg
+          )
+        );
+
+        setMessageNotifications(0);
+      } catch (err) {
+        console.log(
+          "Client mark messages read error:",
+          err.response?.data || err.message
+        );
+      }
+    };
+
+    markMessagesRead();
+  }, [activePage]);
 
   const handleSaveProfile = async () => {
     try {
@@ -260,7 +316,26 @@ export default function UserProfile() {
           onRefreshMessages={async () => {
             try {
               const res = await API.get("/client/messages");
-              setMessages(res.data || []);
+              let refreshedMessages = res.data || [];
+              const unreadAdminMessages = refreshedMessages.filter(
+                (msg) => (msg.sender || "client") === "admin" && !msg.isRead
+              );
+
+              if (unreadAdminMessages.length > 0) {
+                await API.put("/client/messages/read");
+
+                refreshedMessages = refreshedMessages.map((msg) =>
+                  (msg.sender || "client") === "admin"
+                    ? { ...msg, isRead: true }
+                    : msg
+                );
+
+                setMessageNotifications(0);
+              } else {
+                setMessageNotifications(0);
+              }
+
+              setMessages(refreshedMessages);
             } catch (err) {
               alert(err.response?.data?.error || "Unable to refresh messages");
             }
@@ -290,7 +365,6 @@ export default function UserProfile() {
           activePage={activePage}
           setActivePage={setActivePage}
           messageNotifications={messageNotifications}
-          setMessageNotifications={setMessageNotifications}
           onLogout={logout}
         />
 
