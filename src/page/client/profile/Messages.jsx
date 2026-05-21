@@ -1,71 +1,150 @@
+import { useEffect, useMemo, useRef } from "react";
+import { FaPaperPlane, FaSyncAlt } from "react-icons/fa";
+
+const getMessageDate = (msg) =>
+  new Date(
+    msg.createdAt || msg.created_at || msg.dateTime || msg.date || Date.now()
+  );
+
+const isSameDay = (first, second) =>
+  first.getFullYear() === second.getFullYear() &&
+  first.getMonth() === second.getMonth() &&
+  first.getDate() === second.getDate();
+
+const formatChatDate = (date) => {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (isSameDay(date, today)) return "Today";
+  if (isSameDay(date, yesterday)) return "Yesterday";
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatChatTime = (msg) =>
+  getMessageDate(msg).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
 export default function Messages({
   messages,
   messageText,
   setMessageText,
-  replyTexts,
-  setReplyTexts,
   onSendMessage,
-  onReplyMessage,
+  onRefreshMessages,
 }) {
-  const getMessageId = (msg, index) => msg.id || msg._id || index;
+  const threadEndRef = useRef(null);
+
+  const sortedMessages = useMemo(
+    () =>
+      [...messages].sort((a, b) => {
+        const firstDate = getMessageDate(a).getTime();
+        const secondDate = getMessageDate(b).getTime();
+        return firstDate - secondDate;
+      }),
+    [messages]
+  );
+
+  useEffect(() => {
+    if (typeof onRefreshMessages !== "function") return undefined;
+
+    const refreshTimer = setInterval(() => {
+      onRefreshMessages();
+    }, 5000);
+
+    return () => clearInterval(refreshTimer);
+  }, [onRefreshMessages]);
+
+  useEffect(() => {
+    threadEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [sortedMessages.length]);
 
   return (
     <section className="page-section">
-      <h2>Messages</h2>
+      <div className="messenger-header">
+        <div className="messenger-avatar">E</div>
 
-      <p className="section-desc">
-        Send your request to the agency. Our team will reply as soon as possible.
-      </p>
+        <div>
+          <h2>Egypt Holiday Travel</h2>
+          <p>{sortedMessages.length} messages</p>
+        </div>
 
-      <div className="message-box">
-        <textarea
-          placeholder="Write your message here..."
-          value={messageText}
-          onChange={(e) => setMessageText(e.target.value)}
-        />
-
-        <button type="button" onClick={onSendMessage}>
-          Send Message
+        <button type="button" onClick={onRefreshMessages}>
+          <FaSyncAlt /> Refresh
         </button>
       </div>
 
-      {messages.length === 0 && <p className="empty-msg">No messages yet.</p>}
+      <div className="messenger-chat">
+        <div className="messenger-thread">
+          {sortedMessages.length === 0 ? (
+            <p className="empty-msg">Start your conversation with the agency.</p>
+          ) : (
+            sortedMessages.map((msg, index) => {
+              const isAdmin = (msg.sender || "client") === "admin";
+              const currentDate = getMessageDate(msg);
+              const previousMessage = sortedMessages[index - 1];
+              const showDateDivider =
+                !previousMessage ||
+                !isSameDay(currentDate, getMessageDate(previousMessage));
 
-      {messages.map((msg, index) => {
-        const messageId = getMessageId(msg, index);
+              return (
+                <div className="messenger-message-group" key={msg.id || index}>
+                  {showDateDivider && (
+                    <div className="messenger-date-divider">
+                      {formatChatDate(currentDate)}
+                    </div>
+                  )}
 
-        return (
-          <div className="user-message-card" key={messageId}>
-            <p className="msg-date">{msg.date || msg.created_at || "Today"}</p>
+                  <div className={`chat-row ${isAdmin ? "incoming" : "outgoing"}`}>
+                    {isAdmin && <div className="messenger-avatar small">E</div>}
 
-            <p>{msg.message || "No message content."}</p>
+                    <div className="chat-bubble">
+                      <p>{msg.message || "No message content."}</p>
+                      <span>{formatChatTime(msg)}</span>
+                    </div>
+                  </div>
 
-            {msg.reply && (
-              <div className="admin-reply">
-                <strong>Agency reply:</strong>
-                <p>{msg.reply}</p>
-              </div>
-            )}
+                  {msg.reply && (
+                    <div className="chat-row incoming">
+                      <div className="messenger-avatar small">E</div>
+                      <div className="chat-bubble">
+                        <p>{msg.reply}</p>
+                        <span>{msg.repliedAtTime || msg.repliedAt || "Reply"}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
 
-            <div className="user-reply-box">
-              <textarea
-                placeholder="Write your reply to the agency..."
-                value={replyTexts[messageId] || ""}
-                onChange={(e) =>
-                  setReplyTexts({
-                    ...replyTexts,
-                    [messageId]: e.target.value,
-                  })
-                }
-              />
+          <div ref={threadEndRef} />
+        </div>
 
-              <button type="button" onClick={() => onReplyMessage(messageId)}>
-                Reply
-              </button>
-            </div>
-          </div>
-        );
-      })}
+        <div className="messenger-composer">
+          <textarea
+            placeholder="Aa"
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSendMessage();
+              }
+            }}
+          />
+
+          <button type="button" onClick={onSendMessage}>
+            <FaPaperPlane />
+          </button>
+        </div>
+      </div>
     </section>
   );
 }

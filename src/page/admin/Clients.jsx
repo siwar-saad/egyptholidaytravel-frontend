@@ -75,7 +75,10 @@ export default function Clients({ showSuccess }) {
 
     if (client.name) return client.name;
 
-    return `${client.firstName || ""} ${client.lastName || ""}`.trim();
+    const firstName = client.firstName || client.first_name || "";
+    const lastName = client.lastName || client.last_name || "";
+
+    return `${firstName} ${lastName}`.trim();
   };
 
   const getClientsArray = (data) => {
@@ -157,8 +160,8 @@ export default function Clients({ showSuccess }) {
     setEditingClient(client);
 
     setClientForm({
-      firstName: client?.firstName || firstName,
-      lastName: client?.lastName || lastName,
+      firstName: client?.firstName || client?.first_name || firstName,
+      lastName: client?.lastName || client?.last_name || lastName,
       email: client?.email || "",
       phone: phoneData.phone,
     });
@@ -204,6 +207,8 @@ export default function Clients({ showSuccess }) {
     const fullPhone = `${selectedCountry.dialCode} ${phone}`;
 
     const clientData = {
+      first_name: firstName,
+      last_name: lastName,
       firstName,
       lastName,
       name: `${firstName} ${lastName}`,

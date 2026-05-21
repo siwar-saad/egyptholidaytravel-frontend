@@ -53,7 +53,6 @@ export default function UserProfile() {
   const [messages, setMessages] = useState([]);
 
   const [messageText, setMessageText] = useState("");
-  const [replyTexts, setReplyTexts] = useState({});
   const [messageNotifications, setMessageNotifications] = useState(0);
 
   const [showClientPopup, setShowClientPopup] = useState(false);
@@ -182,27 +181,6 @@ export default function UserProfile() {
     }
   };
 
-  const handleReplyMessage = async (messageId) => {
-    const reply = replyTexts[messageId]?.trim();
-
-    if (!reply) return;
-
-    try {
-      const res = await API.post("/client/messages", { message: reply });
-
-      setMessages((prevMessages) => [res.data, ...prevMessages]);
-      setSentMessageText(reply);
-      setShowClientPopup(true);
-
-      setReplyTexts((prevReplies) => ({
-        ...prevReplies,
-        [messageId]: "",
-      }));
-    } catch (err) {
-      alert(err.response?.data?.error || "Reply not sent");
-    }
-  };
-
   const handlePhotoChange = (e) => {
     const file = e.target.files?.[0];
 
@@ -278,10 +256,15 @@ export default function UserProfile() {
           messages={messages}
           messageText={messageText}
           setMessageText={setMessageText}
-          replyTexts={replyTexts}
-          setReplyTexts={setReplyTexts}
           onSendMessage={handleSendMessage}
-          onReplyMessage={handleReplyMessage}
+          onRefreshMessages={async () => {
+            try {
+              const res = await API.get("/client/messages");
+              setMessages(res.data || []);
+            } catch (err) {
+              alert(err.response?.data?.error || "Unable to refresh messages");
+            }
+          }}
         />
       );
     }
