@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
@@ -17,15 +18,29 @@ const getImageUrl = (src) => {
   return src;
 };
 
+const getStoredUser = () => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("user") ||
+        sessionStorage.getItem("user") ||
+        "{}"
+    );
+  } catch {
+    return {};
+  }
+};
+
 export default function Hotels() {
+  const navigate = useNavigate();
+  const storedUser = getStoredUser();
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
 
   const [bookingData, setBookingData] = useState({
-    fullName: "",
-    email: "",
+    fullName: storedUser.name || "",
+    email: storedUser.email || "",
     phone: "",
     travelers: "",
     checkIn: "",
@@ -51,6 +66,27 @@ export default function Hotels() {
     setSelectedHotel(hotel);
     setMainImage(hotel.image);
     setShowBookingForm(false);
+  };
+
+  const isLoggedIn = () =>
+    Boolean(
+      localStorage.getItem("token") ||
+        sessionStorage.getItem("token")
+    );
+
+  const openBookingForm = () => {
+    if (!isLoggedIn()) {
+      alert("Please login or create an account before booking.");
+      navigate("/login");
+      return;
+    }
+
+    setBookingData((current) => ({
+      ...current,
+      fullName: current.fullName || storedUser.name || "",
+      email: storedUser.email || current.email || "",
+    }));
+    setShowBookingForm(true);
   };
 
   const hotelGroups = hotels.reduce((groups, hotel) => {
@@ -178,7 +214,7 @@ export default function Hotels() {
             mainImage={mainImage}
             setMainImage={setMainImage}
             onClose={closeHotel}
-            onBook={() => setShowBookingForm(true)}
+            onBook={openBookingForm}
           />
         )}
 
