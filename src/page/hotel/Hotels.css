@@ -1176,3 +1176,36 @@
     grid-template-columns: 1fr;
   }
 }
+/* ===== FORCE HOTELS HERO SAME SIZE AS PACKAGES HERO ===== */
+
+.hotels-hero,
+.hotel-hero,
+.hotels-hero-section {
+  height: 590px !important;
+  min-height: 590px !important;
+  padding: 0 20px !important;
+  box-sizing: border-box !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+
+  background-size: cover !important;
+  background-position: center center !important;
+}
+
+.hotels-hero-content {
+  max-width: 850px !important;
+  margin: 0 auto !important;
+}
+
+@media (max-width: 700px) {
+  .hotels-hero,
+  .hotel-hero,
+  .hotels-hero-section {
+    height: 340px !important;
+    min-height: 340px !important;
+    padding: 0 16px !important;
+  }
+}

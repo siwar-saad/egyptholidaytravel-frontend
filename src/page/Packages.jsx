@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import API from "../api";
@@ -346,18 +346,51 @@ const EMPTY_PACKAGE_BOOKING = {
 };
 
 const PACKAGE_COUNTRIES = [
-  { flag: "https://flagcdn.com/fr.svg", name: "Paris / France", dialCode: "+33" },
-  { flag: "https://flagcdn.com/de.svg", name: "Germany", dialCode: "+49" },
-  { flag: "https://flagcdn.com/lu.svg", name: "Luxembourg", dialCode: "+352" },
-  { flag: "https://flagcdn.com/tr.svg", name: "Turkey", dialCode: "+90" },
-  { flag: "https://flagcdn.com/tn.svg", name: "Tunisia", dialCode: "+216" },
-  { flag: "https://flagcdn.com/ma.svg", name: "Morocco", dialCode: "+212" },
-  { flag: "https://flagcdn.com/ba.svg", name: "Bosnia", dialCode: "+387" },
-  { flag: "https://flagcdn.com/eg.svg", name: "Egypt", dialCode: "+20" },
+  {
+    flag: "https://flagcdn.com/fr.svg",
+    name: "Paris / France",
+    dialCode: "+33",
+  },
+  {
+    flag: "https://flagcdn.com/de.svg",
+    name: "Germany",
+    dialCode: "+49",
+  },
+  {
+    flag: "https://flagcdn.com/lu.svg",
+    name: "Luxembourg",
+    dialCode: "+352",
+  },
+  {
+    flag: "https://flagcdn.com/tr.svg",
+    name: "Turkey",
+    dialCode: "+90",
+  },
+  {
+    flag: "https://flagcdn.com/tn.svg",
+    name: "Tunisia",
+    dialCode: "+216",
+  },
+  {
+    flag: "https://flagcdn.com/ma.svg",
+    name: "Morocco",
+    dialCode: "+212",
+  },
+  {
+    flag: "https://flagcdn.com/ba.svg",
+    name: "Bosnia",
+    dialCode: "+387",
+  },
+  {
+    flag: "https://flagcdn.com/eg.svg",
+    name: "Egypt",
+    dialCode: "+20",
+  },
 ];
 
 export default function Packages() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [bookingPackage, setBookingPackage] = useState(null);
@@ -379,6 +412,22 @@ export default function Packages() {
     title: "",
     message: "",
   });
+
+  useEffect(() => {
+    const openPackageId = location.state?.openPackageId;
+
+    if (!openPackageId) return;
+
+    const packageToOpen = PACKAGES_DATA.find(
+      (item) => item.id === openPackageId
+    );
+
+    if (packageToOpen) {
+      setSelectedPackage(packageToOpen);
+    }
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
     window.scrollTo({
@@ -549,7 +598,6 @@ export default function Packages() {
           <div className="packages-hero-overlay"></div>
 
           <div className="packages-hero-content">
-
             <h1>Egypt Travel Packages</h1>
 
             <p>
@@ -847,43 +895,43 @@ function PackageModal({ item, onClose, onBook }) {
           )}
 
           <div className="package-note-box">
-  <FaHotel />
+            <FaHotel />
 
-  <p>
-    Above rates are per person per room, including the meals mentioned
-    above and the transfer stated in this package.
-  </p>
-</div>
+            <p>
+              Above rates are per person per room, including the meals mentioned
+              above and the transfer stated in this package.
+            </p>
+          </div>
 
-<div className="package-programme-contact">
-  <h4>Need the complete package programme?</h4>
+          <div className="package-programme-contact">
+            <h4>Need the complete package programme?</h4>
 
-  <p>
-    If you would like the full package programme, please contact us by email
-    or phone and our team will send you all details.
-  </p>
+            <p>
+              If you would like the full package programme, please contact us by
+              email or phone and our team will send you all details.
+            </p>
 
-  <div className="package-programme-contact-links">
-    <a href="mailto:amr@egyptholiday-travel.com">
-      <FaEnvelope />
-      amr@egyptholiday-travel.com
-    </a>
+            <div className="package-programme-contact-links">
+              <a href="mailto:amr@egyptholiday-travel.com">
+                <FaEnvelope />
+                amr@egyptholiday-travel.com
+              </a>
 
-    <a href="tel:01099959949">
-      <FaPhoneAlt />
-      01099959949
-    </a>
-  </div>
-</div>
+              <a href="tel:01099959949">
+                <FaPhoneAlt />
+                01099959949
+              </a>
+            </div>
+          </div>
 
-<button
-  type="button"
-  className="package-modal-book"
-  onClick={() => onBook(item)}
->
-  <FaPlaneDeparture />
-  Book This Package
-</button>
+          <button
+            type="button"
+            className="package-modal-book"
+            onClick={() => onBook(item)}
+          >
+            <FaPlaneDeparture />
+            Book This Package
+          </button>
         </div>
       </div>
     </div>

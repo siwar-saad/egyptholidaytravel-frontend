@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { FaPaperPlane, FaSyncAlt } from "react-icons/fa";
+import { FaPaperPlane, FaSyncAlt, FaCircle } from "react-icons/fa";
 
 const getMessageDate = (msg) =>
   new Date(
@@ -32,8 +32,16 @@ const formatChatTime = (msg) =>
     minute: "2-digit",
   });
 
+const getCurrentUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user")) || null;
+  } catch {
+    return null;
+  }
+};
+
 export default function Messages({
-  messages,
+  messages = [],
   messageText,
   setMessageText,
   onSendMessage,
@@ -41,18 +49,36 @@ export default function Messages({
 }) {
   const threadEndRef = useRef(null);
 
+  const currentUser = useMemo(() => getCurrentUser(), []);
+  const currentClientId =
+    currentUser?._id || currentUser?.id || currentUser?.userId;
+
+  const clientMessages = useMemo(() => {
+    if (!currentClientId) return messages;
+
+    return messages.filter((msg) => {
+      const msgClientId =
+        msg.clientId ||
+        msg.userId ||
+        msg.client?._id ||
+        msg.client?.id ||
+        msg.user?._id ||
+        msg.user?.id;
+
+      return !msgClientId || String(msgClientId) === String(currentClientId);
+    });
+  }, [messages, currentClientId]);
+
   const sortedMessages = useMemo(
     () =>
-      [...messages].sort((a, b) => {
-        const firstDate = getMessageDate(a).getTime();
-        const secondDate = getMessageDate(b).getTime();
-        return firstDate - secondDate;
+      [...clientMessages].sort((a, b) => {
+        return getMessageDate(a).getTime() - getMessageDate(b).getTime();
       }),
-    [messages]
+    [clientMessages]
   );
 
   useEffect(() => {
-    if (typeof onRefreshMessages !== "function") return undefined;
+    if (typeof onRefreshMessages !== "function") return;
 
     const refreshTimer = setInterval(() => {
       onRefreshMessages();
@@ -65,84 +91,132 @@ export default function Messages({
     threadEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [sortedMessages.length]);
 
-  return (
-    <section className="page-section">
-      <div className="messenger-header">
-        <div className="messenger-avatar">E</div>
+  const handleSend = () => {
+    if (!messageText?.trim()) return;
+    onSendMessage();
+  };
 
-        <div>
-          <h2>Egypt Holiday Travel</h2>
-          <p>{sortedMessages.length} messages</p>
+  return (
+    <section className="messages-page-section">
+      <div className="messenger-card">
+        <div className="messenger-header">
+          <div className="messenger-profile">
+            <div className="messenger-avatar">E</div>
+
+            <div>
+              <h2>Egypt Holiday Travel</h2>
+
+              <p>
+                <FaCircle className="online-dot" />
+                Online support · {sortedMessages.length} messages
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="refresh-btn"
+            onClick={onRefreshMessages}
+          >
+            <FaSyncAlt />
+            Refresh
+          </button>
         </div>
 
-        <button type="button" onClick={onRefreshMessages}>
-          <FaSyncAlt /> Refresh
-        </button>
-      </div>
+        <div className="messenger-chat">
+          <div className="messenger-thread">
+            {sortedMessages.length === 0 ? (
+              <div className="empty-chat">
+                <div className="empty-icon">💬</div>
+                <h3>No messages yet</h3>
+                <p>Start your conversation with Egypt Holiday Travel.</p>
+              </div>
+            ) : (
+              sortedMessages.map((msg, index) => {
+                const isAdmin = (msg.sender || "client") === "admin";
+                const currentDate = getMessageDate(msg);
+                const previousMessage = sortedMessages[index - 1];
 
-      <div className="messenger-chat">
-        <div className="messenger-thread">
-          {sortedMessages.length === 0 ? (
-            <p className="empty-msg">Start your conversation with the agency.</p>
-          ) : (
-            sortedMessages.map((msg, index) => {
-              const isAdmin = (msg.sender || "client") === "admin";
-              const currentDate = getMessageDate(msg);
-              const previousMessage = sortedMessages[index - 1];
-              const showDateDivider =
-                !previousMessage ||
-                !isSameDay(currentDate, getMessageDate(previousMessage));
+                const showDateDivider =
+                  !previousMessage ||
+                  !isSameDay(currentDate, getMessageDate(previousMessage));
 
-              return (
-                <div className="messenger-message-group" key={msg.id || index}>
-                  {showDateDivider && (
-                    <div className="messenger-date-divider">
-                      {formatChatDate(currentDate)}
-                    </div>
-                  )}
+                return (
+                  <div
+                    className="messenger-message-group"
+                    key={msg._id || msg.id || index}
+                  >
+                    {showDateDivider && (
+                      <div className="messenger-date-divider">
+                        <span>{formatChatDate(currentDate)}</span>
+                      </div>
+                    )}
 
-                  <div className={`chat-row ${isAdmin ? "incoming" : "outgoing"}`}>
-                    {isAdmin && <div className="messenger-avatar small">E</div>}
+                    <div
+                      className={`chat-row ${
+                        isAdmin ? "incoming" : "outgoing"
+                      }`}
+                    >
+                      {isAdmin && (
+                        <div className="messenger-avatar small">E</div>
+                      )}
 
-                    <div className="chat-bubble">
-                      <p>{msg.message || "No message content."}</p>
-                      <span>{formatChatTime(msg)}</span>
-                    </div>
-                  </div>
-
-                  {msg.reply && (
-                    <div className="chat-row incoming">
-                      <div className="messenger-avatar small">E</div>
                       <div className="chat-bubble">
-                        <p>{msg.reply}</p>
-                        <span>{msg.repliedAtTime || msg.repliedAt || "Reply"}</span>
+                        <p>{msg.message || "No message content."}</p>
+                        <span>{formatChatTime(msg)}</span>
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-            })
-          )}
 
-          <div ref={threadEndRef} />
-        </div>
+                    {msg.reply && (
+                      <div className="chat-row incoming">
+                        <div className="messenger-avatar small">E</div>
 
-        <div className="messenger-composer">
-          <textarea
-            placeholder="Aa"
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                onSendMessage();
-              }
-            }}
-          />
+                        <div className="chat-bubble">
+                          <p>{msg.reply}</p>
+                          <span>
+                            {msg.repliedAt
+                              ? new Date(msg.repliedAt).toLocaleTimeString(
+                                  "en-GB",
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )
+                              : "Reply"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
 
-          <button type="button" onClick={onSendMessage}>
-            <FaPaperPlane />
-          </button>
+            <div ref={threadEndRef} />
+          </div>
+
+          <div className="messenger-composer">
+            <textarea
+              placeholder="Write your message..."
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={!messageText?.trim()}
+              className="send-btn"
+            >
+              <FaPaperPlane />
+            </button>
+          </div>
         </div>
       </div>
     </section>

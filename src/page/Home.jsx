@@ -8,7 +8,6 @@ import Footer from "../components/footer";
 import HomeInfoSection from "./homeInfo/HomeInfoSection";
 import InfoPopup from "./homeInfo/InfoPopup";
 
-
 /* IMAGES */
 import cairoCover from "../assets/image/cairo.jpeg";
 import dahabImg from "../assets/image/dahab.jpeg";
@@ -16,14 +15,49 @@ import sharmImg from "../assets/image/sharm.jpeg";
 import bgImg from "../assets/image/bg.png";
 import LuxorImg from "../assets/image/Luxor.jpg";
 import pyra from "../assets/image/pyra.png";
-import uzbekistan from "../assets/image/uzbekistan.jpg";
-import hurghad from "../assets/image/hurghad.jpg";
-import turkey from "../assets/image/turkey.jpg";
+
+/* FEATURED PACKAGES IMAGES */
+import cairoHurghadaPackage from "../assets/image/cairo-hurghada1.png";
+import cairoSharmPackage from "../assets/image/cairo-sharm.png";
+import cairoLuxorPackage from "../assets/image/cairo-luxor2.png";
 
 /* CUSTOMERS */
 import customer1 from "../assets/image/sara.png";
 import customer2 from "../assets/image/ahmed.png";
 import customer3 from "../assets/image/lara.png";
+
+const DEFAULT_REVIEWS = [
+  {
+    id: 1,
+    name: "Sarah M.",
+    rating: 5,
+    text: "Everything Was Perfectly Organized. The Team Made Our Trip Easy, Safe, And Full Of Beautiful Moments. Highly Recommended!",
+    avatar: customer1,
+  },
+  {
+    id: 2,
+    name: "Ahmed K",
+    rating: 5,
+    text: "Great experience! The communication was clear, and every destination was exactly as described. Excellent service.",
+    avatar: customer2,
+  },
+  {
+    id: 3,
+    name: "Laura P.",
+    rating: 5,
+    text: "I discovered Egypt in a completely new way. The planning, timing, and professionalism were outstanding.",
+    avatar: customer3,
+  },
+];
+
+const getInitialReviews = () => {
+  try {
+    const savedReviews = localStorage.getItem("customerReviews");
+    return savedReviews ? JSON.parse(savedReviews) : DEFAULT_REVIEWS;
+  } catch {
+    return DEFAULT_REVIEWS;
+  }
+};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -33,6 +67,21 @@ export default function Home() {
   const [selectedInfo, setSelectedInfo] = useState(null);
   const [openWhy, setOpenWhy] = useState(null);
 
+  const [reviews, setReviews] = useState(getInitialReviews);
+
+  const [reviewForm, setReviewForm] = useState({
+    name: "",
+    rating: 5,
+    text: "",
+  });
+
+  const [reviewPopup, setReviewPopup] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
   const destinations = [
     { name: "Cairo", desc: "Explore Egypt", img: cairoCover },
     { name: "Dahab", desc: "Explore Egypt", img: dahabImg },
@@ -41,10 +90,40 @@ export default function Home() {
   ];
 
   const packages = [
-    { name: "Uzbekistan", desc: "Explore Central Asia", img: uzbekistan },
-    { name: "Hurghada", desc: "Explore Egypt", img: hurghad },
-    { name: "Turkey", desc: "Explore Turkey", img: turkey },
+    {
+      name: "Cairo – Hurghada",
+      desc: "Cairo & Red Sea Package",
+      img: cairoHurghadaPackage,
+      packageId: "cairo-hurghada-5",
+    },
+    {
+      name: "Cairo – Sharm El Sheikh",
+      desc: "6 Days / 5 Nights Program",
+      img: cairoSharmPackage,
+      packageId: "cairo-sharm-6-days",
+    },
+    {
+      name: "Cairo – Luxor",
+      desc: "Ancient Egypt & Nile Package",
+      img: cairoLuxorPackage,
+      packageId: "cairo-luxor-6",
+    },
   ];
+
+  const closeReviewPopup = () => {
+    setReviewPopup({
+      open: false,
+      type: "success",
+      title: "",
+      message: "",
+    });
+  };
+
+  const openPackageFromHome = (packageId) => {
+    navigate("/packages", {
+      state: { openPackageId: packageId },
+    });
+  };
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
@@ -61,6 +140,48 @@ export default function Home() {
     } catch (err) {
       alert(err.response?.data?.error || "Subscription failed");
     }
+  };
+
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+
+    if (!reviewForm.name.trim() || !reviewForm.text.trim()) {
+      setReviewPopup({
+        open: true,
+        type: "error",
+        title: "Review Incomplete",
+        message:
+          "Please enter your name and share your review before submitting. We truly value your feedback and would be happy to hear about your experience with Egypt Holiday Travel.",
+      });
+      return;
+    }
+
+    const newReview = {
+      id: Date.now(),
+      name: reviewForm.name.trim(),
+      rating: Number(reviewForm.rating),
+      text: reviewForm.text.trim(),
+      avatar: null,
+    };
+
+    const updatedReviews = [newReview, ...reviews];
+
+    setReviews(updatedReviews);
+    localStorage.setItem("customerReviews", JSON.stringify(updatedReviews));
+
+    setReviewForm({
+      name: "",
+      rating: 5,
+      text: "",
+    });
+
+    setReviewPopup({
+      open: true,
+      type: "success",
+      title: "Thank You for Your Review",
+      message:
+        "We sincerely appreciate your time and kind feedback. Your review has been submitted successfully and will help us improve our services while guiding future travelers with confidence.",
+    });
   };
 
   useEffect(() => {
@@ -88,7 +209,7 @@ export default function Home() {
       <section className="hero-section" id="hero">
         <Navbar />
 
-        <img src={bgImg} alt="Egypt"  loading="lazy"  className="hero-image" />
+        <img src={bgImg} alt="Egypt" loading="lazy" className="hero-image" />
         <div className="hero-overlay"></div>
       </section>
 
@@ -100,7 +221,7 @@ export default function Home() {
         <div className="destinations-grid">
           {destinations.map((item, index) => (
             <div key={index} className="destination-card-new">
-              <img src={item.img} alt={item.name}  loading="lazy" />
+              <img src={item.img} alt={item.name} loading="lazy" />
               <div className="card-overlay"></div>
 
               <div className="card-text">
@@ -117,11 +238,26 @@ export default function Home() {
 
         <div className="featured-packages-grid">
           {packages.map((item, index) => (
-            <div className="featured-package-card" key={index}>
-              <img src={item.img}  loading="lazy" alt={item.name} />
+            <div
+              className="featured-package-card"
+              key={index}
+              onClick={() => openPackageFromHome(item.packageId)}
+            >
+              <img src={item.img} loading="lazy" alt={item.name} />
+
               <h3>Cart {index + 1}</h3>
               <h4>{item.name} Trip</h4>
-              <button type="button">View details</button>
+              <p>{item.desc}</p>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openPackageFromHome(item.packageId);
+                }}
+              >
+                View details
+              </button>
             </div>
           ))}
         </div>
@@ -159,109 +295,166 @@ export default function Home() {
         </div>
       </section>
 
-     <section className="why-section">
-  <div className="why-left why-accordion">
-    <div className={`why-accordion-item ${openWhy === "visit" ? "active" : ""}`}>
-      <button
-        type="button"
-        className="why-accordion-title"
-        onClick={() => setOpenWhy(openWhy === "visit" ? null : "visit")}
-      >
-        <span>Why Visit Egypt?</span>
-        <span className="why-arrow">⌄</span>
-      </button>
+      <section className="why-section">
+        <div className="why-left why-accordion">
+          <div
+            className={`why-accordion-item ${
+              openWhy === "visit" ? "active" : ""
+            }`}
+          >
+            <button
+              type="button"
+              className="why-accordion-title"
+              onClick={() => setOpenWhy(openWhy === "visit" ? null : "visit")}
+            >
+              <span>Why Visit Egypt?</span>
+              <span className="why-arrow">⌄</span>
+            </button>
 
-      <div className="why-accordion-content">
-        <p>
-          Egypt offers history, beaches, and adventure at an affordable price,
-          making it a unique travel destination.
-        </p>
-      </div>
-    </div>
+            <div className="why-accordion-content">
+              <p>
+                Egypt offers history, beaches, and adventure at an affordable
+                price, making it a unique travel destination.
+              </p>
+            </div>
+          </div>
 
-    <div className={`why-accordion-item ${openWhy === "choose" ? "active" : ""}`}>
-      <button
-        type="button"
-        className="why-accordion-title"
-        onClick={() => setOpenWhy(openWhy === "choose" ? null : "choose")}
-      >
-        <span>Why Choose Us</span>
-        <span className="why-arrow">⌄</span>
-      </button>
+          <div
+            className={`why-accordion-item ${
+              openWhy === "choose" ? "active" : ""
+            }`}
+          >
+            <button
+              type="button"
+              className="why-accordion-title"
+              onClick={() => setOpenWhy(openWhy === "choose" ? null : "choose")}
+            >
+              <span>Why Choose Us</span>
+              <span className="why-arrow">⌄</span>
+            </button>
 
-      <div className="why-accordion-content">
-        <ul>
-          <li>Experienced travel experts</li>
-          <li>Personalized travel packages</li>
-          <li>Professional and friendly team</li>
-          <li>Attention to every detail for a perfect trip</li>
-        </ul>
-      </div>
-    </div>
-  </div>
+            <div className="why-accordion-content">
+              <ul>
+                <li>Experienced travel experts</li>
+                <li>Personalized travel packages</li>
+                <li>Professional and friendly team</li>
+                <li>Attention to every detail for a perfect trip</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
-  <div className="why-right">
-    <img src={dahabImg}  loading="lazy" alt="Travel" />
-  </div>
-</section>
+        <div className="why-right">
+          <img src={dahabImg} loading="lazy" alt="Travel" />
+        </div>
+      </section>
 
       <section className="testimonials-section">
         <h2>Customers Say</h2>
 
         <div className="testimonials-grid">
-          <div className="testimonial-card">
-            <div className="testimonial-top">
-              <img src={customer1} alt="Sarah M."  loading="lazy" className="customer-img" />
+          {reviews.slice(0, 3).map((review) => (
+            <div className="testimonial-card" key={review.id}>
+              <span className="testimonial-quote">“</span>
 
-              <div className="testimonial-user-info">
-                <h4>Sarah M.</h4>
-                <div className="stars">⭐⭐⭐⭐⭐</div>
+              <div className="testimonial-top">
+                {review.avatar ? (
+                  <img
+                    src={review.avatar}
+                    alt={review.name}
+                    loading="lazy"
+                    className="customer-img"
+                  />
+                ) : (
+                  <div className="customer-letter">
+                    {review.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+
+                <div className="testimonial-user-info">
+                  <h4>{review.name}</h4>
+
+                  <div className="stars">
+                    {"⭐".repeat(Number(review.rating) || 5)}
+                  </div>
+                </div>
               </div>
+
+              <p>{review.text}</p>
             </div>
+          ))}
+        </div>
+
+        <div className="customer-review-form-box">
+          <div className="customer-review-form-head">
+            <span>Share Your Experience</span>
+
+            <h3>Write Your Point Of View</h3>
 
             <p>
-              Everything Was Perfectly Organized. The Team Made Our Trip Easy,
-              Safe, And Full Of Beautiful Moments. Highly Recommended!
+              Tell us about your experience with Egypt Holiday Travel. Your
+              review helps other travelers choose with confidence.
             </p>
           </div>
 
-          <div className="testimonial-card">
-            <div className="testimonial-top">
-              <img src={customer2} alt="Ahmed K"  loading="lazy"  className="customer-img" />
+          <form className="customer-review-form" onSubmit={handleReviewSubmit}>
+            <div className="customer-review-field">
+              <label>Your Name</label>
 
-              <div className="testimonial-user-info">
-                <h4>Ahmed K</h4>
-                <div className="stars">⭐⭐⭐⭐⭐</div>
-              </div>
+              <input
+                type="text"
+                placeholder="Example: Mohamed A."
+                value={reviewForm.name}
+                onChange={(e) =>
+                  setReviewForm({ ...reviewForm, name: e.target.value })
+                }
+              />
             </div>
 
-            <p>
-              Great experience! The communication was clear, and every
-              destination was exactly as described. Excellent service.
-            </p>
-          </div>
+            <div className="customer-review-field">
+              <label>Rating</label>
 
-          <div className="testimonial-card">
-            <div className="testimonial-top">
-              <img src={customer3} alt="Laura P."  loading="lazy" className="customer-img" />
-
-              <div className="testimonial-user-info">
-                <h4>Laura P.</h4>
-                <div className="stars">⭐⭐⭐⭐⭐</div>
-              </div>
+              <select
+                value={reviewForm.rating}
+                onChange={(e) =>
+                  setReviewForm({ ...reviewForm, rating: e.target.value })
+                }
+              >
+                <option value="5">★★★★★ Excellent</option>
+                <option value="4">★★★★☆ Very Good</option>
+                <option value="3">★★★☆☆ Good</option>
+                <option value="2">★★☆☆☆ Average</option>
+                <option value="1">★☆☆☆☆ Poor</option>
+              </select>
             </div>
 
-            <p>
-              I discovered Egypt in a completely new way. The planning, timing,
-              and professionalism were outstanding.
-            </p>
-          </div>
+            <div className="customer-review-field full">
+              <label>Your Review</label>
+
+              <textarea
+                placeholder="Write your opinion about our service..."
+                value={reviewForm.text}
+                onChange={(e) =>
+                  setReviewForm({ ...reviewForm, text: e.target.value })
+                }
+              />
+            </div>
+
+            <button type="submit" className="customer-review-submit">
+              Submit Review
+            </button>
+          </form>
         </div>
       </section>
 
       <section className="newsletter-pro">
         <div className="newsletter-pro-left">
-          <img src={pyra} alt="Pyramids"  loading="lazy" className="newsletter-pro-image" />
+          <img
+            src={pyra}
+            alt="Pyramids"
+            loading="lazy"
+            className="newsletter-pro-image"
+          />
         </div>
 
         <div className="newsletter-pro-right">
@@ -315,7 +508,39 @@ export default function Home() {
         </div>
       </section>
 
-          <Footer />
+      {reviewPopup.open && (
+        <div className="review-popup-overlay" onClick={closeReviewPopup}>
+          <div
+            className={`review-popup-card ${reviewPopup.type}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="review-popup-close"
+              type="button"
+              onClick={closeReviewPopup}
+            >
+              ×
+            </button>
+
+            <div className={`review-popup-icon ${reviewPopup.type}`}>
+              {reviewPopup.type === "success" ? "✓" : "!"}
+            </div>
+
+            <h3>{reviewPopup.title}</h3>
+            <p>{reviewPopup.message}</p>
+
+            <button
+              className="review-popup-btn"
+              type="button"
+              onClick={closeReviewPopup}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      <Footer />
 
       {showButton && (
         <button className="book-now-btn" type="button" onClick={handleBookNow}>

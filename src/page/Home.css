@@ -2206,125 +2206,324 @@ button {
   }
 }
 
-/* ================= INFO CARDS MOBILE PRO FIX ================= */
+/* ================= CUSTOMER REVIEW FORM ================= */
 
-@media (max-width: 768px) {
-  .info-section {
-    padding: 44px 12px 38px !important;
-    background: linear-gradient(180deg, #ffffff 0%, #fbf7f2 100%) !important;
+.testimonial-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.testimonial-quote {
+  position: absolute;
+  top: 4px;
+  right: 22px;
+  color: rgba(147, 84, 38, 0.08);
+  font-size: 78px;
+  font-family: "Playfair Display", serif;
+  line-height: 1;
+}
+
+.customer-letter {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  border: 3px solid #ead8be;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.customer-review-form-box {
+  max-width: 920px;
+  margin: 42px auto 0;
+  background: #ffffff;
+  border-radius: 30px;
+  padding: 34px;
+  border: 1px solid rgba(147, 84, 38, 0.1);
+  box-shadow: 0 28px 60px rgba(147, 84, 38, 0.12);
+}
+
+.customer-review-form-head {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.customer-review-form-head span {
+  color: #935426;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.customer-review-form-head h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 34px;
+  color: #24170f;
+  margin: 8px 0;
+}
+
+.customer-review-form-head p {
+  max-width: 650px;
+  margin: 0 auto;
+  color: #6b5848;
+  line-height: 1.7;
+}
+
+.customer-review-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.customer-review-field {
+  display: grid;
+  gap: 8px;
+}
+
+.customer-review-field.full {
+  grid-column: 1 / -1;
+}
+
+.customer-review-field label {
+  color: #935426;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.customer-review-field input,
+.customer-review-field select,
+.customer-review-field textarea {
+  width: 100%;
+  border: 1px solid rgba(147, 84, 38, 0.18);
+  background: #fffaf3;
+  color: #24170f;
+  padding: 14px 15px;
+  border-radius: 16px;
+  outline: none;
+  font-size: 15px;
+  transition: 0.25s ease;
+}
+
+.customer-review-field textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.customer-review-field input:focus,
+.customer-review-field select:focus,
+.customer-review-field textarea:focus {
+  border-color: #935426;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1);
+  background: #ffffff;
+}
+
+.customer-review-submit {
+  grid-column: 1 / -1;
+  width: fit-content;
+  margin: 8px auto 0;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 38px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(147, 84, 38, 0.28);
+  transition: 0.25s ease;
+}
+
+.customer-review-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 44px rgba(147, 84, 38, 0.38);
+}
+
+@media (max-width: 700px) {
+  .customer-review-form-box {
+    padding: 24px 16px;
+    border-radius: 24px;
   }
 
-  .info-layout {
-    width: 100% !important;
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
-    align-items: stretch !important;
+  .customer-review-form-head h3 {
+    font-size: 27px;
   }
 
-  .info-side {
-    display: contents !important;
+  .customer-review-form {
+    grid-template-columns: 1fr;
   }
 
-  .cinematic-card {
-    grid-column: 1 / -1 !important;
-    width: 170px !important;
-    max-width: 70% !important;
-    margin: 0 auto 16px !important;
+  .customer-review-submit {
+    width: 100%;
   }
+}
+/* ================= REVIEW POPUP ================= */
 
-  .info-block {
-    width: 100% !important;
-    min-height: 220px !important;
-    padding: 14px 12px !important;
-    border-radius: 18px !important;
+.review-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 12, 8, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 99999;
+  animation: reviewPopupFade 0.25s ease;
+}
 
-    background: #ffffff !important;
-    border: 1px solid rgba(147, 84, 38, 0.12) !important;
-    box-shadow: 0 12px 30px rgba(147, 84, 38, 0.08) !important;
+.review-popup-card {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 34px 28px 28px;
+  text-align: center;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  animation: reviewPopupScale 0.28s ease;
+}
 
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
+.review-popup-card.success {
+  background:
+    radial-gradient(circle at top right, rgba(147, 84, 38, 0.08), transparent 35%),
+    #ffffff;
+}
 
-    overflow: hidden !important;
+.review-popup-card.error {
+  background:
+    radial-gradient(circle at top right, rgba(220, 53, 69, 0.08), transparent 35%),
+    #ffffff;
+}
+
+.review-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #f5eee7;
+  color: #935426;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.review-popup-close:hover {
+  background: #935426;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.review-popup-icon {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: 900;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1);
+}
+
+.review-popup-icon.success {
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+}
+
+.review-popup-icon.error {
+  background: linear-gradient(135deg, #d9534f, #b52b27);
+  color: #ffffff;
+}
+
+.review-popup-card h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 31px;
+  color: #24160f;
+  margin-bottom: 12px;
+}
+
+.review-popup-card p {
+  color: #5f5248;
+  font-size: 15px;
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+.review-popup-btn {
+  min-width: 150px;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.25);
+  transition: 0.3s ease;
+}
+
+.review-popup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(147, 84, 38, 0.35);
+}
+
+@keyframes reviewPopupFade {
+  from {
+    opacity: 0;
   }
-
-  .info-block h3 {
-    font-size: 15.5px !important;
-    line-height: 1.2 !important;
-    margin-bottom: 10px !important;
-    color: #24160f !important;
-  }
-
-  .info-block ul {
-    padding-left: 14px !important;
-    margin: 0 !important;
-  }
-
-  .info-block li {
-    font-size: 10.8px !important;
-    line-height: 1.45 !important;
-    color: #4a372b !important;
-    margin-bottom: 4px !important;
-  }
-
-  .read-btn {
-    margin-top: 12px !important;
-    padding: 6px 12px !important;
-    width: fit-content !important;
-    border-radius: 999px !important;
-    font-size: 10px !important;
-    font-weight: 800 !important;
-
-    background: #ffffff !important;
-    color: #935426 !important;
-    border: 1px solid #935426 !important;
-  }
-
-  .read-btn:hover {
-    background: #935426 !important;
-    color: #ffffff !important;
+  to {
+    opacity: 1;
   }
 }
 
-@media (max-width: 430px) {
-  .info-section {
-    padding: 38px 10px 34px !important;
+@keyframes reviewPopupScale {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.95);
   }
-
-  .info-layout {
-    gap: 10px !important;
-  }
-
-  .info-block {
-    min-height: 210px !important;
-    padding: 12px 10px !important;
-    border-radius: 16px !important;
-  }
-
-  .info-block h3 {
-    font-size: 14px !important;
-    margin-bottom: 8px !important;
-  }
-
-  .info-block li {
-    font-size: 9.8px !important;
-    line-height: 1.4 !important;
-  }
-
-  .read-btn {
-    padding: 5px 10px !important;
-    font-size: 9.5px !important;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-@media (max-width: 340px) {
-  .info-layout {
-    grid-template-columns: 1fr !important;
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .review-popup-card {
+    padding: 28px 18px 22px;
+    border-radius: 22px;
   }
 
-  .info-block {
-    min-height: auto !important;
+  .review-popup-icon {
+    width: 68px;
+    height: 68px;
+    font-size: 30px;
+  }
+
+  .review-popup-card h3 {
+    font-size: 25px;
+  }
+
+  .review-popup-card p {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .review-popup-btn {
+    width: 100%;
   }
 }
