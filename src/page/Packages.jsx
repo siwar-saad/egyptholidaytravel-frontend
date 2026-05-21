@@ -10,6 +10,8 @@ import cairoHurghada6 from "../assets/image/cairo-hurghada2.png";
 import cairoAlexandria6 from "../assets/image/cairo-alexandria1.png";
 import cairoLuxor6 from "../assets/image/cairo-luxor2.png";
 import cairoSharm from "../assets/image/cairo-sharm.png";
+import cairoNorthCoast from "../assets/image/alexandria.png";
+import cairoAinSokhna from "../assets/image/ainsokhna.jpg";
 
 import {
   FaChevronDown,
@@ -333,6 +335,168 @@ const PACKAGES_DATA = [
       },
     ],
   },
+  {
+    id: "cairo-north-coast-6",
+    name: "Cairo & North Coast Package",
+    backendName: "Cairo & North Coast Package – 6 Nights / 7 Days",
+    route: "Cairo – North Coast",
+    duration: "6 Nights / 7 Days",
+    transfer: "3 Nights in Cairo + 3 Nights in North Coast with transfer included",
+    startPrice: "From 1,293$",
+    image: cairoNorthCoast,
+    options: [
+      {
+        title: "Luxury Package",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "3 Nights",
+            hotel: "Hilton Ramses",
+            meal: "To be confirmed",
+            sgl: "1,562$",
+            dbl: "1,781$",
+            tpl: "2,346$",
+          },
+          {
+            city: "North Coast",
+            nights: "3 Nights",
+            hotel: "Rixos Premium Alamein",
+            meal: "To be confirmed",
+            sgl: "",
+            dbl: "",
+            tpl: "",
+          },
+        ],
+      },
+      {
+        title: "Premium Package",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "3 Nights",
+            hotel: "Fairmont Nile City",
+            meal: "To be confirmed",
+            sgl: "1,925$",
+            dbl: "2,150$",
+            tpl: "2,500$",
+          },
+          {
+            city: "North Coast",
+            nights: "3 Nights",
+            hotel: "Gewan Palace",
+            meal: "To be confirmed",
+            sgl: "",
+            dbl: "",
+            tpl: "",
+          },
+        ],
+      },
+      {
+        title: "Standard Package",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "3 Nights",
+            hotel: "Hilton Ramses",
+            meal: "To be confirmed",
+            sgl: "1,293$",
+            dbl: "1,457$",
+            tpl: "1,902$",
+          },
+          {
+            city: "North Coast",
+            nights: "3 Nights",
+            hotel: "Azur One Eleven",
+            meal: "To be confirmed",
+            sgl: "",
+            dbl: "",
+            tpl: "",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "cairo-ain-sokhna-6",
+    name: "Cairo & Ain El Sokhna Package",
+    backendName: "Cairo & Ain El Sokhna Package – 6 Nights / 7 Days",
+    route: "Cairo – Ain El Sokhna",
+    duration: "6 Nights / 7 Days",
+    transfer: "3 Nights in Cairo + 3 Nights in Ain El Sokhna with transfer included",
+    startPrice: "From 1,072$",
+    image: cairoAinSokhna,
+    options: [
+      {
+        title: "Luxury Package",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "3 Nights",
+            hotel: "The St. Regis Cairo",
+            meal: "To be confirmed",
+            sgl: "1,825$",
+            dbl: "1,900$",
+            tpl: "2,500$",
+          },
+          {
+            city: "Ain El Sokhna",
+            nights: "3 Nights",
+            hotel: "Movenpick El Sokhna",
+            meal: "To be confirmed",
+            sgl: "",
+            dbl: "",
+            tpl: "",
+          },
+        ],
+      },
+      {
+        title: "Premium Package",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "3 Nights",
+            hotel: "Hilton Ramses",
+            meal: "To be confirmed",
+            sgl: "1,084$",
+            dbl: "1,260$",
+            tpl: "1,716$",
+          },
+          {
+            city: "Ain El Sokhna",
+            nights: "3 Nights",
+            hotel: "Coral Sea Beach",
+            meal: "To be confirmed",
+            sgl: "",
+            dbl: "",
+            tpl: "",
+          },
+        ],
+      },
+      {
+        title: "Standard Package",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "3 Nights",
+            hotel: "Fairmont Nile City",
+            meal: "To be confirmed",
+            sgl: "1,072$",
+            dbl: "1,214$",
+            tpl: "1,656$",
+          },
+          {
+            city: "Ain El Sokhna",
+            nights: "3 Nights",
+            hotel: "Stella Grand",
+            meal: "To be confirmed",
+            sgl: "",
+            dbl: "",
+            tpl: "",
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const EMPTY_PACKAGE_BOOKING = {
@@ -346,46 +510,14 @@ const EMPTY_PACKAGE_BOOKING = {
 };
 
 const PACKAGE_COUNTRIES = [
-  {
-    flag: "https://flagcdn.com/fr.svg",
-    name: "Paris / France",
-    dialCode: "+33",
-  },
-  {
-    flag: "https://flagcdn.com/de.svg",
-    name: "Germany",
-    dialCode: "+49",
-  },
-  {
-    flag: "https://flagcdn.com/lu.svg",
-    name: "Luxembourg",
-    dialCode: "+352",
-  },
-  {
-    flag: "https://flagcdn.com/tr.svg",
-    name: "Turkey",
-    dialCode: "+90",
-  },
-  {
-    flag: "https://flagcdn.com/tn.svg",
-    name: "Tunisia",
-    dialCode: "+216",
-  },
-  {
-    flag: "https://flagcdn.com/ma.svg",
-    name: "Morocco",
-    dialCode: "+212",
-  },
-  {
-    flag: "https://flagcdn.com/ba.svg",
-    name: "Bosnia",
-    dialCode: "+387",
-  },
-  {
-    flag: "https://flagcdn.com/eg.svg",
-    name: "Egypt",
-    dialCode: "+20",
-  },
+  { flag: "https://flagcdn.com/fr.svg", name: "Paris / France", dialCode: "+33" },
+  { flag: "https://flagcdn.com/de.svg", name: "Germany", dialCode: "+49" },
+  { flag: "https://flagcdn.com/lu.svg", name: "Luxembourg", dialCode: "+352" },
+  { flag: "https://flagcdn.com/tr.svg", name: "Turkey", dialCode: "+90" },
+  { flag: "https://flagcdn.com/tn.svg", name: "Tunisia", dialCode: "+216" },
+  { flag: "https://flagcdn.com/ma.svg", name: "Morocco", dialCode: "+212" },
+  { flag: "https://flagcdn.com/ba.svg", name: "Bosnia", dialCode: "+387" },
+  { flag: "https://flagcdn.com/eg.svg", name: "Egypt", dialCode: "+20" },
 ];
 
 export default function Packages() {
@@ -396,14 +528,8 @@ export default function Packages() {
   const [bookingPackage, setBookingPackage] = useState(null);
   const [showPackageBookingForm, setShowPackageBookingForm] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
-
-  const [packageBookingData, setPackageBookingData] =
-    useState(EMPTY_PACKAGE_BOOKING);
-
-  const [selectedPackageCountry, setSelectedPackageCountry] = useState(
-    PACKAGE_COUNTRIES[0]
-  );
-
+  const [packageBookingData, setPackageBookingData] = useState(EMPTY_PACKAGE_BOOKING);
+  const [selectedPackageCountry, setSelectedPackageCountry] = useState(PACKAGE_COUNTRIES[0]);
   const [openPackageCountry, setOpenPackageCountry] = useState(false);
 
   const [packageAlert, setPackageAlert] = useState({
@@ -418,9 +544,7 @@ export default function Packages() {
 
     if (!openPackageId) return;
 
-    const packageToOpen = PACKAGES_DATA.find(
-      (item) => item.id === openPackageId
-    );
+    const packageToOpen = PACKAGES_DATA.find((item) => item.id === openPackageId);
 
     if (packageToOpen) {
       setSelectedPackage(packageToOpen);
@@ -472,10 +596,7 @@ export default function Packages() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      showPackageAlert(
-        "Please login or create an account before booking.",
-        "login"
-      );
+      showPackageAlert("Please login or create an account before booking.", "login");
       return;
     }
 
@@ -502,9 +623,7 @@ export default function Packages() {
       packageBookingData.travelDate,
     ];
 
-    const hasEmptyField = requiredFields.some(
-      (field) => !String(field).trim()
-    );
+    const hasEmptyField = requiredFields.some((field) => !String(field).trim());
 
     if (hasEmptyField) {
       showPackageAlert(
@@ -517,7 +636,6 @@ export default function Packages() {
 
     const reservationData = {
       type: "package",
-
       selected_package: {
         name: bookingPackage.name,
         backendName: bookingPackage.backendName,
@@ -528,7 +646,6 @@ export default function Packages() {
         travelDate: packageBookingData.travelDate,
         startPrice: bookingPackage.startPrice,
       },
-
       customer_info: {
         fullName: packageBookingData.fullName.trim(),
         email: packageBookingData.email.trim(),
@@ -536,7 +653,6 @@ export default function Packages() {
         travelers: packageBookingData.travelers,
         notes: packageBookingData.notes,
       },
-
       packageName: bookingPackage.name,
       trip: bookingPackage.route,
       date: packageBookingData.travelDate,
