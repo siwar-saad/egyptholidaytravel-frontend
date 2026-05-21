@@ -7,10 +7,19 @@ const DEFAULT_COVER =
 
 const EMPTY_PACKAGE = {
   name: "",
+  backendName: "",
+  route: "",
+  duration: "",
+  transfer: "",
+  transferReduction: "",
+  startPrice: "",
   programme: "",
   price: "",
   visibility: "Private",
   image: "",
+  options: "",
+  itinerary: "",
+  displayOrder: 0,
 };
 
 export default function Packages({ showSuccess }) {
@@ -18,6 +27,7 @@ export default function Packages({ showSuccess }) {
   const [packageSearch, setPackageSearch] = useState("");
   const [showPackageForm, setShowPackageForm] = useState(false);
   const [newPackage, setNewPackage] = useState(EMPTY_PACKAGE);
+  const [editingPackage, setEditingPackage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -48,6 +58,43 @@ export default function Packages({ showSuccess }) {
     return data || fallback;
   };
 
+  const getImageUrl = (image) => {
+    if (!image) return DEFAULT_COVER;
+    if (image.startsWith("http") || image.startsWith("data:")) return image;
+
+    const apiBase = API.defaults.baseURL || "/api";
+    const origin = apiBase.replace(/\/api\/?$/, "");
+
+    return `${origin}${image}`;
+  };
+
+  const stringifyJson = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return "";
+    }
+  };
+
+  const parseJson = (value, fieldName) => {
+    if (!value?.trim()) return [];
+
+    try {
+      const parsed = JSON.parse(value);
+
+      if (!Array.isArray(parsed)) {
+        throw new Error(`${fieldName} must be an array`);
+      }
+
+      return parsed;
+    } catch (error) {
+      throw new Error(`${fieldName} must be valid JSON array`);
+    }
+  };
+
   const fetchPackages = async () => {
     try {
       setLoading(true);
@@ -76,13 +123,36 @@ export default function Packages({ showSuccess }) {
   );
 
   const openPackageForm = () => {
+    setEditingPackage(null);
     setNewPackage(EMPTY_PACKAGE);
+    setShowPackageForm(true);
+  };
+
+  const openEditPackage = (item) => {
+    setEditingPackage(item);
+    setNewPackage({
+      name: item?.name || item?.title || "",
+      backendName: item?.backendName || item?.backend_name || "",
+      route: item?.route || "",
+      duration: item?.duration || "",
+      transfer: item?.transfer || "",
+      transferReduction: item?.transferReduction || item?.transfer_reduction || "",
+      startPrice: item?.startPrice || item?.start_price || item?.price || "",
+      programme: item?.programme || "",
+      price: item?.price || item?.startPrice || "",
+      visibility: item?.visibility || "Private",
+      image: item?.image || "",
+      options: stringifyJson(item?.options),
+      itinerary: stringifyJson(item?.itinerary),
+      displayOrder: item?.displayOrder || item?.display_order || 0,
+    });
     setShowPackageForm(true);
   };
 
   const closePackageForm = () => {
     setShowPackageForm(false);
     setNewPackage(EMPTY_PACKAGE);
+    setEditingPackage(null);
     setSaving(false);
   };
 
@@ -93,18 +163,26 @@ export default function Packages({ showSuccess }) {
     }));
   };
 
-  const handlePackageImage = (e) => {
+  const handlePackageImage = async (e) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
     const reader = new FileReader();
 
-    reader.onloadend = () => {
-      setNewPackage((prevPackage) => ({
-        ...prevPackage,
-        image: reader.result,
-      }));
+    reader.onloadend = async () => {
+      try {
+        const res = await API.post("/admin/packages/upload-image", {
+          image: reader.result,
+        });
+
+        setNewPackage((prevPackage) => ({
+          ...prevPackage,
+          image: res.data.image,
+        }));
+      } catch (err) {
+        notify(err.response?.data?.error || "Unable to upload package image.");
+      }
     };
 
     reader.readAsDataURL(file);
@@ -118,50 +196,78 @@ export default function Packages({ showSuccess }) {
     }));
   };
 
-  const addPackage = async () => {
+  const savePackage = async () => {
     if (saving) return;
 
     const name = newPackage.name.trim();
-    const programme = newPackage.programme.trim();
-    const price = newPackage.price.trim();
 
-    if (!name || !programme || !price) {
-      notify("Please fill all package fields.");
+    if (!name) {
+      notify("Please enter package name.");
+      return;
+    }
+
+    let options = [];
+    let itinerary = [];
+
+    try {
+      options = parseJson(newPackage.options, "Options");
+      itinerary = parseJson(newPackage.itinerary, "Itinerary");
+    } catch (error) {
+      notify(error.message);
       return;
     }
 
     const packageData = {
       name,
       title: name,
-      programme,
-      price,
+      backendName: newPackage.backendName.trim() || name,
+      route: newPackage.route.trim(),
+      duration: newPackage.duration.trim(),
+      transfer: newPackage.transfer.trim(),
+      transferReduction: newPackage.transferReduction.trim(),
+      startPrice: newPackage.startPrice.trim() || newPackage.price.trim(),
+      programme: newPackage.programme.trim(),
+      price: newPackage.price.trim() || newPackage.startPrice.trim(),
       visibility: newPackage.visibility || "Private",
       image: newPackage.image,
+      options,
+      itinerary,
+      displayOrder: Number(newPackage.displayOrder || 0),
     };
 
     try {
       setSaving(true);
 
-      const res = await API.post("/admin/packages", packageData);
+      const res = editingPackage
+        ? await API.put(`/admin/packages/${getPackageId(editingPackage)}`, packageData)
+        : await API.post("/admin/packages", packageData);
 
       const savedPackage = getPackageFromResponse(res.data, {
         id: Date.now(),
         ...packageData,
       });
 
-      setPackages((prevPackages) => [savedPackage, ...prevPackages]);
+      setPackages((prevPackages) =>
+        editingPackage
+          ? prevPackages.map((item) =>
+              getPackageId(item) === getPackageId(editingPackage)
+                ? savedPackage
+                : item
+            )
+          : [savedPackage, ...prevPackages]
+      );
 
       closePackageForm();
-      notify("Package added successfully.");
+      notify(editingPackage ? "Package updated successfully." : "Package added successfully.");
 
       fetchPackages();
     } catch (err) {
-      console.log("Add package error:", err.response?.data || err.message);
+      console.log("Save package error:", err.response?.data || err.message);
 
       notify(
         err.response?.data?.error ||
           err.response?.data?.message ||
-          "Failed to add package."
+          "Failed to save package."
       );
     } finally {
       setSaving(false);
@@ -262,10 +368,11 @@ export default function Packages({ showSuccess }) {
                 <div className="package-admin-card" key={packageId || index}>
                   <img
                     src={
-                      item?.image ||
-                      item?.image_url ||
-                      item?.cover ||
-                      DEFAULT_COVER
+                      getImageUrl(
+                        item?.image ||
+                          item?.image_url ||
+                          item?.cover
+                      )
                     }
                     alt={item?.name || item?.title || "Package"}
                     className="package-admin-image"
@@ -279,16 +386,21 @@ export default function Packages({ showSuccess }) {
 
                     <p>
                       {item?.programme ||
+                        item?.transfer ||
                         "No programme added for this package yet."}
                     </p>
 
                     <div className="package-admin-meta">
-                      <span>{item?.price || "No price"}</span>
+                      <span>{item?.startPrice || item?.start_price || item?.price || "No price"}</span>
                       <span>{item?.visibility || "Private"}</span>
                     </div>
                   </div>
 
                   <div className="package-admin-actions">
+                    <button type="button" onClick={() => openEditPackage(item)}>
+                      Edit
+                    </button>
+
                     <select
                       className={`package-select ${
                         item?.visibility === "Published"
@@ -323,7 +435,7 @@ export default function Packages({ showSuccess }) {
           <div className="package-popup">
             <div className="package-popup-head">
               <div>
-                <h2>Add New Package</h2>
+                <h2>{editingPackage ? "Edit Package" : "Add New Package"}</h2>
                 <p>Create a complete travel package.</p>
               </div>
 
@@ -344,12 +456,75 @@ export default function Packages({ showSuccess }) {
                 onChange={(e) => updatePackageField("name", e.target.value)}
               />
 
+              <input
+                type="text"
+                placeholder="Backend Name"
+                value={newPackage.backendName}
+                onChange={(e) => updatePackageField("backendName", e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Route, e.g. Cairo - Hurghada"
+                value={newPackage.route}
+                onChange={(e) => updatePackageField("route", e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Duration, e.g. 6 Nights"
+                value={newPackage.duration}
+                onChange={(e) => updatePackageField("duration", e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Transfer"
+                value={newPackage.transfer}
+                onChange={(e) => updatePackageField("transfer", e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Transfer Reduction"
+                value={newPackage.transferReduction}
+                onChange={(e) =>
+                  updatePackageField("transferReduction", e.target.value)
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="Starting Price"
+                value={newPackage.startPrice}
+                onChange={(e) => updatePackageField("startPrice", e.target.value)}
+              />
+
               <textarea
                 placeholder="Full Programme"
                 value={newPackage.programme}
                 onChange={(e) =>
                   updatePackageField("programme", e.target.value)
                 }
+              />
+
+              <textarea
+                placeholder='Options JSON array, e.g. [{"title":"Option 01","rows":[{"city":"Cairo","nights":"2 Nights","hotel":"Hotel","meal":"Breakfast","sgl":"100$","dbl":"80$","tpl":"70$"}]}]'
+                value={newPackage.options}
+                onChange={(e) => updatePackageField("options", e.target.value)}
+              />
+
+              <textarea
+                placeholder='Itinerary JSON array, e.g. [{"day":"Day 1","title":"Arrival","details":["Meet and assist"]}]'
+                value={newPackage.itinerary}
+                onChange={(e) => updatePackageField("itinerary", e.target.value)}
+              />
+
+              <input
+                type="number"
+                placeholder="Display Order"
+                value={newPackage.displayOrder}
+                onChange={(e) => updatePackageField("displayOrder", e.target.value)}
               />
 
               <input
@@ -368,7 +543,7 @@ export default function Packages({ showSuccess }) {
               {newPackage.image && (
                 <div className="hotel-preview-grid">
                   <div className="hotel-preview-item">
-                    <img src={newPackage.image} alt="Package preview" />
+                    <img src={getImageUrl(newPackage.image)} alt="Package preview" />
 
                     <button type="button" onClick={removePackageImage}>
                       ×
@@ -388,8 +563,8 @@ export default function Packages({ showSuccess }) {
               </select>
 
               <div className="package-popup-actions">
-                <button type="button" onClick={addPackage} disabled={saving}>
-                  {saving ? "Saving..." : "Save Package"}
+                <button type="button" onClick={savePackage} disabled={saving}>
+                  {saving ? "Saving..." : editingPackage ? "Save Changes" : "Save Package"}
                 </button>
 
                 <button

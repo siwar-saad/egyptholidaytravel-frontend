@@ -520,10 +520,34 @@ const PACKAGE_COUNTRIES = [
   { flag: "https://flagcdn.com/eg.svg", name: "Egypt", dialCode: "+20" },
 ];
 
+const getStoredClient = () => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("user") || sessionStorage.getItem("user") || "{}"
+    );
+  } catch {
+    return {};
+  }
+};
+
+const splitStoredPhone = (phone = "") => {
+  const cleanPhone = phone.trim();
+  const country =
+    PACKAGE_COUNTRIES.find((item) => cleanPhone.startsWith(item.dialCode)) ||
+    PACKAGE_COUNTRIES[0];
+
+  return {
+    country,
+    phone: cleanPhone.replace(country.dialCode, "").trim(),
+  };
+};
+
 export default function Packages() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [packagesData, setPackagesData] = useState([]);
+  const [packagesLoading, setPackagesLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [bookingPackage, setBookingPackage] = useState(null);
   const [showPackageBookingForm, setShowPackageBookingForm] = useState(false);
@@ -539,19 +563,64 @@ export default function Packages() {
     message: "",
   });
 
+  const getImageUrl = (image) => {
+    if (!image) return "";
+    if (image.startsWith("http") || image.startsWith("data:")) return image;
+
+    const apiBase = API.defaults.baseURL || "/api";
+    const origin = apiBase.replace(/\/api\/?$/, "");
+
+    return `${origin}${image}`;
+  };
+
+  const normalizePackage = (item) => ({
+    id: item.id,
+    name: item.name || item.title || "Package",
+    backendName: item.backendName || item.backend_name || item.title || item.name || "",
+    route: item.route || "",
+    duration: item.duration || "",
+    transfer: item.transfer || "",
+    transferReduction: item.transferReduction || item.transfer_reduction || "",
+    startPrice: item.startPrice || item.start_price || item.price || "Contact us",
+    image: getImageUrl(item.image) || cairoHurghada5,
+    options: Array.isArray(item.options) ? item.options : [],
+    itinerary: Array.isArray(item.itinerary) ? item.itinerary : [],
+    programme: item.programme || "",
+  });
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setPackagesLoading(true);
+        const res = await API.get("/packages");
+        const loadedPackages = Array.isArray(res.data) ? res.data : [];
+
+        setPackagesData(loadedPackages.map(normalizePackage));
+      } catch (err) {
+        console.log("Public packages error:", err.response?.data || err.message);
+        setPackagesData([]);
+      } finally {
+        setPackagesLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
+
   useEffect(() => {
     const openPackageId = location.state?.openPackageId;
 
     if (!openPackageId) return;
+    if (packagesLoading) return;
 
-    const packageToOpen = PACKAGES_DATA.find((item) => item.id === openPackageId);
+    const packageToOpen = packagesData.find((item) => item.id === openPackageId);
 
     if (packageToOpen) {
       setSelectedPackage(packageToOpen);
     }
 
     navigate(location.pathname, { replace: true, state: null });
-  }, [location.state, location.pathname, navigate]);
+  }, [location.state, location.pathname, navigate, packagesData, packagesLoading]);
 
   useEffect(() => {
     window.scrollTo({
@@ -592,16 +661,39 @@ export default function Packages() {
     });
   };
 
-  const openPackageBooking = (item) => {
-    const token = localStorage.getItem("token");
+  const openPackageBooking = async (item) => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
     if (!token) {
       showPackageAlert("Please login or create an account before booking.", "login");
       return;
     }
 
+    let storedClient = getStoredClient();
+
+    try {
+      const res = await API.get("/client/profile");
+      storedClient = {
+        ...storedClient,
+        ...res.data,
+      };
+    } catch (err) {
+      console.log("Profile prefill error:", err.response?.data || err.message);
+    }
+
+    const phoneData = splitStoredPhone(storedClient.phone || "");
+
     setSelectedPackage(null);
     setBookingPackage(item);
+    setPackageBookingData({
+      ...EMPTY_PACKAGE_BOOKING,
+      fullName:
+        storedClient.name ||
+        `${storedClient.firstName || ""} ${storedClient.lastName || ""}`.trim(),
+      email: storedClient.email || "",
+      phone: phoneData.phone,
+    });
+    setSelectedPackageCountry(phoneData.country);
     setShowPackageBookingForm(true);
     setOpenPackageCountry(false);
   };
@@ -635,8 +727,8 @@ export default function Packages() {
     const fullPhone = `${selectedPackageCountry.dialCode} ${packageBookingData.phone.trim()}`;
 
     const reservationData = {
-      type: "package",
-      selected_package: {
+      booking_type: "package",
+      search_params: {
         name: bookingPackage.name,
         backendName: bookingPackage.backendName,
         route: bookingPackage.route,
@@ -653,39 +745,13 @@ export default function Packages() {
         travelers: packageBookingData.travelers,
         notes: packageBookingData.notes,
       },
-      packageName: bookingPackage.name,
-      trip: bookingPackage.route,
-      date: packageBookingData.travelDate,
-      status: "Pending",
+      total_price: 0,
     };
-
-    const endpoints = [
-      "/reservations",
-      "/packages_reservation/reserve",
-      "/package_reservation/reserve",
-    ];
 
     try {
       setBookingLoading(true);
 
-      let success = false;
-
-      for (const endpoint of endpoints) {
-        try {
-          await API.post(endpoint, reservationData);
-          success = true;
-          break;
-        } catch (err) {
-          console.log(
-            `Package booking failed on ${endpoint}`,
-            err.response?.data || err.message
-          );
-        }
-      }
-
-      if (!success) {
-        throw new Error("No package reservation endpoint worked.");
-      }
+      await API.post("/bookings", reservationData);
 
       setPackageBookingData(EMPTY_PACKAGE_BOOKING);
       setSelectedPackageCountry(PACKAGE_COUNTRIES[0]);
@@ -723,7 +789,7 @@ export default function Packages() {
 
             <div className="packages-hero-stats">
               <div>
-                <strong>{PACKAGES_DATA.length}</strong>
+                <strong>{packagesData.length}</strong>
                 <span>Packages</span>
               </div>
 
@@ -751,7 +817,11 @@ export default function Packages() {
           </div>
 
           <div className="packages-grid-pro">
-            {PACKAGES_DATA.map((item) => (
+            {packagesLoading ? (
+              <p className="empty-packages-message">Loading packages...</p>
+            ) : packagesData.length === 0 ? (
+              <p className="empty-packages-message">No published packages yet.</p>
+            ) : packagesData.map((item) => (
               <article className="package-card-pro" key={item.id}>
                 <div className="package-img-box">
                   <img src={item.image} alt={item.name} loading="lazy" />
@@ -883,7 +953,11 @@ export default function Packages() {
           onClose={closePackageAlert}
           onLogin={() => {
             closePackageAlert();
-            navigate("/login");
+            navigate("/login", {
+              state: {
+                redirectTo: "/packages",
+              },
+            });
           }}
           onSignup={() => {
             closePackageAlert();
@@ -899,6 +973,7 @@ export default function Packages() {
 
 function PackageModal({ item, onClose, onBook }) {
   const hasItinerary = Array.isArray(item.itinerary) && item.itinerary.length > 0;
+  const hasOptions = Array.isArray(item.options) && item.options.length > 0;
 
   return (
     <div className="package-modal-overlay">
@@ -965,7 +1040,7 @@ function PackageModal({ item, onClose, onBook }) {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : hasOptions ? (
             <div className="package-options">
               {item.options.map((option) => (
                 <div className="package-option-card" key={option.title}>
@@ -1007,6 +1082,13 @@ function PackageModal({ item, onClose, onBook }) {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : (
+            <div className="package-option-card">
+              <h3>Programme</h3>
+              <p className="package-programme-text">
+                {item.programme || "Package details will be confirmed by our team."}
+              </p>
             </div>
           )}
 

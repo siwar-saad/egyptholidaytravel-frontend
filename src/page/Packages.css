@@ -163,6 +163,19 @@
   gap: 28px;
 }
 
+.empty-packages-message {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+  padding: 28px;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #6b5848;
+  font-weight: 900;
+  text-align: center;
+  border: 1px solid rgba(147, 84, 38, 0.12);
+}
+
 .package-card-pro {
   height: 370px;
   border-radius: 30px;
@@ -596,6 +609,13 @@
   color: #935426;
   font-size: 21px;
   margin: 0 0 18px;
+}
+
+.package-programme-text {
+  margin: 0;
+  color: #4f3c2e;
+  line-height: 1.7;
+  white-space: pre-wrap;
 }
 
 .package-table-wrapper {
