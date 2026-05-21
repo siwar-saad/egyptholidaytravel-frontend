@@ -44,8 +44,6 @@ const EMPTY_CLIENT_FORM = {
   firstName: "",
   lastName: "",
   email: "",
-  password: "",
-  confirmPassword: "",
   phone: "",
 };
 
@@ -162,8 +160,6 @@ export default function Clients({ showSuccess }) {
       firstName: client?.firstName || firstName,
       lastName: client?.lastName || lastName,
       email: client?.email || "",
-      password: "",
-      confirmPassword: "",
       phone: phoneData.phone,
     });
 
@@ -204,17 +200,6 @@ export default function Clients({ showSuccess }) {
       return;
     }
 
-    if (!editingClient && (!clientForm.password || !clientForm.confirmPassword)) {
-      notify("Please enter password and confirm password.");
-      return;
-    }
-
-    if (clientForm.password || clientForm.confirmPassword) {
-      if (clientForm.password !== clientForm.confirmPassword) {
-        notify("Passwords do not match.");
-        return;
-      }
-    }
 
     const fullPhone = `${selectedCountry.dialCode} ${phone}`;
 
@@ -227,10 +212,6 @@ export default function Clients({ showSuccess }) {
       role: "user",
     };
 
-    if (clientForm.password) {
-      clientData.password = clientForm.password;
-      clientData.confirmPassword = clientForm.confirmPassword;
-    }
 
     try {
       setLoading(true);
@@ -409,25 +390,6 @@ export default function Clients({ showSuccess }) {
                 onChange={(e) => handleChange("email", e.target.value)}
               />
 
-              <div className="client-signup-row">
-                <input
-                  type="password"
-                  placeholder={
-                    editingClient ? "New Password Optional" : "Password"
-                  }
-                  value={clientForm.password}
-                  onChange={(e) => handleChange("password", e.target.value)}
-                />
-
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  value={clientForm.confirmPassword}
-                  onChange={(e) =>
-                    handleChange("confirmPassword", e.target.value)
-                  }
-                />
-              </div>
 
               <div className="client-phone-field">
                 <div

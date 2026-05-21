@@ -1139,3 +1139,40 @@
     height: 62px;
   }
 }
+
+/* ================= LOGIN REQUIRED PRO ALERT ================= */
+
+.hotel-pro-alert.login .hotel-pro-alert-icon {
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  font-size: 28px;
+}
+
+.hotel-pro-alert-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.hotel-pro-alert-secondary {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: #f1e7dd;
+  color: #935426;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.hotel-pro-alert-secondary:hover {
+  background: #ead8c8;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+  .hotel-pro-alert-actions {
+    grid-template-columns: 1fr;
+  }
+}

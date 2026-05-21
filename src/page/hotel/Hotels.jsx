@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaChevronDown } from "react-icons/fa";
 
-import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
@@ -73,21 +73,9 @@ const BOOKING_COUNTRIES = [
   },
 ];
 
-const getStoredUser = () => {
-  try {
-    return JSON.parse(
-      localStorage.getItem("user") ||
-        sessionStorage.getItem("user") ||
-        "{}"
-    );
-  } catch {
-    return {};
-  }
-};
-
 export default function Hotels() {
   const navigate = useNavigate();
-  const storedUser = getStoredUser();
+
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [mainImage, setMainImage] = useState(null);
@@ -110,10 +98,16 @@ export default function Hotels() {
   });
 
   const showHotelAlert = (message, type = "error") => {
+    const titles = {
+      success: "Booking Sent",
+      error: "Missing Information",
+      login: "Login Required",
+    };
+
     setHotelAlert({
       show: true,
       type,
-      title: type === "success" ? "Booking Sent" : "Missing Information",
+      title: titles[type] || "Notice",
       message,
     });
   };
@@ -162,6 +156,16 @@ export default function Hotels() {
   };
 
   const openBooking = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showHotelAlert(
+        "Please login or create an account before booking.",
+        "login"
+      );
+      return;
+    }
+
     setShowBookingForm(true);
     setOpenBookingCountry(false);
   };
@@ -169,27 +173,6 @@ export default function Hotels() {
   const closeBooking = () => {
     setShowBookingForm(false);
     setOpenBookingCountry(false);
-  };
-
-  const isLoggedIn = () =>
-    Boolean(
-      localStorage.getItem("token") ||
-        sessionStorage.getItem("token")
-    );
-
-  const openBookingForm = () => {
-    if (!isLoggedIn()) {
-      alert("Please login or create an account before booking.");
-      navigate("/login");
-      return;
-    }
-
-    setBookingData((current) => ({
-      ...current,
-      fullName: current.fullName || storedUser.name || "",
-      email: storedUser.email || current.email || "",
-    }));
-    setShowBookingForm(true);
   };
 
   const hotelGroups = hotels.reduce((groups, hotel) => {
@@ -327,7 +310,6 @@ export default function Hotels() {
             setMainImage={setMainImage}
             onClose={closeHotel}
             onBook={openBooking}
-            onBook={openBookingForm}
           />
         )}
 
@@ -348,7 +330,18 @@ export default function Hotels() {
         )}
 
         {hotelAlert.show && (
-          <HotelProAlert alert={hotelAlert} onClose={closeHotelAlert} />
+          <HotelProAlert
+            alert={hotelAlert}
+            onClose={closeHotelAlert}
+            onLogin={() => {
+              closeHotelAlert();
+              navigate("/login");
+            }}
+            onSignup={() => {
+              closeHotelAlert();
+              navigate("/signup");
+            }}
+          />
         )}
       </main>
 
@@ -670,7 +663,9 @@ function BookingForm({
   );
 }
 
-function HotelProAlert({ alert, onClose }) {
+function HotelProAlert({ alert, onClose, onLogin, onSignup }) {
+  const isLoginAlert = alert.type === "login";
+
   return (
     <div className="hotel-pro-alert-overlay">
       <div className={`hotel-pro-alert ${alert.type}`}>
@@ -683,15 +678,35 @@ function HotelProAlert({ alert, onClose }) {
         </button>
 
         <div className="hotel-pro-alert-icon">
-          {alert.type === "success" ? "✓" : "!"}
+          {alert.type === "success" ? "✓" : isLoginAlert ? "🔐" : "!"}
         </div>
 
         <h3>{alert.title}</h3>
         <p>{alert.message}</p>
 
-        <button type="button" className="hotel-pro-alert-btn" onClick={onClose}>
-          OK
-        </button>
+        {isLoginAlert ? (
+          <div className="hotel-pro-alert-actions">
+            <button
+              type="button"
+              className="hotel-pro-alert-btn"
+              onClick={onLogin}
+            >
+              Login
+            </button>
+
+            <button
+              type="button"
+              className="hotel-pro-alert-secondary"
+              onClick={onSignup}
+            >
+              Create Account
+            </button>
+          </div>
+        ) : (
+          <button type="button" className="hotel-pro-alert-btn" onClick={onClose}>
+            OK
+          </button>
+        )}
       </div>
     </div>
   );

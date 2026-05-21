@@ -1,53 +1,97 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import API from "../../api";
 
-export default function Packages({ showSuccess }) {
-  const defaultCover =
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+const DEFAULT_COVER =
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
 
+const EMPTY_PACKAGE = {
+  name: "",
+  programme: "",
+  price: "",
+  visibility: "Private",
+  image: "",
+};
+
+export default function Packages({ showSuccess }) {
   const [packages, setPackages] = useState([]);
   const [packageSearch, setPackageSearch] = useState("");
   const [showPackageForm, setShowPackageForm] = useState(false);
-
-  const [newPackage, setNewPackage] = useState({
-    name: "",
-    programme: "",
-    price: "",
-    visibility: "Private",
-    image: "",
-  });
+  const [newPackage, setNewPackage] = useState(EMPTY_PACKAGE);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const notify = (message) => {
     if (typeof showSuccess === "function") {
       showSuccess(message);
+    } else {
+      console.log(message);
     }
   };
 
-  const getPackageId = (item) => item.id || item._id;
+  const getPackageId = (item) => item?._id || item?.id;
+
+  const getPackagesArray = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.packages)) return data.packages;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.items)) return data.items;
+
+    return [];
+  };
+
+  const getPackageFromResponse = (data, fallback) => {
+    if (data?.package) return data.package;
+    if (data?.data) return data.data;
+    if (data?.item) return data.item;
+
+    return data || fallback;
+  };
+
+  const fetchPackages = async () => {
+    try {
+      setLoading(true);
+
+      const res = await API.get("/admin/packages");
+
+      setPackages(getPackagesArray(res.data));
+    } catch (err) {
+      console.log("Packages error:", err.response?.data || err.message);
+      setPackages([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        const res = await API.get("/admin/packages");
-        setPackages(res.data || []);
-      } catch (err) {
-        console.log("Packages error:", err.response?.data || err.message);
-      }
-    };
-
     fetchPackages();
   }, []);
 
   const filteredPackages = packages.filter((item) =>
-    `${item.name || ""} ${item.title || ""} ${item.programme || ""} ${
-      item.price || ""
-    } ${item.visibility || ""}`
+    `${item?.name || ""} ${item?.title || ""} ${item?.programme || ""} ${
+      item?.price || ""
+    } ${item?.visibility || ""}`
       .toLowerCase()
       .includes(packageSearch.toLowerCase())
   );
+
+  const openPackageForm = () => {
+    setNewPackage(EMPTY_PACKAGE);
+    setShowPackageForm(true);
+  };
+
+  const closePackageForm = () => {
+    setShowPackageForm(false);
+    setNewPackage(EMPTY_PACKAGE);
+    setSaving(false);
+  };
+
+  const updatePackageField = (field, value) => {
+    setNewPackage((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handlePackageImage = (e) => {
     const file = e.target.files?.[0];
@@ -75,6 +119,8 @@ export default function Packages({ showSuccess }) {
   };
 
   const addPackage = async () => {
+    if (saving) return;
+
     const name = newPackage.name.trim();
     const programme = newPackage.programme.trim();
     const price = newPackage.price.trim();
@@ -85,30 +131,40 @@ export default function Packages({ showSuccess }) {
     }
 
     const packageData = {
-      ...newPackage,
       name,
+      title: name,
       programme,
       price,
+      visibility: newPackage.visibility || "Private",
+      image: newPackage.image,
     };
 
     try {
+      setSaving(true);
+
       const res = await API.post("/admin/packages", packageData);
 
-      setPackages((prevPackages) => [res.data, ...prevPackages]);
-
-      setNewPackage({
-        name: "",
-        programme: "",
-        price: "",
-        visibility: "Private",
-        image: "",
+      const savedPackage = getPackageFromResponse(res.data, {
+        id: Date.now(),
+        ...packageData,
       });
 
-      setShowPackageForm(false);
+      setPackages((prevPackages) => [savedPackage, ...prevPackages]);
+
+      closePackageForm();
       notify("Package added successfully.");
+
+      fetchPackages();
     } catch (err) {
       console.log("Add package error:", err.response?.data || err.message);
-      notify("Failed to add package.");
+
+      notify(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to add package."
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -132,7 +188,12 @@ export default function Packages({ showSuccess }) {
       notify("Package visibility updated.");
     } catch (err) {
       console.log("Visibility error:", err.response?.data || err.message);
-      notify("Failed to update package visibility.");
+
+      notify(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to update package visibility."
+      );
     }
   };
 
@@ -152,7 +213,12 @@ export default function Packages({ showSuccess }) {
       notify("Package deleted successfully.");
     } catch (err) {
       console.log("Delete package error:", err.response?.data || err.message);
-      notify("Failed to delete package.");
+
+      notify(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to delete package."
+      );
     }
   };
 
@@ -168,7 +234,7 @@ export default function Packages({ showSuccess }) {
           <button
             type="button"
             className="add-package-btn-pro"
-            onClick={() => setShowPackageForm(true)}
+            onClick={openPackageForm}
           >
             <FaPlus /> Add New Package
           </button>
@@ -183,7 +249,9 @@ export default function Packages({ showSuccess }) {
           />
         </div>
 
-        {filteredPackages.length === 0 ? (
+        {loading ? (
+          <p className="empty-msg">Loading packages...</p>
+        ) : filteredPackages.length === 0 ? (
           <p className="empty-msg">No packages found.</p>
         ) : (
           <div className="packages-admin-grid">
@@ -194,45 +262,47 @@ export default function Packages({ showSuccess }) {
                 <div className="package-admin-card" key={packageId || index}>
                   <img
                     src={
-                      item.image ||
-                      item.image_url ||
-                      item.cover ||
-                      defaultCover
+                      item?.image ||
+                      item?.image_url ||
+                      item?.cover ||
+                      DEFAULT_COVER
                     }
-                    alt={item.name || "Package"}
+                    alt={item?.name || item?.title || "Package"}
                     className="package-admin-image"
                     onError={(e) => {
-                      e.currentTarget.src = defaultCover;
+                      e.currentTarget.src = DEFAULT_COVER;
                     }}
                   />
 
                   <div className="package-admin-content">
-                    <h3>{item.name || item.title || "Untitled Package"}</h3>
+                    <h3>{item?.name || item?.title || "Untitled Package"}</h3>
 
                     <p>
-                      {item.programme ||
+                      {item?.programme ||
                         "No programme added for this package yet."}
                     </p>
 
                     <div className="package-admin-meta">
-                      <span>{item.price || "No price"}</span>
-                      <span>{item.visibility || "Private"}</span>
+                      <span>{item?.price || "No price"}</span>
+                      <span>{item?.visibility || "Private"}</span>
                     </div>
                   </div>
 
                   <div className="package-admin-actions">
                     <select
                       className={`package-select ${
-                        item.visibility === "Published"
+                        item?.visibility === "Published"
                           ? "uploaded"
                           : "missing"
                       }`}
-                      value={item.visibility || "Private"}
+                      value={item?.visibility || "Private"}
                       onChange={(e) => {
-                        if (e.target.value === "Delete") {
+                        const value = e.target.value;
+
+                        if (value === "Delete") {
                           deletePackage(packageId);
                         } else {
-                          updatePackageVisibility(packageId, e.target.value);
+                          updatePackageVisibility(packageId, value);
                         }
                       }}
                     >
@@ -260,7 +330,7 @@ export default function Packages({ showSuccess }) {
               <button
                 type="button"
                 className="close-package-popup"
-                onClick={() => setShowPackageForm(false)}
+                onClick={closePackageForm}
               >
                 ×
               </button>
@@ -271,22 +341,14 @@ export default function Packages({ showSuccess }) {
                 type="text"
                 placeholder="Package Name"
                 value={newPackage.name}
-                onChange={(e) =>
-                  setNewPackage({
-                    ...newPackage,
-                    name: e.target.value,
-                  })
-                }
+                onChange={(e) => updatePackageField("name", e.target.value)}
               />
 
               <textarea
                 placeholder="Full Programme"
                 value={newPackage.programme}
                 onChange={(e) =>
-                  setNewPackage({
-                    ...newPackage,
-                    programme: e.target.value,
-                  })
+                  updatePackageField("programme", e.target.value)
                 }
               />
 
@@ -294,12 +356,7 @@ export default function Packages({ showSuccess }) {
                 type="text"
                 placeholder="Price"
                 value={newPackage.price}
-                onChange={(e) =>
-                  setNewPackage({
-                    ...newPackage,
-                    price: e.target.value,
-                  })
-                }
+                onChange={(e) => updatePackageField("price", e.target.value)}
               />
 
               <input
@@ -311,7 +368,7 @@ export default function Packages({ showSuccess }) {
               {newPackage.image && (
                 <div className="hotel-preview-grid">
                   <div className="hotel-preview-item">
-                    <img src={newPackage.image} alt="preview" />
+                    <img src={newPackage.image} alt="Package preview" />
 
                     <button type="button" onClick={removePackageImage}>
                       ×
@@ -323,10 +380,7 @@ export default function Packages({ showSuccess }) {
               <select
                 value={newPackage.visibility}
                 onChange={(e) =>
-                  setNewPackage({
-                    ...newPackage,
-                    visibility: e.target.value,
-                  })
+                  updatePackageField("visibility", e.target.value)
                 }
               >
                 <option value="Published">Published</option>
@@ -334,14 +388,15 @@ export default function Packages({ showSuccess }) {
               </select>
 
               <div className="package-popup-actions">
-                <button type="button" onClick={addPackage}>
-                  Save Package
+                <button type="button" onClick={addPackage} disabled={saving}>
+                  {saving ? "Saving..." : "Save Package"}
                 </button>
 
                 <button
                   type="button"
                   className="cancel-package-btn"
-                  onClick={() => setShowPackageForm(false)}
+                  onClick={closePackageForm}
+                  disabled={saving}
                 >
                   Cancel
                 </button>

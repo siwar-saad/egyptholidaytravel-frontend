@@ -1935,3 +1935,20 @@ th {
     max-height: 230px;
   }
 }
+
+/* ================= DASHBOARD CLICKABLE CARDS ================= */
+
+.dashboard-card-clickable {
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dashboard-card-clickable:hover {
+  transform: translateY(-7px) scale(1.01);
+}
+
+.dashboard-card-clickable:active {
+  transform: scale(0.98);
+}

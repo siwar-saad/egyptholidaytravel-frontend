@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import API from "../../api";
 
-export default function Dashboard() {
-  const [dashboard, setDashboard] = useState(null);
-
-  const stats = [
-    { title: "Packages", value: dashboard?.packages ?? 0, icon: "📦" },
-    { title: "Reservations", value: dashboard?.reservations ?? 0, icon: "🧾" },
-    { title: "Clients", value: dashboard?.clients ?? 0, icon: "👥" },
-    { title: "Messages", value: dashboard?.messages ?? 0, icon: "💬" },
-  ];
+export default function Dashboard({ onOpenTab }) {
+  const [dashboard, setDashboard] = useState({
+    packages: 0,
+    reservations: 0,
+    clients: 0,
+    messages: 0,
+  });
 
   useEffect(() => {
-    const fetchDashboard = async () => {
+    const loadDashboard = async () => {
       try {
         const res = await API.get("/admin/dashboard");
 
@@ -27,8 +25,41 @@ export default function Dashboard() {
       }
     };
 
-    fetchDashboard();
+    loadDashboard();
   }, []);
+
+  const stats = [
+    {
+      title: "Packages",
+      value: dashboard.packages,
+      icon: "📦",
+      tab: "packages",
+    },
+    {
+      title: "Reservations",
+      value: dashboard.reservations,
+      icon: "🧾",
+      tab: "reservations",
+    },
+    {
+      title: "Clients",
+      value: dashboard.clients,
+      icon: "👥",
+      tab: "clients",
+    },
+    {
+      title: "Messages",
+      value: dashboard.messages,
+      icon: "💬",
+      tab: "messages",
+    },
+  ];
+
+  const handleOpenTab = (tab) => {
+    if (typeof onOpenTab === "function") {
+      onOpenTab(tab);
+    }
+  };
 
   return (
     <section className="admin-panel">
@@ -41,14 +72,19 @@ export default function Dashboard() {
 
       <div className="dashboard-grid">
         {stats.map((item) => (
-          <div key={item.title} className="dashboard-card">
+          <button
+            type="button"
+            key={item.title}
+            className="dashboard-card dashboard-card-clickable"
+            onClick={() => handleOpenTab(item.tab)}
+          >
             <span className="dashboard-icon">{item.icon}</span>
 
             <div>
               <h3>{item.value}</h3>
               <p>{item.title}</p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </section>

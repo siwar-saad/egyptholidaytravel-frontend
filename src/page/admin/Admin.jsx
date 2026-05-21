@@ -50,7 +50,7 @@ export default function Admin() {
     const loadMessageNotifications = async () => {
       try {
         const res = await API.get("/admin/messages");
-        setAdminMessageNotifications((res.data || []).length);
+        setAdminMessageNotifications(Array.isArray(res.data) ? res.data.length : 0);
       } catch (err) {
         console.log(
           "Messages notification error:",
@@ -71,18 +71,38 @@ export default function Admin() {
   };
 
   const renderContent = () => {
-    if (activeTab === "dashboard") return <Dashboard />;
-    if (activeTab === "packages") return <Packages showSuccess={showSuccess} />;
-    if (activeTab === "hotels") return <Hotels showSuccess={showSuccess} />;
-    if (activeTab === "reservations") return <Reservations showSuccess={showSuccess} />;
-    if (activeTab === "clients") return <Clients showSuccess={showSuccess} />;
-    if (activeTab === "payments") return <Payments />;
-    if (activeTab === "messages") return <Messages showSuccess={showSuccess} />;
-    if (activeTab === "subscribers") return <Subscribers />;
-    if (activeTab === "settings") return <Settings />;
+  switch (activeTab) {
+    case "dashboard":
+      return <Dashboard onOpenTab={openTab} />;
 
-    return <Dashboard />;
-  };
+    case "packages":
+      return <Packages showSuccess={showSuccess} />;
+
+    case "hotels":
+      return <Hotels showSuccess={showSuccess} />;
+
+    case "reservations":
+      return <Reservations showSuccess={showSuccess} />;
+
+    case "clients":
+      return <Clients showSuccess={showSuccess} />;
+
+    case "payments":
+      return <Payments />;
+
+    case "messages":
+      return <Messages showSuccess={showSuccess} />;
+
+    case "subscribers":
+      return <Subscribers />;
+
+    case "settings":
+      return <Settings />;
+
+    default:
+      return <Dashboard onOpenTab={openTab} />;
+  }
+};
 
   return (
     <div className="admin-wrapper">
@@ -104,6 +124,7 @@ export default function Admin() {
 
             <nav className="admin-nav">
               <button
+                type="button"
                 className={activeTab === "dashboard" ? "active" : ""}
                 onClick={() => openTab("dashboard")}
               >
@@ -111,6 +132,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "packages" ? "active" : ""}
                 onClick={() => openTab("packages")}
               >
@@ -118,6 +140,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "hotels" ? "active" : ""}
                 onClick={() => openTab("hotels")}
               >
@@ -125,6 +148,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "reservations" ? "active" : ""}
                 onClick={() => openTab("reservations")}
               >
@@ -132,6 +156,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "clients" ? "active" : ""}
                 onClick={() => openTab("clients")}
               >
@@ -139,6 +164,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "payments" ? "active" : ""}
                 onClick={() => openTab("payments")}
               >
@@ -146,6 +172,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "messages" ? "active" : ""}
                 onClick={() => openTab("messages")}
               >
@@ -160,6 +187,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "subscribers" ? "active" : ""}
                 onClick={() => openTab("subscribers")}
               >
@@ -167,6 +195,7 @@ export default function Admin() {
               </button>
 
               <button
+                type="button"
                 className={activeTab === "settings" ? "active" : ""}
                 onClick={() => openTab("settings")}
               >
@@ -175,7 +204,7 @@ export default function Admin() {
             </nav>
           </div>
 
-          <button className="admin-logout" onClick={handleLogout}>
+          <button type="button" className="admin-logout" onClick={handleLogout}>
             <FaSignOutAlt /> Logout
           </button>
         </aside>
