@@ -2032,3 +2032,299 @@ button {
     font-size: 14px;
   }
 }
+
+/* ================= TESTIMONIALS MOBILE SIDE BY SIDE ================= */
+
+@media (max-width: 768px) {
+  .testimonials-section {
+    padding: 48px 12px !important;
+    overflow: hidden !important;
+  }
+
+  .testimonials-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 78% !important;
+    grid-template-columns: none !important;
+
+    gap: 14px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+
+    padding: 4px 4px 12px !important;
+  }
+
+  .testimonials-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .testimonial-card {
+    width: 100% !important;
+    min-height: 215px !important;
+    scroll-snap-align: start !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .testimonials-grid {
+    grid-auto-columns: 82% !important;
+    gap: 12px !important;
+  }
+
+  .testimonial-card {
+    padding: 20px 16px !important;
+    border-radius: 22px !important;
+  }
+}
+
+/* ================= FEATURED PACKAGES MOBILE SIDE BY SIDE ================= */
+
+@media (max-width: 768px) {
+  .featured-packages-section {
+    overflow: hidden !important;
+  }
+
+  .featured-packages-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 72% !important;
+    grid-template-columns: none !important;
+
+    gap: 14px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+
+    padding: 4px 4px 14px !important;
+    justify-items: stretch !important;
+  }
+
+  .featured-packages-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .featured-package-card {
+    width: 100% !important;
+    max-width: none !important;
+    scroll-snap-align: start !important;
+  }
+
+  .featured-package-card img {
+    height: 125px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .featured-packages-grid {
+    grid-auto-columns: 76% !important;
+    gap: 12px !important;
+  }
+
+  .featured-package-card {
+    padding: 12px !important;
+    border-radius: 18px !important;
+  }
+
+  .featured-package-card img {
+    height: 115px !important;
+  }
+}
+
+/* ================= FEATURES MOBILE SIDE BY SIDE ================= */
+
+@media (max-width: 768px) {
+  .features-strip {
+    width: calc(100% - 24px) !important;
+    max-width: 100% !important;
+
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 46% !important;
+    grid-template-columns: none !important;
+
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+
+    padding: 4px 4px 14px !important;
+    margin: 24px auto 44px !important;
+  }
+
+  .features-strip::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .feature-item {
+    width: 100% !important;
+    min-height: 140px !important;
+    scroll-snap-align: start !important;
+
+    padding: 18px 10px !important;
+    border-radius: 20px !important;
+  }
+
+  .feature-icon {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 24px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .feature-item h3 {
+    font-size: 17px !important;
+  }
+
+  .feature-item p {
+    font-size: 10.5px !important;
+    line-height: 1.4 !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .features-strip {
+    grid-auto-columns: 48% !important;
+    gap: 10px !important;
+  }
+
+  .feature-item {
+    min-height: 135px !important;
+    padding: 16px 8px !important;
+  }
+}
+
+/* ================= INFO CARDS MOBILE PRO FIX ================= */
+
+@media (max-width: 768px) {
+  .info-section {
+    padding: 44px 12px 38px !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fbf7f2 100%) !important;
+  }
+
+  .info-layout {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+
+  .info-side {
+    display: contents !important;
+  }
+
+  .cinematic-card {
+    grid-column: 1 / -1 !important;
+    width: 170px !important;
+    max-width: 70% !important;
+    margin: 0 auto 16px !important;
+  }
+
+  .info-block {
+    width: 100% !important;
+    min-height: 220px !important;
+    padding: 14px 12px !important;
+    border-radius: 18px !important;
+
+    background: #ffffff !important;
+    border: 1px solid rgba(147, 84, 38, 0.12) !important;
+    box-shadow: 0 12px 30px rgba(147, 84, 38, 0.08) !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+
+    overflow: hidden !important;
+  }
+
+  .info-block h3 {
+    font-size: 15.5px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 10px !important;
+    color: #24160f !important;
+  }
+
+  .info-block ul {
+    padding-left: 14px !important;
+    margin: 0 !important;
+  }
+
+  .info-block li {
+    font-size: 10.8px !important;
+    line-height: 1.45 !important;
+    color: #4a372b !important;
+    margin-bottom: 4px !important;
+  }
+
+  .read-btn {
+    margin-top: 12px !important;
+    padding: 6px 12px !important;
+    width: fit-content !important;
+    border-radius: 999px !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+
+    background: #ffffff !important;
+    color: #935426 !important;
+    border: 1px solid #935426 !important;
+  }
+
+  .read-btn:hover {
+    background: #935426 !important;
+    color: #ffffff !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .info-section {
+    padding: 38px 10px 34px !important;
+  }
+
+  .info-layout {
+    gap: 10px !important;
+  }
+
+  .info-block {
+    min-height: 210px !important;
+    padding: 12px 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .info-block h3 {
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .info-block li {
+    font-size: 9.8px !important;
+    line-height: 1.4 !important;
+  }
+
+  .read-btn {
+    padding: 5px 10px !important;
+    font-size: 9.5px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  .info-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .info-block {
+    min-height: auto !important;
+  }
+}
