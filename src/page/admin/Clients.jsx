@@ -1,144 +1,311 @@
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaChevronDown, FaPlus } from "react-icons/fa";
 import API from "../../api";
+
+const COUNTRIES = [
+  {
+    flag: "https://flagcdn.com/fr.svg",
+    name: "Paris / France",
+    dialCode: "+33",
+  },
+  {
+    flag: "https://flagcdn.com/de.svg",
+    name: "Germany",
+    dialCode: "+49",
+  },
+  {
+    flag: "https://flagcdn.com/lu.svg",
+    name: "Luxembourg",
+    dialCode: "+352",
+  },
+  {
+    flag: "https://flagcdn.com/tr.svg",
+    name: "Turkey",
+    dialCode: "+90",
+  },
+  {
+    flag: "https://flagcdn.com/tn.svg",
+    name: "Tunisia",
+    dialCode: "+216",
+  },
+  {
+    flag: "https://flagcdn.com/ma.svg",
+    name: "Morocco",
+    dialCode: "+212",
+  },
+  {
+    flag: "https://flagcdn.com/ba.svg",
+    name: "Bosnia",
+    dialCode: "+387",
+  },
+];
+
+const EMPTY_CLIENT_FORM = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  phone: "",
+};
 
 export default function Clients({ showSuccess }) {
   const [clients, setClients] = useState([]);
   const [clientSearch, setClientSearch] = useState("");
   const [showClientForm, setShowClientForm] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-  const [savingClient, setSavingClient] = useState(false);
 
-  const [clientForm, setClientForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
+  const [clientForm, setClientForm] = useState(EMPTY_CLIENT_FORM);
+  const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
+  const [openCountry, setOpenCountry] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const notify = (message) => {
     if (typeof showSuccess === "function") {
       showSuccess(message);
+    } else {
+      alert(message);
     }
   };
 
-  const getClientName = (client) =>
-    client.name ||
-    `${client.first_name || ""} ${client.last_name || ""}`.trim();
+  const getClientId = (client) => {
+    return client?._id || client?.id;
+  };
 
-  const splitClientName = (name) => {
-    const parts = name.trim().split(/\s+/);
-    const firstName = parts.shift() || "";
+  const getClientName = (client) => {
+    if (!client) return "";
+
+    if (client.name) return client.name;
+
+    return `${client.firstName || ""} ${client.lastName || ""}`.trim();
+  };
+
+  const getClientsArray = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.clients)) return data.clients;
+    if (Array.isArray(data?.users)) return data.users;
+    if (Array.isArray(data?.data)) return data.data;
+
+    return [];
+  };
+
+  const getClientFromResponse = (data, fallback) => {
+    if (data?.client) return data.client;
+    if (data?.user) return data.user;
+    if (data?.data) return data.data;
+
+    return fallback;
+  };
+
+  const splitName = (name = "") => {
+    const parts = name.trim().split(" ");
 
     return {
-      first_name: firstName,
-      last_name: parts.join(" "),
+      firstName: parts[0] || "",
+      lastName: parts.slice(1).join(" ") || "",
     };
   };
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const res = await API.get("/admin/clients");
-        setClients(res.data || []);
-      } catch (err) {
-        console.log("Clients error:", err.response?.data || err.message);
-      }
-    };
+  const splitPhone = (phone = "") => {
+    const cleanPhone = phone.trim();
 
+    const foundCountry =
+      COUNTRIES.find((country) => cleanPhone.startsWith(country.dialCode)) ||
+      COUNTRIES[0];
+
+    const phoneNumber = cleanPhone.replace(foundCountry.dialCode, "").trim();
+
+    return {
+      country: foundCountry,
+      phone: phoneNumber,
+    };
+  };
+
+  const fetchClients = async () => {
+    try {
+      const res = await API.get("/admin/clients");
+      setClients(getClientsArray(res.data));
+    } catch (err) {
+      console.log("Clients error:", err.response?.data || err.message);
+      setClients([]);
+    }
+  };
+
+  useEffect(() => {
     fetchClients();
   }, []);
 
-  const filteredClients = clients.filter((client) =>
-    `${getClientName(client)} ${client.email || ""} ${client.phone || ""}`
-      .toLowerCase()
-      .includes(clientSearch.toLowerCase())
-  );
+  const filteredClients = clients.filter((client) => {
+    const text = `${getClientName(client)} ${client?.email || ""} ${
+      client?.phone || ""
+    }`;
+
+    return text.toLowerCase().includes(clientSearch.toLowerCase());
+  });
 
   const openAddClient = () => {
     setEditingClient(null);
-    setClientForm({
-      name: "",
-      email: "",
-      phone: "",
-    });
+    setClientForm(EMPTY_CLIENT_FORM);
+    setSelectedCountry(COUNTRIES[0]);
+    setOpenCountry(false);
     setShowClientForm(true);
   };
 
   const openEditClient = (client) => {
+    const clientName = getClientName(client);
+    const { firstName, lastName } = splitName(clientName);
+    const phoneData = splitPhone(client?.phone || "");
+
     setEditingClient(client);
+
     setClientForm({
-      name: getClientName(client),
-      email: client.email || "",
-      phone: client.phone || "",
+      firstName: client?.firstName || firstName,
+      lastName: client?.lastName || lastName,
+      email: client?.email || "",
+      password: "",
+      confirmPassword: "",
+      phone: phoneData.phone,
     });
+
+    setSelectedCountry(phoneData.country);
+    setOpenCountry(false);
     setShowClientForm(true);
   };
 
+  const closeClientPopup = () => {
+    setShowClientForm(false);
+    setEditingClient(null);
+    setClientForm(EMPTY_CLIENT_FORM);
+    setSelectedCountry(COUNTRIES[0]);
+    setOpenCountry(false);
+    setLoading(false);
+  };
+
+  const handleChange = (field, value) => {
+    setClientForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const chooseCountry = (country) => {
+    setSelectedCountry(country);
+    setOpenCountry(false);
+  };
+
   const saveClient = async () => {
-    const name = clientForm.name.trim();
+    const firstName = clientForm.firstName.trim();
+    const lastName = clientForm.lastName.trim();
     const email = clientForm.email.trim();
     const phone = clientForm.phone.trim();
 
-    if (!name || !email) {
-      notify("Please fill client name and email.");
+    if (!firstName || !lastName || !email || !phone) {
+      notify("Please fill first name, last name, email and phone.");
       return;
     }
 
-    const payload = {
-      ...splitClientName(name),
+    if (!editingClient && (!clientForm.password || !clientForm.confirmPassword)) {
+      notify("Please enter password and confirm password.");
+      return;
+    }
+
+    if (clientForm.password || clientForm.confirmPassword) {
+      if (clientForm.password !== clientForm.confirmPassword) {
+        notify("Passwords do not match.");
+        return;
+      }
+    }
+
+    const fullPhone = `${selectedCountry.dialCode} ${phone}`;
+
+    const clientData = {
+      firstName,
+      lastName,
+      name: `${firstName} ${lastName}`,
       email,
-      phone,
-      country: editingClient?.country || "Egypt",
-      city: editingClient?.city || "",
-      role: editingClient?.role || "user",
+      phone: fullPhone,
+      role: "user",
     };
 
+    if (clientForm.password) {
+      clientData.password = clientForm.password;
+      clientData.confirmPassword = clientForm.confirmPassword;
+    }
+
     try {
-      setSavingClient(true);
+      setLoading(true);
 
       if (editingClient) {
-        const res = await API.put(`/admin/clients/${editingClient.id}`, payload);
+        const clientId = getClientId(editingClient);
 
-        setClients((prevClients) =>
-          prevClients.map((client) =>
-            client.id === editingClient.id ? res.data : client
+        if (!clientId) {
+          notify("Client id not found.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await API.put(`/admin/clients/${clientId}`, clientData);
+
+        const updatedClient = getClientFromResponse(res.data, {
+          ...editingClient,
+          ...clientData,
+        });
+
+        setClients((prev) =>
+          prev.map((client) =>
+            getClientId(client) === clientId ? updatedClient : client
           )
         );
 
         notify("Client updated successfully.");
       } else {
-        const res = await API.post("/admin/clients", payload);
+        const res = await API.post("/admin/clients", clientData);
 
-        setClients((prevClients) => [res.data.user, ...prevClients]);
-        notify("Client created successfully. A password was sent by email.");
+        const newClient = getClientFromResponse(res.data, {
+          id: Date.now(),
+          ...clientData,
+        });
+
+        setClients((prev) => [newClient, ...prev]);
+
+        notify("Client added successfully.");
       }
 
-      setShowClientForm(false);
-      setEditingClient(null);
-
-      setClientForm({
-        name: "",
-        email: "",
-        phone: "",
-      });
+      closeClientPopup();
+      fetchClients();
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to save client.");
+      console.log("Save client error:", err.response?.data || err.message);
+
+      notify(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Unable to save client."
+      );
     } finally {
-      setSavingClient(false);
+      setLoading(false);
     }
   };
 
   const deleteClient = async (id) => {
+    if (!id) {
+      notify("Client id not found.");
+      return;
+    }
+
     try {
       await API.delete(`/admin/clients/${id}`);
 
-      setClients((prevClients) =>
-        prevClients.filter((client) => client.id !== id)
-      );
+      setClients((prev) => prev.filter((client) => getClientId(client) !== id));
 
       notify("Client deleted successfully.");
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to delete client.");
+      console.log("Delete client error:", err.response?.data || err.message);
+
+      notify(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Unable to delete client."
+      );
     }
   };
 
@@ -169,82 +336,162 @@ export default function Clients({ showSuccess }) {
           <p className="empty-msg">No clients found.</p>
         ) : (
           <div className="clients-grid">
-            {filteredClients.map((client) => (
-              <div className="client-card" key={client.id || client.email}>
-                <div>
-                  <h3>{getClientName(client) || "Client"}</h3>
-                  <p>{client.email}</p>
-                  <span>{client.phone || "No phone"}</span>
-                </div>
+            {filteredClients.map((client, index) => {
+              const clientId = getClientId(client);
 
-                <div className="client-actions">
-                  <button type="button" onClick={() => openEditClient(client)}>
-                    Edit
-                  </button>
+              return (
+                <div className="client-card" key={clientId || index}>
+                  <div>
+                    <h3>{getClientName(client) || "Client"}</h3>
+                    <p>{client?.email || "No email"}</p>
+                    <span>{client?.phone || "No phone"}</span>
+                  </div>
 
-                  <button
-                    type="button"
-                    className="delete-client-btn"
-                    onClick={() => deleteClient(client.id)}
-                  >
-                    Delete
-                  </button>
+                  <div className="client-actions">
+                    <button type="button" onClick={() => openEditClient(client)}>
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      className="delete-client-btn"
+                      onClick={() => deleteClient(clientId)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
 
       {showClientForm && (
         <div className="package-popup-overlay">
-          <div className="package-popup">
+          <div className="package-popup client-signup-popup">
             <div className="package-popup-head">
               <div>
                 <h2>{editingClient ? "Edit Client" : "Add New Client"}</h2>
-                <p>Manage client information professionally.</p>
+                <p>Add the same information used in the signup form.</p>
               </div>
 
               <button
                 type="button"
                 className="close-package-popup"
-                onClick={() => setShowClientForm(false)}
+                onClick={closeClientPopup}
               >
                 ×
               </button>
             </div>
 
-            <div className="package-popup-form">
-              <input
-                type="text"
-                placeholder="Client Name"
-                value={clientForm.name}
-                onChange={(e) =>
-                  setClientForm({ ...clientForm, name: e.target.value })
-                }
-              />
+            <div className="package-popup-form client-signup-form">
+              <div className="client-signup-row">
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  value={clientForm.firstName}
+                  onChange={(e) => handleChange("firstName", e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  value={clientForm.lastName}
+                  onChange={(e) => handleChange("lastName", e.target.value)}
+                />
+              </div>
 
               <input
                 type="email"
-                placeholder="Client Email"
+                placeholder="Email"
                 value={clientForm.email}
-                onChange={(e) =>
-                  setClientForm({ ...clientForm, email: e.target.value })
-                }
+                onChange={(e) => handleChange("email", e.target.value)}
               />
 
-              <input
-                type="text"
-                placeholder="Client Phone"
-                value={clientForm.phone}
-                onChange={(e) =>
-                  setClientForm({ ...clientForm, phone: e.target.value })
-                }
-              />
+              <div className="client-signup-row">
+                <input
+                  type="password"
+                  placeholder={
+                    editingClient ? "New Password Optional" : "Password"
+                  }
+                  value={clientForm.password}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                />
+
+                <input
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={clientForm.confirmPassword}
+                  onChange={(e) =>
+                    handleChange("confirmPassword", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="client-phone-field">
+                <div
+                  className={`admin-country-select ${
+                    openCountry ? "active" : ""
+                  }`}
+                >
+                  <button
+                    type="button"
+                    className="admin-country-btn"
+                    onClick={() => setOpenCountry((prev) => !prev)}
+                  >
+                    <div className="admin-country-left">
+                      <img
+                        src={selectedCountry.flag}
+                        alt={selectedCountry.name}
+                      />
+
+                      <div>
+                        <small>Country</small>
+                        <strong>{selectedCountry.name}</strong>
+                      </div>
+                    </div>
+
+                    <FaChevronDown />
+                  </button>
+
+                  {openCountry && (
+                    <div className="admin-country-menu">
+                      {COUNTRIES.map((country) => (
+                        <button
+                          type="button"
+                          key={country.dialCode}
+                          className={
+                            selectedCountry.dialCode === country.dialCode
+                              ? "admin-country-option selected"
+                              : "admin-country-option"
+                          }
+                          onClick={() => chooseCountry(country)}
+                        >
+                          <img src={country.flag} alt={country.name} />
+                          <span>{country.name}</span>
+                          <strong>{country.dialCode}</strong>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="admin-phone-input">
+                  <span>{selectedCountry.dialCode}</span>
+
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    value={clientForm.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                  />
+                </div>
+              </div>
 
               <div className="package-popup-actions">
-                <button type="button" onClick={saveClient}>
-                  {savingClient
+                <button type="button" onClick={saveClient} disabled={loading}>
+                  {loading
                     ? "Saving..."
                     : editingClient
                     ? "Save Changes"
@@ -254,7 +501,8 @@ export default function Clients({ showSuccess }) {
                 <button
                   type="button"
                   className="cancel-package-btn"
-                  onClick={() => setShowClientForm(false)}
+                  onClick={closeClientPopup}
+                  disabled={loading}
                 >
                   Cancel
                 </button>

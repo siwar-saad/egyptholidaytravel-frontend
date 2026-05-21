@@ -219,6 +219,7 @@
   z-index: 9999;
   background: rgba(23, 15, 10, 0.74);
   backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -450,6 +451,12 @@
   box-shadow: 0 20px 40px rgba(147, 84, 38, 0.36);
 }
 
+.submit-booking:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ================= BOOKING FORM ================= */
 
 .booking-popup {
@@ -504,6 +511,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  overflow: visible;
 }
 
 .booking-form input,
@@ -535,6 +543,354 @@
 .booking-form textarea {
   min-height: 110px;
   resize: vertical;
+}
+
+/* ================= HOTEL BOOKING COUNTRY PHONE ================= */
+
+.hotel-booking-phone {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  position: relative;
+  overflow: visible;
+}
+
+.hotel-booking-country {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  z-index: 80;
+}
+
+.hotel-booking-country-btn {
+  width: 100%;
+  height: 52px;
+  border: 1px solid rgba(147, 84, 38, 0.18);
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  color: #2a2117;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.hotel-booking-country-btn:hover,
+.hotel-booking-country.active .hotel-booking-country-btn {
+  border-color: #935426;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1);
+}
+
+.hotel-booking-country-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.hotel-booking-country-left img {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px #f7eee2;
+}
+
+.hotel-booking-country-left div {
+  display: grid;
+  text-align: left;
+  min-width: 0;
+}
+
+.hotel-booking-country-left small {
+  color: #8b7665;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hotel-booking-country-left strong {
+  color: #24160f;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hotel-booking-country-btn svg {
+  color: #935426;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: 0.25s ease;
+}
+
+.hotel-booking-country.active .hotel-booking-country-btn svg {
+  transform: rotate(180deg);
+}
+
+.hotel-booking-country-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 999999;
+
+  background: #ffffff;
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  border-radius: 20px;
+  padding: 8px;
+
+  display: grid;
+  gap: 5px;
+
+  max-height: 245px;
+  overflow-y: auto;
+
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.18);
+}
+
+.hotel-booking-country-option {
+  width: 100%;
+  height: 44px;
+  border: none;
+  background: transparent;
+  border-radius: 14px;
+  padding: 0 10px;
+
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+
+  color: #24160f;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.hotel-booking-country-option:hover,
+.hotel-booking-country-option.selected {
+  background: #f3ebe4;
+}
+
+.hotel-booking-country-option img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hotel-booking-country-option span {
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+}
+
+.hotel-booking-country-option strong {
+  font-size: 12px;
+  font-weight: 900;
+  color: #935426;
+}
+
+.hotel-booking-phone-input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid rgba(147, 84, 38, 0.18);
+  background: #ffffff;
+  border-radius: 15px;
+
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+
+  transition: 0.25s ease;
+}
+
+.hotel-booking-phone-input:focus-within {
+  border-color: #935426;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1);
+}
+
+.hotel-booking-phone-input span {
+  height: 34px;
+  min-width: 44px;
+  margin-left: 10px;
+  border-radius: 999px;
+  background: #f3ebe4;
+  color: #935426;
+  font-size: 12px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hotel-booking-phone-input input {
+  height: 100%;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 14px 0 8px !important;
+}
+
+.hotel-booking-phone-input input:focus {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ================= BOOKING DATE LABELS ================= */
+
+.booking-date-field {
+  width: 100%;
+  height: 52px;
+  position: relative;
+}
+
+.booking-date-field label {
+  position: absolute;
+  top: 7px;
+  left: 15px;
+  z-index: 2;
+  color: #935426;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.booking-date-field input {
+  width: 100%;
+  height: 100%;
+  padding: 22px 15px 8px !important;
+}
+
+/* ================= HOTEL BOOKING PRO ALERT ================= */
+
+.hotel-pro-alert-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(28, 18, 10, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.hotel-pro-alert {
+  width: min(420px, 100%);
+  position: relative;
+  background: linear-gradient(145deg, #fffdfb, #fff8f2);
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  border-radius: 30px;
+  padding: 34px 28px 26px;
+  text-align: center;
+  box-shadow: 0 35px 90px rgba(0, 0, 0, 0.28);
+  animation: hotelAlertShow 0.28s ease;
+}
+
+@keyframes hotelAlertShow {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hotel-pro-alert-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #f1e7dd;
+  color: #935426;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.hotel-pro-alert-close:hover {
+  background: #935426;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.hotel-pro-alert-icon {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 34px;
+  font-weight: 900;
+  box-shadow: 0 16px 34px rgba(147, 84, 38, 0.28);
+}
+
+.hotel-pro-alert.success .hotel-pro-alert-icon {
+  background: linear-gradient(135deg, #2f8f5b, #1f6f43);
+  box-shadow: 0 16px 34px rgba(47, 143, 91, 0.28);
+}
+
+.hotel-pro-alert h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  color: #24160f;
+  margin-bottom: 8px;
+}
+
+.hotel-pro-alert p {
+  color: #6f5a4a;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.hotel-pro-alert-btn {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.hotel-pro-alert.success .hotel-pro-alert-btn {
+  background: linear-gradient(135deg, #2f8f5b, #1f6f43);
+}
+
+.hotel-pro-alert-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.25);
 }
 
 /* ================= TABLET ================= */
@@ -701,11 +1057,27 @@
     gap: 12px;
   }
 
+  .hotel-booking-phone {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .hotel-booking-country-menu {
+    position: relative;
+    top: 8px;
+    margin-bottom: 8px;
+    max-height: 220px;
+  }
+
   .booking-form input,
   .booking-form select,
   .booking-form textarea {
     padding: 13px;
     font-size: 14px;
+  }
+
+  .booking-date-field input {
+    padding: 22px 13px 8px !important;
   }
 
   .close-modal,
@@ -715,6 +1087,19 @@
     width: 38px;
     height: 38px;
     font-size: 26px;
+  }
+
+  .hotel-pro-alert {
+    border-radius: 24px;
+    padding: 30px 20px 22px;
+  }
+
+  .hotel-pro-alert h3 {
+    font-size: 24px;
+  }
+
+  .hotel-pro-alert p {
+    font-size: 14px;
   }
 }
 

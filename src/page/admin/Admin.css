@@ -1695,3 +1695,243 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+/* ================= ADD CLIENT SAME AS SIGNUP ================= */
+
+.client-signup-popup {
+  max-width: 760px !important;
+  overflow: visible !important;
+}
+
+.client-signup-form {
+  gap: 16px !important;
+  overflow: visible !important;
+}
+
+.client-signup-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.client-phone-field {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  position: relative;
+  overflow: visible;
+}
+
+.admin-country-select {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  z-index: 20;
+}
+
+.admin-country-btn {
+  width: 100%;
+  height: 58px;
+  border: 1px solid transparent;
+  outline: none;
+  background: #fff5ed;
+  border-radius: 20px;
+  padding: 0 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  color: #24160f;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.admin-country-btn:hover,
+.admin-country-select.active .admin-country-btn {
+  background: #ffffff;
+  border-color: rgba(147, 84, 38, 0.35);
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08);
+}
+
+.admin-country-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-country-left img {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px #ffffff;
+}
+
+.admin-country-left div {
+  display: grid;
+  text-align: left;
+  min-width: 0;
+}
+
+.admin-country-left small {
+  color: #8b7665;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.admin-country-left strong {
+  color: #24160f;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-country-btn svg {
+  color: #935426;
+  font-size: 13px;
+  flex-shrink: 0;
+  transition: 0.3s ease;
+}
+
+.admin-country-select.active .admin-country-btn svg {
+  transform: rotate(180deg);
+}
+
+.admin-country-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 999999;
+
+  background: #ffffff;
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  border-radius: 22px;
+  padding: 8px;
+
+  display: grid;
+  gap: 5px;
+
+  max-height: 260px;
+  overflow-y: auto;
+
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.18);
+}
+
+.admin-country-option {
+  width: 100%;
+  height: 46px;
+  border: none;
+  background: transparent;
+  border-radius: 15px;
+  padding: 0 10px;
+
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+
+  color: #24160f;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.admin-country-option:hover,
+.admin-country-option.selected {
+  background: #f3ebe4;
+}
+
+.admin-country-option img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-country-option span {
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+}
+
+.admin-country-option strong {
+  font-size: 12px;
+  font-weight: 900;
+  color: #935426;
+}
+
+.admin-phone-input {
+  width: 100%;
+  height: 58px;
+  border-radius: 20px;
+  background: #fff5ed;
+  border: 1px solid transparent;
+
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+
+  transition: 0.3s ease;
+}
+
+.admin-phone-input:focus-within {
+  background: #ffffff;
+  border-color: rgba(147, 84, 38, 0.35);
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08);
+}
+
+.admin-phone-input span {
+  height: 36px;
+  min-width: 46px;
+  margin-left: 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #935426;
+  font-size: 12px;
+  font-weight: 900;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-phone-input input {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 16px 0 10px !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.admin-phone-input input:focus {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 700px) {
+  .client-signup-popup {
+    max-width: 100% !important;
+  }
+
+  .client-signup-row,
+  .client-phone-field {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-country-menu {
+    position: relative;
+    top: 8px;
+    margin-bottom: 8px;
+    max-height: 230px;
+  }
+}
