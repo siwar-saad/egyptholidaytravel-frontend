@@ -1,4 +1,9 @@
-export default function EditProfilePopup({ editForm, setEditForm, onSave, onClose }) {
+export default function EditProfilePopup({
+  editForm,
+  setEditForm,
+  onSave,
+  onClose,
+}) {
   return (
     <div className="popup-overlay">
       <div className="profile-popup">
@@ -25,21 +30,19 @@ export default function EditProfilePopup({ editForm, setEditForm, onSave, onClos
           placeholder="Phone"
         />
 
-        <input
-          type="text"
-          value={editForm.city || ""}
-          onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-          placeholder="City"
-        />
-
         <select
-          value={editForm.country || "Egypt"}
-          onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+          value={editForm.country || "Paris"}
+          onChange={(e) =>
+            setEditForm({ ...editForm, country: e.target.value })
+          }
         >
-          <option value="Egypt">Egypt</option>
-          <option value="Tunisia">Tunisia</option>
-          <option value="France">France</option>
-          <option value="Turkey">Turkey</option>
+          <option value="Paris">Paris</option>
+          <option value="Allemagne">Allemagne</option>
+          <option value="Luxembourg">Luxembourg</option>
+          <option value="Turquie">Turquie</option>
+          <option value="Tunisie">Tunisie</option>
+          <option value="Maroc">Maroc</option>
+          <option value="Bosnie">Bosnie</option>
         </select>
 
         <div className="popup-actions">

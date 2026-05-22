@@ -1,22 +1,37 @@
-export default function Payments({ payments }) {
+import { FaCreditCard, FaClock, FaShieldAlt } from "react-icons/fa";
+
+export default function Payments() {
   return (
-    <section className="page-section">
-      <h2>Payment</h2>
+    <section className="page-section payments-coming-section">
+      <div className="payments-coming-card">
+        <div className="payments-icon-wrap">
+          <FaCreditCard />
+        </div>
 
-      <div className="booking-list">
-        {payments.length === 0 ? (
-          <p className="empty-msg">No payments yet.</p>
-        ) : (
-          payments.map((payment, index) => (
-            <div className="payment-card-pro" key={payment.id || payment._id || index}>
-              <span>{payment.invoice || `Invoice #${payment.id || index + 1}`}</span>
+        <span className="payments-badge">
+          <FaClock />
+          Coming Soon
+        </span>
 
-              <span className={payment.status === "Paid" ? "paid" : "unpaid"}>
-                {payment.status || "Not Paid"}
-              </span>
-            </div>
-          ))
-        )}
+        <h2>Payment</h2>
+
+        <p>
+          Online payment will be available soon. You will be able to view your
+          invoices, payment status, and secure transactions directly from your
+          account.
+        </p>
+
+        <div className="payments-features">
+          <div>
+            <FaShieldAlt />
+            <span>Secure Payment</span>
+          </div>
+
+          <div>
+            <FaCreditCard />
+            <span>Invoices Tracking</span>
+          </div>
+        </div>
       </div>
     </section>
   );
