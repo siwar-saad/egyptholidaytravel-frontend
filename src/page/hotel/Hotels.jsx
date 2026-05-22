@@ -83,6 +83,11 @@ const getStoredClient = () => {
   }
 };
 
+const isStoredAdmin = () => {
+  const user = getStoredClient();
+  return user.role === "admin";
+};
+
 const splitStoredPhone = (phone = "") => {
   const cleanPhone = phone.trim();
   const country =
@@ -188,6 +193,14 @@ export default function Hotels() {
       return;
     }
 
+    if (isStoredAdmin()) {
+      setBookingData(EMPTY_BOOKING_DATA);
+      setSelectedBookingCountry(BOOKING_COUNTRIES[0]);
+      setShowBookingForm(true);
+      setOpenBookingCountry(false);
+      return;
+    }
+
     let storedClient = getStoredClient();
 
     try {
@@ -267,7 +280,7 @@ export default function Hotels() {
     try {
       setBookingLoading(true);
 
-      const response = await API.post("/hotels_reservation/reserve", {
+      const bookingPayload = {
         selected_hotel: {
           name: selectedHotel.name,
           city: selectedHotel.city,
@@ -290,7 +303,28 @@ export default function Hotels() {
           selectedHotel.double_room ||
           selectedHotel.price ||
           0,
-      });
+      };
+
+      const response = isStoredAdmin()
+        ? await API.post("/admin/hotels/reservations", {
+            hotelName: selectedHotel.name,
+            city: selectedHotel.city,
+            mealPlan: selectedHotel.meal,
+            checkIn: bookingData.checkIn,
+            checkOut: bookingData.checkOut,
+            roomType: bookingData.roomType,
+            fullName: bookingData.fullName.trim(),
+            email: bookingData.email.trim(),
+            phone: fullPhone,
+            travelers: bookingData.travelers,
+            notes: bookingData.notes,
+            totalPrice:
+              selectedHotel.single_room ||
+              selectedHotel.double_room ||
+              selectedHotel.price ||
+              0,
+          })
+        : await API.post("/hotels_reservation/reserve", bookingPayload);
 
       console.log("Booking success:", response.data);
 
