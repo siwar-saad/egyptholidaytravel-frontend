@@ -37,6 +37,15 @@ export default function Reservations({ showSuccess }) {
   };
 
   const normalizePackageReservation = (booking, index) => {
+    const searchParams =
+      booking.search_params ||
+      booking.searchParams ||
+      booking.selected_package ||
+      booking.selectedPackage ||
+      booking.package ||
+      {};
+    const customerInfo = booking.customer_info || booking.customerInfo || {};
+
     return {
       ...booking,
       id: booking.id || booking._id || `package-${index}`,
@@ -46,44 +55,57 @@ export default function Reservations({ showSuccess }) {
         booking.name ||
         booking.fullName ||
         booking.customerName ||
-        booking.customer_info?.fullName ||
+        customerInfo.fullName ||
+        customerInfo.full_name ||
+        customerInfo.name ||
         "Client",
       email:
         booking.email ||
         booking.customerEmail ||
-        booking.customer_info?.email ||
+        customerInfo.email ||
         "-",
       phone:
         booking.phone ||
         booking.customerPhone ||
-        booking.customer_info?.phone ||
+        customerInfo.phone ||
         "-",
       packageName:
         booking.packageName ||
         booking.package_name ||
         booking.trip ||
         booking.title ||
-        booking.selected_package?.name ||
-        booking.package?.name ||
+        searchParams.name ||
+        searchParams.backendName ||
+        searchParams.backend_name ||
+        searchParams.route ||
         "Package",
       date:
         booking.date ||
         booking.travelDate ||
-        booking.selected_package?.date ||
+        booking.travel_date ||
+        searchParams.travelDate ||
+        searchParams.travel_date ||
+        searchParams.date ||
         booking.createdAt?.slice?.(0, 10) ||
+        booking.created_at?.slice?.(0, 10) ||
         "-",
       travelers:
         booking.travelers ||
         booking.people ||
-        booking.customer_info?.travelers ||
+        customerInfo.travelers ||
+        customerInfo.people ||
         "-",
       status: booking.status || "Pending",
-      notes: booking.notes || booking.customer_info?.notes || "",
+      notes: booking.notes || customerInfo.notes || "",
     };
   };
 
   const normalizeHotelReservation = (booking, index) => {
-    const selectedHotel = booking.selected_hotel || booking.hotel || {};
+    const selectedHotel =
+      booking.selected_hotel ||
+      booking.selectedHotel ||
+      booking.hotel ||
+      {};
     const customerInfo = booking.customer_info || booking.customerInfo || {};
 
     return {
@@ -94,7 +116,10 @@ export default function Reservations({ showSuccess }) {
         booking.client ||
         booking.name ||
         booking.fullName ||
+        booking.full_name ||
         customerInfo.fullName ||
+        customerInfo.full_name ||
+        customerInfo.name ||
         "Client",
       email: booking.email || customerInfo.email || "-",
       phone: booking.phone || customerInfo.phone || "-",
@@ -104,12 +129,36 @@ export default function Reservations({ showSuccess }) {
         selectedHotel.name ||
         booking.name ||
         "Hotel",
-      city: booking.city || selectedHotel.city || "-",
+      city: booking.city || selectedHotel.city || selectedHotel.destination || "-",
       mealPlan: booking.mealPlan || selectedHotel.mealPlan || selectedHotel.meal || "-",
-      checkIn: booking.checkIn || selectedHotel.checkIn || booking.date || "-",
-      checkOut: booking.checkOut || selectedHotel.checkOut || "-",
-      roomType: booking.roomType || selectedHotel.roomType || "-",
-      travelers: booking.travelers || customerInfo.travelers || "-",
+      checkIn:
+        booking.checkIn ||
+        booking.check_in ||
+        selectedHotel.checkIn ||
+        selectedHotel.check_in ||
+        customerInfo.checkIn ||
+        booking.date ||
+        "-",
+      checkOut:
+        booking.checkOut ||
+        booking.check_out ||
+        selectedHotel.checkOut ||
+        selectedHotel.check_out ||
+        customerInfo.checkOut ||
+        "-",
+      roomType:
+        booking.roomType ||
+        booking.room_type ||
+        selectedHotel.roomType ||
+        selectedHotel.room_type ||
+        customerInfo.roomType ||
+        "-",
+      travelers:
+        booking.travelers ||
+        booking.people ||
+        customerInfo.travelers ||
+        customerInfo.people ||
+        "-",
       totalPrice: booking.totalPrice || booking.price || "-",
       status: booking.status || "Pending",
       notes: booking.notes || customerInfo.notes || "",
@@ -127,10 +176,10 @@ export default function Reservations({ showSuccess }) {
       ]);
 
       const hotelReservations = await requestFirstWorkingEndpoint([
-        "/admin/hotels-reservations",
+        "/admin/hotels/reservations",
+        "/hotels_reservation/reservations",
         "/hotels_reservation",
         "/hotels_reservation/bookings",
-        "/hotels_reservation/reservations",
         "/hotels/bookings",
       ]);
 
@@ -196,11 +245,11 @@ export default function Reservations({ showSuccess }) {
     ];
 
     const hotelEndpoints = [
-      `/admin/hotels-reservations/${id}/status`,
+      `/admin/hotels/reservations/${id}/status`,
+      `/hotels_reservation/reservations/${id}/status`,
       `/hotels_reservation/${id}/status`,
       `/hotels_reservation/bookings/${id}/status`,
       `/hotels/bookings/${id}/status`,
-      `/admin/reservations/${id}/status`,
     ];
 
     const endpoints = booking.type === "hotel" ? hotelEndpoints : packageEndpoints;
