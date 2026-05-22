@@ -69,6 +69,7 @@ export default function Reservations({ showSuccess }) {
         "Package",
       date: searchParams.travelDate || booking.date || "-",
       travelers: customerInfo.travelers || booking.travelers || "-",
+      roomType: searchParams.roomType || booking.roomType || "-",
       status: booking.status || "Pending",
       notes: customerInfo.notes || booking.notes || "",
     };
