@@ -2527,3 +2527,30 @@ button {
     width: 100%;
   }
 }
+.destinations-note {
+  max-width: 760px;
+  margin: 28px auto 0;
+  text-align: center;
+  color: #6e5b4d;
+  font-size: 15px;
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+.destinations-note::after {
+  content: "";
+  display: block;
+  width: 76px;
+  height: 3px;
+  margin: 14px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+}
+
+@media (max-width: 650px) {
+  .destinations-note {
+    font-size: 14px;
+    margin-top: 22px;
+    padding: 0 12px;
+  }
+}

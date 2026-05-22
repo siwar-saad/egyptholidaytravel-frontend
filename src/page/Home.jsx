@@ -231,6 +231,11 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        <p className="destinations-note">
+          For more details about our destinations, please contact our agency.
+          Our team will be happy to help you choose the perfect trip.
+        </p>
       </section>
 
       <section className="featured-packages-section">

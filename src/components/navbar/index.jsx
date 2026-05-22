@@ -1,8 +1,7 @@
 import "./style.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import agency from "../../assets/image/agency.png";
-import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -32,50 +31,34 @@ export default function Navbar() {
           Home
         </button>
 
-        <button
-          className="nav-link-btn"
-          onClick={() => navigate("/flight")}
-        >
+        <button className="nav-link-btn" onClick={() => navigate("/flight")}>
           Flights
         </button>
 
-        <button
-          className="nav-link-btn"
-          onClick={() => navigate("/packages")}
-        >
+        <button className="nav-link-btn" onClick={() => navigate("/packages")}>
           Packages
         </button>
 
-        <button
-          className="nav-link-btn"
-          onClick={() => navigate("/hotels")}
-        >
+        <button className="nav-link-btn" onClick={() => navigate("/hotels")}>
           Hotels
         </button>
 
         {user ? (
           <button
             className="profile-btn"
-            onClick={() => navigate(user.role === "admin" ? "/admin" : "/profile")}
+            onClick={() =>
+              navigate(user.role === "admin" ? "/admin" : "/profile")
+            }
           >
             <FaUser />
-            <span>
-              {user.name || user.email || "Profile"}
-            </span>
+            <span>{user.name || user.email || "Profile"}</span>
           </button>
         ) : (
-          <button
-            className="navbar-user"
-            onClick={() => navigate("/login")}
-          >
+          <button className="navbar-user" onClick={() => navigate("/login")}>
             <FaUser />
           </button>
         )}
-
-
-
-
       </nav>
-    </header >
+    </header>
   );
 }
