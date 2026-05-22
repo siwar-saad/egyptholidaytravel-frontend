@@ -741,6 +741,7 @@ export default function Packages() {
       customer_info: {
         fullName: packageBookingData.fullName.trim(),
         email: packageBookingData.email.trim(),
+        country: selectedPackageCountry.name,
         phone: fullPhone,
         travelers: packageBookingData.travelers,
         notes: packageBookingData.notes,

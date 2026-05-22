@@ -34,9 +34,7 @@ export default function Dashboard({ user, onContact }) {
           <div>
             <FaMapMarkerAlt />
             <span>Location</span>
-            <strong>
-              {user.city || "Mansoura"}, {user.country || "Egypt"}
-            </strong>
+            <strong>{user.country || "Tunisie"}</strong>
           </div>
         </div>
       </section>

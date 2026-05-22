@@ -1,4 +1,20 @@
-export default function EditProfilePopup({ editForm, setEditForm, onSave, onClose }) {
+export default function EditProfilePopup({
+  editForm,
+  setEditForm,
+  onSave,
+  onClose,
+}) {
+  const countries = [
+    "France",
+    "Germany",
+    "Luxembourg",
+    "Turkey",
+    "Tunisia",
+    "Morocco",
+    "Bosnia",
+    "Egypt",
+  ];
+
   return (
     <div className="popup-overlay">
       <div className="profile-popup">
@@ -25,21 +41,17 @@ export default function EditProfilePopup({ editForm, setEditForm, onSave, onClos
           placeholder="Phone"
         />
 
-        <input
-          type="text"
-          value={editForm.city || ""}
-          onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-          placeholder="City"
-        />
-
         <select
-          value={editForm.country || "Egypt"}
-          onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+          value={editForm.country || "France"}
+          onChange={(e) =>
+            setEditForm({ ...editForm, country: e.target.value })
+          }
         >
-          <option value="Egypt">Egypt</option>
-          <option value="Tunisia">Tunisia</option>
-          <option value="France">France</option>
-          <option value="Turkey">Turkey</option>
+          {countries.map((country) => (
+            <option value={country} key={country}>
+              {country}
+            </option>
+          ))}
         </select>
 
         <div className="popup-actions">

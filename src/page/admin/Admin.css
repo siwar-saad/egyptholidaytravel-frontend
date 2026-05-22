@@ -432,95 +432,6 @@ th {
   color: #b30000;
 }
 
-/* ================= SETTINGS ================= */
-
-.settings-panel {
-  padding: 30px;
-}
-
-.settings-header-pro {
-  margin-bottom: 24px;
-}
-
-.settings-header-pro p {
-  color: var(--admin-muted);
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.settings-grid-pro {
-  display: grid;
-  gap: 16px;
-}
-
-.settings-card-pro {
-  width: 100%;
-  border: 1px solid rgba(147, 84, 38, 0.14);
-  background: var(--admin-soft);
-  border-radius: 24px;
-  padding: 20px 22px;
-  display: grid;
-  grid-template-columns: 62px 1fr 42px;
-  align-items: center;
-  gap: 18px;
-  cursor: pointer;
-  transition: var(--admin-transition);
-  text-align: left;
-}
-
-.settings-card-pro:hover {
-  background: #ffffff;
-  transform: translateY(-4px);
-  box-shadow: 0 18px 38px rgba(147, 84, 38, 0.14);
-}
-
-.settings-icon-pro {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #a65f2a, #7b4016);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-}
-
-.settings-text-pro {
-  display: grid;
-  gap: 5px;
-}
-
-.settings-text-pro strong {
-  font-family: "Playfair Display", serif;
-  font-size: 21px;
-  color: var(--admin-text);
-}
-
-.settings-text-pro small {
-  color: var(--admin-muted);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.settings-arrow-pro {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  background: var(--admin-soft-2);
-  color: var(--admin-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 900;
-}
-
-.settings-card-pro:hover .settings-arrow-pro {
-  background: var(--admin-accent);
-  color: #ffffff;
-}
-
 /* ================= POPUPS SHARED ================= */
 
 .settings-popup-overlay,
@@ -2676,3 +2587,608 @@ th {
     max-width: 92%;
   }
 }
+
+/* =========================================================
+   SETTINGS CLEAN SIMPLE FINAL
+   This section replaces the old settings design.
+   Simple white popup, no dark frame, no heavy blur.
+========================================================= */
+
+.settings-panel {
+  position: relative;
+  padding: clamp(22px, 4vw, 34px) !important;
+  border-radius: 28px !important;
+  background: linear-gradient(145deg, #ffffff 0%, #fff8f2 100%) !important;
+  border: 1px solid rgba(147, 84, 38, 0.12) !important;
+  box-shadow: 0 20px 48px rgba(60, 38, 22, 0.09) !important;
+  overflow: hidden !important;
+}
+
+.settings-panel::before,
+.settings-panel::after {
+  display: none !important;
+  content: none !important;
+}
+
+.settings-header-pro {
+  margin-bottom: 26px !important;
+  padding-bottom: 20px !important;
+  border-bottom: 1px solid rgba(147, 84, 38, 0.1) !important;
+}
+
+.settings-header-pro h2 {
+  margin: 0 0 9px !important;
+  font-family: "Playfair Display", serif !important;
+  font-size: clamp(30px, 4vw, 40px) !important;
+  line-height: 1.08 !important;
+  color: #24160f !important;
+}
+
+.settings-header-pro p {
+  max-width: 760px !important;
+  margin: 0 !important;
+  color: #6e5b4d !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+}
+
+.settings-grid-pro {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.settings-card-pro {
+  position: relative !important;
+  width: 100% !important;
+  min-height: 112px !important;
+  border: 1px solid rgba(147, 84, 38, 0.12) !important;
+  border-radius: 24px !important;
+  padding: 20px !important;
+  background: #ffffff !important;
+  display: grid !important;
+  grid-template-columns: 58px minmax(0, 1fr) 42px !important;
+  align-items: center !important;
+  gap: 16px !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 32px rgba(60, 38, 22, 0.06) !important;
+  transition: 0.28s ease !important;
+  overflow: hidden !important;
+}
+
+.settings-card-pro:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(147, 84, 38, 0.24) !important;
+  box-shadow: 0 22px 48px rgba(147, 84, 38, 0.13) !important;
+}
+
+.settings-icon-pro {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #a65f2a, #6f3a15) !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.22) !important;
+}
+
+.settings-text-pro {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+}
+
+.settings-text-pro strong {
+  font-family: "Playfair Display", serif !important;
+  font-size: 21px !important;
+  line-height: 1.15 !important;
+  color: #24160f !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.settings-text-pro small {
+  color: #7b6859 !important;
+  font-size: 13.2px !important;
+  line-height: 1.5 !important;
+  font-weight: 700 !important;
+}
+
+.settings-arrow-pro {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 14px !important;
+  background: #f3ebe4 !important;
+  color: #935426 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  transition: 0.28s ease !important;
+}
+
+.settings-card-pro:hover .settings-arrow-pro {
+  background: linear-gradient(135deg, #935426, #6f3a15) !important;
+  color: #ffffff !important;
+  transform: translateX(3px) !important;
+}
+
+/* ---------- Simple popup ---------- */
+
+.settings-popup-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 95px 18px 28px !important;
+  overflow-y: auto !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.settings-popup {
+  position: relative !important;
+  width: min(560px, 100%) !important;
+  max-width: 560px !important;
+  max-height: calc(100vh - 125px) !important;
+  overflow-y: auto !important;
+  background: #ffffff !important;
+  border-radius: 26px !important;
+  padding: 30px 26px !important;
+  border: 1px solid rgba(147, 84, 38, 0.14) !important;
+  box-shadow: 0 18px 45px rgba(60, 38, 22, 0.14) !important;
+  margin: auto !important;
+  animation: simpleSettingsPopupShow 0.22s ease both !important;
+}
+
+.settings-popup::before,
+.settings-popup::after,
+.settings-popup-overlay::before,
+.settings-popup-overlay::after {
+  display: none !important;
+  content: none !important;
+}
+
+.settings-popup h2 {
+  margin: 0 0 22px !important;
+  text-align: center !important;
+  font-family: "Playfair Display", serif !important;
+  font-size: 34px !important;
+  line-height: 1.1 !important;
+  color: #24160f !important;
+}
+
+.settings-popup input,
+.settings-popup > input,
+.contact-item input {
+  width: 100% !important;
+  height: 54px !important;
+  margin-bottom: 12px !important;
+  border: 1px solid rgba(147, 84, 38, 0.13) !important;
+  outline: none !important;
+  border-radius: 16px !important;
+  background: #fbf6f0 !important;
+  color: #24160f !important;
+  padding: 0 16px !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  transition: 0.25s ease !important;
+}
+
+.settings-popup input::placeholder,
+.contact-item input::placeholder {
+  color: rgba(123, 104, 89, 0.7) !important;
+}
+
+.settings-popup input:focus,
+.settings-popup > input:focus,
+.contact-item input:focus {
+  background: #ffffff !important;
+  border-color: #935426 !important;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08) !important;
+}
+
+.settings-popup-actions,
+.contact-popup-actions {
+  display: flex !important;
+  gap: 12px !important;
+  margin-top: 18px !important;
+}
+
+.settings-popup-actions button,
+.save-contact-btn,
+.cancel-contact-btn {
+  flex: 1 !important;
+  height: 52px !important;
+  border: none !important;
+  border-radius: 16px !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  transition: 0.25s ease !important;
+}
+
+.settings-popup-actions button:not(.settings-cancel-btn),
+.save-contact-btn {
+  background: linear-gradient(135deg, #935426, #6f3a15) !important;
+  color: #ffffff !important;
+}
+
+.settings-popup-actions button:not(.settings-cancel-btn):hover,
+.save-contact-btn:hover,
+.add-contact-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.25) !important;
+}
+
+.settings-cancel-btn,
+.cancel-contact-btn {
+  background: #f0e5dc !important;
+  color: #935426 !important;
+  box-shadow: none !important;
+}
+
+.settings-cancel-btn:hover,
+.cancel-contact-btn:hover {
+  background: #e6d6ca !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ---------- Contact settings inside popup ---------- */
+
+.contact-list {
+  display: grid !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.contact-item {
+  display: grid !important;
+  grid-template-columns: 1fr 105px !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+.contact-item input {
+  margin-bottom: 0 !important;
+}
+
+.remove-contact-btn {
+  width: 100% !important;
+  height: 54px !important;
+  border: none !important;
+  border-radius: 16px !important;
+  background: #fff1f1 !important;
+  color: #b42318 !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  transition: 0.25s ease !important;
+}
+
+.remove-contact-btn:hover {
+  background: #b42318 !important;
+  color: #ffffff !important;
+}
+
+.add-contact-btn {
+  width: 100% !important;
+  height: 54px !important;
+  border: none !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #935426, #6f3a15) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  margin: 12px 0 0 !important;
+  transition: 0.25s ease !important;
+}
+
+@keyframes simpleSettingsPopupShow {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Responsive settings ---------- */
+
+@media (max-width: 900px) {
+  .settings-grid-pro {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .settings-panel {
+    padding: 20px 14px !important;
+    border-radius: 22px !important;
+  }
+
+  .settings-header-pro {
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .settings-header-pro h2 {
+    font-size: 28px !important;
+  }
+
+  .settings-header-pro p {
+    font-size: 13.5px !important;
+  }
+
+  .settings-card-pro {
+    min-height: 96px !important;
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+    padding: 16px !important;
+    gap: 13px !important;
+    border-radius: 20px !important;
+  }
+
+  .settings-icon-pro {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 16px !important;
+    font-size: 21px !important;
+  }
+
+  .settings-arrow-pro {
+    display: none !important;
+  }
+
+  .settings-text-pro strong {
+    font-size: 18.5px !important;
+    white-space: normal !important;
+  }
+
+  .settings-text-pro small {
+    font-size: 12.5px !important;
+  }
+
+  .settings-popup-overlay {
+    padding: 85px 12px 20px !important;
+    align-items: flex-start !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+
+  .settings-popup {
+    max-width: 100% !important;
+    border-radius: 22px !important;
+    padding: 24px 16px !important;
+    max-height: calc(100vh - 105px) !important;
+  }
+
+  .settings-popup h2 {
+    font-size: 27px !important;
+  }
+
+  .settings-popup-actions,
+  .contact-popup-actions {
+    flex-direction: column !important;
+  }
+
+  .contact-item {
+    grid-template-columns: 1fr !important;
+  }
+
+  .settings-popup-actions button,
+  .save-contact-btn,
+  .cancel-contact-btn,
+  .remove-contact-btn,
+  .add-contact-btn {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .settings-panel {
+    padding: 18px 10px !important;
+  }
+
+  .settings-card-pro {
+    padding: 14px !important;
+  }
+
+  .settings-popup {
+    padding: 22px 14px !important;
+  }
+}
+.reservation-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 22px;
+}
+
+.reservation-table {
+  width: 100%;
+  min-width: 1150px;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+.reservation-table th {
+  text-align: left;
+  color: #7a421f;
+  font-size: 13px;
+  padding: 0 14px 10px;
+  white-space: nowrap;
+}
+
+.reservation-table td {
+  background: #fffaf6;
+  padding: 16px 14px;
+  color: #24160f;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.reservation-table tr td:first-child {
+  border-radius: 14px 0 0 14px;
+}
+
+.reservation-table tr td:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+.reservation-note {
+  display: block;
+  max-width: 220px;
+  line-height: 1.5;
+  color: #6e5b4d;
+}
+
+.reservation-status {
+  min-width: 120px;
+  height: 36px;
+  border: 1px solid rgba(139, 74, 32, 0.25);
+  border-radius: 8px;
+  background: #fffaf6;
+  color: #7a421f;
+  font-weight: 800;
+  padding: 0 8px;
+  outline: none;
+}
+
+.reservation-status.confirmed {
+  background: #e8f8ee;
+  color: #16833a;
+}
+
+.reservation-status.pending {
+  background: #fff1d8;
+  color: #a86700;
+}
+
+.reservation-status.cancelled {
+  background: #ffe8e8;
+  color: #b42318;
+}
+.reservations-section {
+  background: #ffffff;
+  border-radius: 30px;
+  padding: 28px;
+  box-shadow: 0 22px 55px rgba(60, 38, 22, 0.09);
+  border: 1px solid rgba(147, 84, 38, 0.1);
+}
+
+.admin-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.admin-section-head h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 34px;
+  color: #24160f;
+  margin: 0 0 8px;
+}
+
+.admin-section-head p {
+  margin: 0;
+  color: #6e5b4d;
+  font-weight: 700;
+}
+
+.refresh-btn {
+  border: none;
+  border-radius: 18px;
+  padding: 14px 26px;
+  background: linear-gradient(135deg, #8b4a20, #6f3a15);
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(139, 74, 32, 0.2);
+  transition: 0.25s ease;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(139, 74, 32, 0.28);
+}
+
+.reservation-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.reservation-tabs button {
+  border: none;
+  padding: 18px;
+  border-radius: 18px;
+  background: #f3ebe4;
+  color: #7a421f;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.reservation-tabs button.active {
+  background: linear-gradient(135deg, #8b4a20, #6f3a15);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(139, 74, 32, 0.25);
+}
+
+.reservation-search {
+  width: 100%;
+  height: 58px;
+  border: none;
+  outline: none;
+  border-radius: 18px;
+  background: #fff6ee;
+  padding: 0 20px;
+  font-weight: 800;
+  color: #24160f;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+}
+
+.reservation-search:focus {
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(139, 74, 32, 0.1);
+}
+.refresh-btn {
+  border: none !important;
+  border-radius: 18px !important;
+  padding: 14px 28px !important;
+  background: linear-gradient(135deg, #935426, #6f3a15) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.28) !important;
+  transition: 0.25s ease !important;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #a76332, #7a421f) !important;
+  box-shadow: 0 18px 38px rgba(147, 84, 38, 0.35) !important;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+
