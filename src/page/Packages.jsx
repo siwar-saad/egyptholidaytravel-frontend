@@ -530,6 +530,11 @@ const getStoredClient = () => {
   }
 };
 
+const isStoredAdmin = () => {
+  const user = getStoredClient();
+  return user.role === "admin";
+};
+
 const splitStoredPhone = (phone = "") => {
   const cleanPhone = phone.trim();
   const country =
@@ -669,6 +674,19 @@ export default function Packages() {
       return;
     }
 
+    if (isStoredAdmin()) {
+      setSelectedPackage(null);
+      setBookingPackage(item);
+      setPackageBookingData({
+        ...EMPTY_PACKAGE_BOOKING,
+        roomType: "DBL",
+      });
+      setSelectedPackageCountry(PACKAGE_COUNTRIES[0]);
+      setShowPackageBookingForm(true);
+      setOpenPackageCountry(false);
+      return;
+    }
+
     let storedClient = getStoredClient();
 
     try {
@@ -741,6 +759,7 @@ export default function Packages() {
       customer_info: {
         fullName: packageBookingData.fullName.trim(),
         email: packageBookingData.email.trim(),
+        country: selectedPackageCountry.name,
         phone: fullPhone,
         travelers: packageBookingData.travelers,
         notes: packageBookingData.notes,
@@ -751,7 +770,23 @@ export default function Packages() {
     try {
       setBookingLoading(true);
 
-      await API.post("/bookings", reservationData);
+      if (isStoredAdmin()) {
+        await API.post("/admin/reservations", {
+          packageName: bookingPackage.name,
+          route: bookingPackage.route,
+          duration: bookingPackage.duration,
+          travelDate: packageBookingData.travelDate,
+          roomType: packageBookingData.roomType,
+          fullName: packageBookingData.fullName.trim(),
+          email: packageBookingData.email.trim(),
+          phone: fullPhone,
+          travelers: packageBookingData.travelers,
+          notes: packageBookingData.notes,
+          totalPrice: 0,
+        });
+      } else {
+        await API.post("/bookings", reservationData);
+      }
 
       setPackageBookingData(EMPTY_PACKAGE_BOOKING);
       setSelectedPackageCountry(PACKAGE_COUNTRIES[0]);

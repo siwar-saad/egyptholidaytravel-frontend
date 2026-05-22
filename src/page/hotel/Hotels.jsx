@@ -73,6 +73,33 @@ const BOOKING_COUNTRIES = [
   },
 ];
 
+const getStoredClient = () => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("user") || sessionStorage.getItem("user") || "{}"
+    );
+  } catch {
+    return {};
+  }
+};
+
+const isStoredAdmin = () => {
+  const user = getStoredClient();
+  return user.role === "admin";
+};
+
+const splitStoredPhone = (phone = "") => {
+  const cleanPhone = phone.trim();
+  const country =
+    BOOKING_COUNTRIES.find((item) => cleanPhone.startsWith(item.dialCode)) ||
+    BOOKING_COUNTRIES[0];
+
+  return {
+    country,
+    phone: cleanPhone.replace(country.dialCode, "").trim(),
+  };
+};
+
 export default function Hotels() {
   const navigate = useNavigate();
 
@@ -155,8 +182,8 @@ export default function Hotels() {
     setOpenBookingCountry(false);
   };
 
-  const openBooking = () => {
-    const token = localStorage.getItem("token");
+  const openBooking = async () => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
     if (!token) {
       showHotelAlert(
@@ -165,6 +192,39 @@ export default function Hotels() {
       );
       return;
     }
+
+    if (isStoredAdmin()) {
+      setBookingData(EMPTY_BOOKING_DATA);
+      setSelectedBookingCountry(BOOKING_COUNTRIES[0]);
+      setShowBookingForm(true);
+      setOpenBookingCountry(false);
+      return;
+    }
+
+    let storedClient = getStoredClient();
+
+    try {
+      const res = await API.get("/client/profile");
+      storedClient = {
+        ...storedClient,
+        ...res.data,
+      };
+    } catch (err) {
+      console.log("Hotel profile prefill error:", err.response?.data || err.message);
+    }
+
+    const phoneData = splitStoredPhone(storedClient.phone || "");
+
+    setBookingData({
+      ...EMPTY_BOOKING_DATA,
+      fullName:
+        storedClient.name ||
+        `${storedClient.firstName || ""} ${storedClient.lastName || ""}`.trim(),
+      email: storedClient.email || "",
+      phone: phoneData.phone,
+    });
+
+    setSelectedBookingCountry(phoneData.country);
 
     setShowBookingForm(true);
     setOpenBookingCountry(false);
@@ -220,7 +280,7 @@ export default function Hotels() {
     try {
       setBookingLoading(true);
 
-      const response = await API.post("/hotels_reservation/reserve", {
+      const bookingPayload = {
         selected_hotel: {
           name: selectedHotel.name,
           city: selectedHotel.city,
@@ -243,7 +303,28 @@ export default function Hotels() {
           selectedHotel.double_room ||
           selectedHotel.price ||
           0,
-      });
+      };
+
+      const response = isStoredAdmin()
+        ? await API.post("/admin/hotels/reservations", {
+            hotelName: selectedHotel.name,
+            city: selectedHotel.city,
+            mealPlan: selectedHotel.meal,
+            checkIn: bookingData.checkIn,
+            checkOut: bookingData.checkOut,
+            roomType: bookingData.roomType,
+            fullName: bookingData.fullName.trim(),
+            email: bookingData.email.trim(),
+            phone: fullPhone,
+            travelers: bookingData.travelers,
+            notes: bookingData.notes,
+            totalPrice:
+              selectedHotel.single_room ||
+              selectedHotel.double_room ||
+              selectedHotel.price ||
+              0,
+          })
+        : await API.post("/hotels_reservation/reserve", bookingPayload);
 
       console.log("Booking success:", response.data);
 

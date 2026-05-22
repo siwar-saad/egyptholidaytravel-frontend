@@ -1,636 +1,376 @@
 import { useEffect, useMemo, useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import API from "../../api";
 
-const API_URL = (
-  import.meta.env.VITE_API_URL ||
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:5000"
-).replace(/\/$/, "");
-
-const BAD_VALUES = [
-  "package",
-  "packages",
-  "hotel",
-  "hotels",
-  "booking",
-  "bookings",
-  "reservation",
-  "reservations",
-];
-
-const readPath = (obj, path) => {
-  if (!obj || !path) return "";
-  return path.split(".").reduce((acc, key) => acc?.[key], obj);
+const EMPTY_FORM = {
+  type: "package",
+  packageName: "",
+  route: "",
+  duration: "",
+  travelDate: "",
+  hotelName: "",
+  city: "",
+  mealPlan: "",
+  checkIn: "",
+  checkOut: "",
+  roomType: "Double Room",
+  fullName: "",
+  email: "",
+  phone: "",
+  travelers: "",
+  notes: "",
+  totalPrice: "",
 };
 
-const toText = (value) => {
-  if (value === null || value === undefined) return "";
-
-  if (Array.isArray(value)) {
-    return value.map(toText).filter(Boolean).join(", ");
-  }
-
-  if (typeof value === "object") {
-    return (
-      value.packageName ||
-      value.hotelName ||
-      value.title ||
-      value.name ||
-      value.label ||
-      value.value ||
-      value.countryName ||
-      value.country ||
-      value.city ||
-      ""
-    );
-  }
-
-  return String(value).trim();
-};
-
-const cleanText = (value) => {
-  const text = toText(value);
-
-  if (!text) return "";
-
-  const lower = text.toLowerCase();
-
-  if (BAD_VALUES.includes(lower)) return "";
-
-  if (/^[a-f0-9]{24}$/i.test(text)) return "";
-
-  return text;
-};
-
-const getValue = (booking, keys, fallback = "-") => {
-  for (const key of keys) {
-    const value = cleanText(readPath(booking, key));
-    if (value) return value;
-  }
-
-  return fallback;
-};
-
-const getPackageName = (booking) =>
-  getValue(
-    booking,
-    [
-      "packageName",
-      "packageTitle",
-      "selectedPackageName",
-      "selectedPackageTitle",
-
-      "package.packageName",
-      "package.title",
-      "package.name",
-
-      "selectedPackage.packageName",
-      "selectedPackage.title",
-      "selectedPackage.name",
-
-      "packageData.packageName",
-      "packageData.title",
-      "packageData.name",
-
-      "trip.packageName",
-      "trip.title",
-      "trip.name",
-
-      "tripName",
-      "tripTitle",
-      "tourName",
-      "tourTitle",
-      "destination",
-      "placeName",
-      "route",
-      "title",
-    ],
-    "No package name"
-  );
-
-const getHotelName = (booking) =>
-  getValue(
-    booking,
-    [
-      "hotelName",
-      "hotelTitle",
-      "selectedHotelName",
-      "hotel.hotelName",
-      "hotel.title",
-      "hotel.name",
-      "selectedHotel.hotelName",
-      "selectedHotel.title",
-      "selectedHotel.name",
-      "title",
-    ],
-    "No hotel name"
-  );
-
-const getClientName = (booking) =>
-  getValue(
-    booking,
-    [
-      "clientName",
-      "customerName",
-      "fullName",
-      "userName",
-      "username",
-      "name",
-      "client.name",
-      "customer.name",
-      "user.name",
-      "formData.name",
-      "bookingData.name",
-    ],
-    "No client name"
-  );
-
-const getEmail = (booking) =>
-  getValue(
-    booking,
-    [
-      "email",
-      "clientEmail",
-      "customerEmail",
-      "userEmail",
-      "client.email",
-      "customer.email",
-      "user.email",
-      "formData.email",
-      "bookingData.email",
-    ],
-    "No email"
-  );
-
-const getPhone = (booking) => {
-  const dialCode = getValue(
-    booking,
-    [
-      "dialCode",
-      "phoneCode",
-      "countryCode",
-      "clientDialCode",
-      "country.dialCode",
-      "country.phoneCode",
-      "formData.dialCode",
-      "formData.phoneCode",
-      "formData.countryCode",
-    ],
-    ""
-  );
-
-  const phone = getValue(
-    booking,
-    [
-      "phone",
-      "phoneNumber",
-      "whatsapp",
-      "whatsappNumber",
-      "clientPhone",
-      "customerPhone",
-      "mobile",
-      "formData.phone",
-      "formData.phoneNumber",
-      "formData.whatsapp",
-      "bookingData.phone",
-    ],
-    ""
-  );
-
-  if (dialCode && phone) return `${dialCode} ${phone}`;
-
-  return phone || "No phone";
-};
-
-const getCountry = (booking) => {
-  const countryValue =
-    booking.country ||
-    booking.clientCountry ||
-    booking.customerCountry ||
-    booking.nationality ||
-    booking.formData?.country ||
-    booking.bookingData?.country;
-
-  if (countryValue && typeof countryValue === "object") {
-    const city = cleanText(
-      countryValue.city || countryValue.state || countryValue.location
-    );
-
-    const country = cleanText(
-      countryValue.country ||
-        countryValue.countryName ||
-        countryValue.name ||
-        countryValue.label ||
-        countryValue.value
-    );
-
-    if (city && country && city !== country) return `${city} / ${country}`;
-
-    return country || city || "No country";
-  }
-
-  return cleanText(countryValue) || "No country";
-};
-
-const getTravelDate = (booking) =>
-  getValue(
-    booking,
-    [
-      "travelDate",
-      "date",
-      "bookingDate",
-      "startDate",
-      "arrivalDate",
-      "checkIn",
-      "formData.travelDate",
-      "formData.date",
-      "bookingData.travelDate",
-    ],
-    "-"
-  );
-
-const getTravelers = (booking) =>
-  getValue(
-    booking,
-    [
-      "travelers",
-      "travellers",
-      "numberOfTravelers",
-      "numberOfTravellers",
-      "numberOfGuests",
-      "guests",
-      "people",
-      "persons",
-      "adults",
-      "pax",
-      "formData.travelers",
-      "formData.numberOfTravelers",
-      "bookingData.travelers",
-    ],
-    "-"
-  );
-
-const getRoom = (booking) =>
-  getValue(
-    booking,
-    [
-      "roomType",
-      "room",
-      "roomName",
-      "selectedRoom",
-      "selectedRoom.name",
-      "selectedRoom.title",
-      "formData.roomType",
-      "formData.room",
-      "bookingData.roomType",
-    ],
-    "-"
-  );
-
-const getNotes = (booking) =>
-  getValue(
-    booking,
-    [
-      "notes",
-      "note",
-      "specialRequest",
-      "specialRequests",
-      "request",
-      "message",
-      "details",
-      "formData.notes",
-      "formData.specialRequests",
-      "bookingData.notes",
-    ],
-    ""
-  );
-
-const getStatus = (booking) =>
-  cleanText(booking.status || booking.bookingStatus) || "Pending";
-
-const normalizeStatusClass = (status) =>
-  status.toLowerCase().replace(/\s+/g, "-");
-
-export default function Reservations({
-  bookings,
-  reservations,
-  setBookings,
-  setReservations,
-  refreshBookings,
-  refreshReservations,
-  updateBookingStatus,
-}) {
-  const [localBookings, setLocalBookings] = useState([]);
+export default function Reservations({ showSuccess }) {
   const [reservationTab, setReservationTab] = useState("packages");
-  const [search, setSearch] = useState("");
+  const [reservationSearch, setReservationSearch] = useState("");
+  const [bookings, setBookings] = useState([]);
+  const [packages, setPackages] = useState([]);
+  const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
 
-  const propsBookings = Array.isArray(bookings)
-    ? bookings
-    : Array.isArray(reservations)
-    ? reservations
-    : [];
+  const notify = (message) => {
+    if (typeof showSuccess === "function") showSuccess(message);
+  };
 
-  const allBookings =
-    propsBookings.length > 0 ? propsBookings : localBookings;
+  const getArray = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.reservations)) return data.reservations;
+    if (Array.isArray(data?.bookings)) return data.bookings;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  };
 
-  const fetchBookings = async () => {
-    setLoading(true);
+  const normalizePackageReservation = (booking, index) => {
+    const searchParams =
+      booking.search_params || booking.searchParams || booking.package || {};
+    const customerInfo = booking.customer_info || booking.customerInfo || {};
 
-    const endpoints = [
-      `${API_URL}/api/bookings`,
-      `${API_URL}/api/reservations`,
-      `${API_URL}/bookings`,
-    ];
+    return {
+      id: booking.id || booking._id || `package-${index}`,
+      type: "package",
+      client:
+        customerInfo.fullName ||
+        customerInfo.full_name ||
+        customerInfo.name ||
+        booking.client ||
+        "Client",
+      email: customerInfo.email || booking.email || "-",
+      phone: customerInfo.phone || booking.phone || "-",
+      packageName:
+        searchParams.name ||
+        searchParams.backendName ||
+        searchParams.route ||
+        booking.packageName ||
+        "Package",
+      date: searchParams.travelDate || booking.date || "-",
+      travelers: customerInfo.travelers || booking.travelers || "-",
+      status: booking.status || "Pending",
+      notes: customerInfo.notes || booking.notes || "",
+    };
+  };
 
+  const normalizeHotelReservation = (booking, index) => {
+    const selectedHotel =
+      booking.selected_hotel || booking.selectedHotel || booking.hotel || {};
+    const customerInfo = booking.customer_info || booking.customerInfo || {};
+
+    return {
+      id: booking.id || booking._id || `hotel-${index}`,
+      type: "hotel",
+      client:
+        customerInfo.fullName ||
+        customerInfo.full_name ||
+        customerInfo.name ||
+        booking.client ||
+        "Client",
+      email: customerInfo.email || booking.email || "-",
+      phone: customerInfo.phone || booking.phone || "-",
+      hotelName: selectedHotel.name || booking.hotelName || "Hotel",
+      city: selectedHotel.city || booking.city || "-",
+      roomType: selectedHotel.roomType || booking.roomType || "-",
+      checkIn: selectedHotel.checkIn || booking.checkIn || "-",
+      checkOut: selectedHotel.checkOut || booking.checkOut || "-",
+      travelers: customerInfo.travelers || booking.travelers || "-",
+      status: booking.status || "Pending",
+      notes: customerInfo.notes || booking.notes || "",
+    };
+  };
+
+  const fetchReservations = async () => {
     try {
-      for (const endpoint of endpoints) {
-        try {
-          const res = await fetch(endpoint);
+      setLoading(true);
 
-          if (!res.ok) continue;
+      const [packageRes, hotelRes] = await Promise.all([
+        API.get("/admin/reservations"),
+        API.get("/admin/hotels/reservations"),
+      ]);
 
-          const data = await res.json();
+      const packageBookings = getArray(packageRes.data).map((booking, index) =>
+        normalizePackageReservation(booking, index)
+      );
+      const hotelBookings = getArray(hotelRes.data).map((booking, index) =>
+        normalizeHotelReservation(booking, index)
+      );
 
-          const list = Array.isArray(data)
-            ? data
-            : data.bookings || data.reservations || data.data || [];
-
-          if (Array.isArray(list)) {
-            setLocalBookings(list);
-            break;
-          }
-        } catch {
-          continue;
-        }
-      }
-    } catch (error) {
-      console.error("Fetch reservations error:", error);
+      setBookings([...packageBookings, ...hotelBookings]);
+    } catch (err) {
+      console.log("Reservations error:", err.response?.data || err.message);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchOptions = async () => {
+    try {
+      const [packageRes, hotelRes] = await Promise.all([
+        API.get("/admin/packages"),
+        API.get("/hotels"),
+      ]);
+
+      setPackages(getArray(packageRes.data));
+      setHotels(getArray(hotelRes.data));
+    } catch (err) {
+      console.log("Reservation options error:", err.response?.data || err.message);
+    }
+  };
+
   useEffect(() => {
-    fetchBookings();
+    fetchReservations();
+    fetchOptions();
   }, []);
 
-  const updateReservationsState = (updater) => {
-    setLocalBookings(updater);
+  const packageReservations = useMemo(
+    () => bookings.filter((booking) => booking.type === "package"),
+    [bookings]
+  );
 
-    if (typeof setBookings === "function") {
-      setBookings(updater);
-    }
-
-    if (typeof setReservations === "function") {
-      setReservations(updater);
-    }
-  };
-
-  const handleRefresh = async () => {
-    if (typeof refreshBookings === "function") {
-      await refreshBookings();
-      return;
-    }
-
-    if (typeof refreshReservations === "function") {
-      await refreshReservations();
-      return;
-    }
-
-    await fetchBookings();
-  };
-
-  const isHotelBooking = (booking) =>
-    booking.type === "hotel" ||
-    cleanText(booking.hotelName) ||
-    cleanText(booking.hotelTitle) ||
-    cleanText(booking.selectedHotelName) ||
-    booking.hotel ||
-    booking.selectedHotel;
-
-  const isPackageBooking = (booking) =>
-    booking.type === "package" ||
-    cleanText(booking.packageName) ||
-    cleanText(booking.packageTitle) ||
-    cleanText(booking.selectedPackageName) ||
-    booking.package ||
-    booking.selectedPackage ||
-    booking.packageData ||
-    booking.trip ||
-    booking.tripName ||
-    booking.tripTitle ||
-    booking.destination ||
-    (!isHotelBooking(booking) && booking.type !== "hotel");
-
-  const packageReservations = useMemo(() => {
-    return allBookings.filter(isPackageBooking);
-  }, [allBookings]);
-
-  const hotelReservations = useMemo(() => {
-    return allBookings.filter(isHotelBooking);
-  }, [allBookings]);
+  const hotelReservations = useMemo(
+    () => bookings.filter((booking) => booking.type === "hotel"),
+    [bookings]
+  );
 
   const currentReservations =
     reservationTab === "packages" ? packageReservations : hotelReservations;
 
-  const filteredReservations = currentReservations.filter((booking) => {
-    const text = [
-      getClientName(booking),
-      getEmail(booking),
-      getPhone(booking),
-      getCountry(booking),
-      getPackageName(booking),
-      getHotelName(booking),
-      getTravelDate(booking),
-      getTravelers(booking),
-      getRoom(booking),
-      getStatus(booking),
-      getNotes(booking),
-    ]
+  const filteredReservations = currentReservations.filter((booking) =>
+    Object.values(booking)
       .join(" ")
-      .toLowerCase();
+      .toLowerCase()
+      .includes(reservationSearch.toLowerCase())
+  );
 
-    return text.includes(search.trim().toLowerCase());
-  });
+  const updateForm = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const handleStatusChange = async (booking, newStatus) => {
-    const bookingId = booking._id || booking.id;
-    const oldStatus = getStatus(booking);
+  const openCreateForm = (type = reservationTab === "hotels" ? "hotel" : "package") => {
+    setForm({ ...EMPTY_FORM, type });
+    setShowForm(true);
+  };
 
-    updateReservationsState((prev) =>
-      Array.isArray(prev)
-        ? prev.map((item) =>
-            (item._id || item.id) === bookingId
-              ? { ...item, status: newStatus }
-              : item
-          )
-        : prev
+  const closeCreateForm = () => {
+    setShowForm(false);
+    setForm(EMPTY_FORM);
+    setSaving(false);
+  };
+
+  const choosePackage = (packageId) => {
+    const selectedPackage = packages.find(
+      (item) => String(item.id) === String(packageId)
     );
 
+    if (!selectedPackage) return;
+
+    setForm((prev) => ({
+      ...prev,
+      packageName: selectedPackage.name || selectedPackage.title || "",
+      route: selectedPackage.route || "",
+      duration: selectedPackage.duration || "",
+      totalPrice: selectedPackage.price || "",
+    }));
+  };
+
+  const chooseHotel = (hotelId) => {
+    const selectedHotel = hotels.find((item) => String(item.id) === String(hotelId));
+
+    if (!selectedHotel) return;
+
+    setForm((prev) => ({
+      ...prev,
+      hotelName: selectedHotel.name || "",
+      city: selectedHotel.city || "",
+      mealPlan: selectedHotel.meal || "",
+      totalPrice: selectedHotel.price || "",
+    }));
+  };
+
+  const createReservation = async () => {
+    if (saving) return;
+
+    const isHotel = form.type === "hotel";
+
+    if (!form.fullName.trim() || !form.email.trim()) {
+      notify("Client name and email are required.");
+      return;
+    }
+
+    if (isHotel && !form.hotelName.trim()) {
+      notify("Hotel name is required.");
+      return;
+    }
+
+    if (!isHotel && !form.packageName.trim()) {
+      notify("Package name is required.");
+      return;
+    }
+
     try {
-      if (typeof updateBookingStatus === "function") {
-        await updateBookingStatus(bookingId, newStatus);
-        return;
+      setSaving(true);
+
+      if (isHotel) {
+        await API.post("/admin/hotels/reservations", form);
+      } else {
+        await API.post("/admin/reservations", form);
       }
 
-      if (!bookingId) return;
+      notify("Reservation created successfully.");
+      closeCreateForm();
+      fetchReservations();
+    } catch (err) {
+      notify(err.response?.data?.error || "Unable to create reservation.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-      const endpoints = [
-        `${API_URL}/api/bookings/${bookingId}/status`,
-        `${API_URL}/api/bookings/${bookingId}`,
-        `${API_URL}/api/reservations/${bookingId}/status`,
-        `${API_URL}/api/reservations/${bookingId}`,
-      ];
+  const updateReservationStatus = async (booking, status) => {
+    const endpoint =
+      booking.type === "hotel"
+        ? `/admin/hotels/reservations/${booking.id}/status`
+        : `/admin/reservations/${booking.id}/status`;
 
-      let success = false;
+    try {
+      await API.put(endpoint, { status });
 
-      for (const endpoint of endpoints) {
-        try {
-          const res = await fetch(endpoint, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status: newStatus }),
-          });
-
-          if (res.ok) {
-            success = true;
-            break;
-          }
-        } catch {
-          continue;
-        }
-      }
-
-      if (!success) {
-        throw new Error("Status update failed");
-      }
-    } catch (error) {
-      console.error("Update status error:", error);
-
-      updateReservationsState((prev) =>
-        Array.isArray(prev)
-          ? prev.map((item) =>
-              (item._id || item.id) === bookingId
-                ? { ...item, status: oldStatus }
-                : item
-            )
-          : prev
+      setBookings((prev) =>
+        prev.map((item) =>
+          item.id === booking.id && item.type === booking.type
+            ? { ...item, status }
+            : item
+        )
       );
+
+      notify("Reservation status updated.");
+    } catch (err) {
+      notify(err.response?.data?.error || "Unable to update status.");
     }
   };
 
   return (
-    <section className="admin-section reservations-section">
-      <div className="admin-section-head">
-        <div>
-          <h2>Reservations</h2>
-          <p>All hotel and package bookings made by users appear here.</p>
+    <>
+      <section className="admin-panel">
+        <div className="panel-head">
+          <div>
+            <h2>Reservations</h2>
+            <p>Admin can create hotel and package bookings manually.</p>
+          </div>
+
+          <div className="panel-actions">
+            <button type="button" onClick={() => openCreateForm()}>
+              <FaPlus /> Add Booking
+            </button>
+
+            <button type="button" onClick={fetchReservations}>
+              Refresh
+            </button>
+          </div>
         </div>
 
-        <button
-          type="button"
-          className="refresh-btn"
-          onClick={handleRefresh}
-          disabled={loading}
-        >
-          {loading ? "Loading..." : "Refresh"}
-        </button>
-      </div>
+        <div className="reservation-switcher">
+          <button
+            type="button"
+            className={reservationTab === "packages" ? "active" : ""}
+            onClick={() => setReservationTab("packages")}
+          >
+            Packages Reservations ({packageReservations.length})
+          </button>
 
-      <div className="reservation-tabs">
-        <button
-          type="button"
-          className={reservationTab === "packages" ? "active" : ""}
-          onClick={() => setReservationTab("packages")}
-        >
-          Packages Reservations ({packageReservations.length})
-        </button>
-
-        <button
-          type="button"
-          className={reservationTab === "hotels" ? "active" : ""}
-          onClick={() => setReservationTab("hotels")}
-        >
-          Hotels Reservations ({hotelReservations.length})
-        </button>
-      </div>
-
-      <input
-        className="reservation-search"
-        type="text"
-        placeholder="Search reservations by client, email, phone, hotel, package or date..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-
-      {filteredReservations.length === 0 ? (
-        <div className="reservation-empty">
-          No {reservationTab === "packages" ? "package" : "hotel"} reservations found.
+          <button
+            type="button"
+            className={reservationTab === "hotels" ? "active" : ""}
+            onClick={() => setReservationTab("hotels")}
+          >
+            Hotels Reservations ({hotelReservations.length})
+          </button>
         </div>
-      ) : (
-        <div className="reservation-table-wrap">
-          <table className="reservation-table">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>{reservationTab === "packages" ? "Package" : "Hotel"}</th>
-                <th>Date</th>
-                <th>Travelers</th>
-                <th>Country</th>
-                <th>Room</th>
-                <th>Notes</th>
-                <th>Status</th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {filteredReservations.map((booking, index) => {
-                const status = getStatus(booking);
+        <div className="client-tools">
+          <input
+            type="text"
+            placeholder="Search reservations by client, email, phone, hotel, package or date..."
+            value={reservationSearch}
+            onChange={(e) => setReservationSearch(e.target.value)}
+          />
+        </div>
 
-                return (
-                  <tr key={booking._id || booking.id || index}>
+        {loading ? (
+          <p className="empty-msg">Loading reservations...</p>
+        ) : filteredReservations.length === 0 ? (
+          <p className="empty-msg">No reservations found.</p>
+        ) : (
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>{reservationTab === "packages" ? "Package" : "Hotel"}</th>
+                  <th>{reservationTab === "packages" ? "Date" : "Check In"}</th>
+                  {reservationTab === "hotels" && <th>Check Out</th>}
+                  <th>Travelers</th>
+                  <th>Room</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredReservations.map((booking) => (
+                  <tr key={`${booking.type}-${booking.id}`}>
+                    <td>{booking.client}</td>
+                    <td>{booking.email}</td>
+                    <td>{booking.phone}</td>
                     <td>
-                      <strong>{getClientName(booking)}</strong>
+                      {booking.type === "package"
+                        ? booking.packageName
+                        : booking.hotelName}
                     </td>
-
-                    <td>{getEmail(booking)}</td>
-                    <td>{getPhone(booking)}</td>
-
                     <td>
-                      <strong>
-                        {reservationTab === "packages"
-                          ? getPackageName(booking)
-                          : getHotelName(booking)}
-                      </strong>
+                      {booking.type === "package"
+                        ? booking.date
+                        : booking.checkIn}
                     </td>
-
-                    <td>{getTravelDate(booking)}</td>
-                    <td>{getTravelers(booking)}</td>
-                    <td>{getCountry(booking)}</td>
-                    <td>{getRoom(booking)}</td>
-
-                    <td>
-                      {getNotes(booking) ? (
-                        <span className="reservation-note">
-                          {getNotes(booking)}
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-
+                    {reservationTab === "hotels" && <td>{booking.checkOut}</td>}
+                    <td>{booking.travelers}</td>
+                    <td>{booking.roomType || "-"}</td>
                     <td>
                       <select
-                        className={`reservation-status ${normalizeStatusClass(
-                          status
-                        )}`}
-                        value={status}
+                        className={`status-select ${
+                          booking.status === "Confirmed"
+                            ? "confirmed"
+                            : booking.status === "Cancelled"
+                            ? "cancelled"
+                            : "pending"
+                        }`}
+                        value={booking.status || "Pending"}
                         onChange={(e) =>
-                          handleStatusChange(booking, e.target.value)
+                          updateReservationStatus(booking, e.target.value)
                         }
                       >
                         <option value="Pending">Pending</option>
@@ -639,12 +379,198 @@ export default function Reservations({
                       </select>
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {showForm && (
+        <div className="package-popup-overlay">
+          <div className="package-popup">
+            <div className="package-popup-head">
+              <div>
+                <h2>Add Booking</h2>
+                <p>Create a manual package or hotel reservation.</p>
+              </div>
+
+              <button
+                type="button"
+                className="close-package-popup"
+                onClick={closeCreateForm}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="package-popup-form">
+              <select
+                value={form.type}
+                onChange={(e) =>
+                  setForm({ ...EMPTY_FORM, type: e.target.value })
+                }
+              >
+                <option value="package">Package Booking</option>
+                <option value="hotel">Hotel Booking</option>
+              </select>
+
+              {form.type === "package" ? (
+                <>
+                  <select onChange={(e) => choosePackage(e.target.value)}>
+                    <option value="">Choose existing package</option>
+                    {packages.map((item) => (
+                      <option value={item.id} key={item.id}>
+                        {item.name || item.title}
+                      </option>
+                    ))}
+                  </select>
+
+                  <input
+                    type="text"
+                    placeholder="Package Name"
+                    value={form.packageName}
+                    onChange={(e) => updateForm("packageName", e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Route"
+                    value={form.route}
+                    onChange={(e) => updateForm("route", e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Duration"
+                    value={form.duration}
+                    onChange={(e) => updateForm("duration", e.target.value)}
+                  />
+
+                  <input
+                    type="date"
+                    value={form.travelDate}
+                    onChange={(e) => updateForm("travelDate", e.target.value)}
+                  />
+                </>
+              ) : (
+                <>
+                  <select onChange={(e) => chooseHotel(e.target.value)}>
+                    <option value="">Choose existing hotel</option>
+                    {hotels.map((item) => (
+                      <option value={item.id} key={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <input
+                    type="text"
+                    placeholder="Hotel Name"
+                    value={form.hotelName}
+                    onChange={(e) => updateForm("hotelName", e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={form.city}
+                    onChange={(e) => updateForm("city", e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Meal Plan"
+                    value={form.mealPlan}
+                    onChange={(e) => updateForm("mealPlan", e.target.value)}
+                  />
+
+                  <input
+                    type="date"
+                    value={form.checkIn}
+                    onChange={(e) => updateForm("checkIn", e.target.value)}
+                  />
+
+                  <input
+                    type="date"
+                    value={form.checkOut}
+                    onChange={(e) => updateForm("checkOut", e.target.value)}
+                  />
+                </>
+              )}
+
+              <select
+                value={form.roomType}
+                onChange={(e) => updateForm("roomType", e.target.value)}
+              >
+                <option>Single Room</option>
+                <option>Double Room</option>
+                <option>Triple Room</option>
+                <option>Family Room</option>
+                <option>Suite</option>
+              </select>
+
+              <input
+                type="text"
+                placeholder="Client Full Name"
+                value={form.fullName}
+                onChange={(e) => updateForm("fullName", e.target.value)}
+              />
+
+              <input
+                type="email"
+                placeholder="Client Email"
+                value={form.email}
+                onChange={(e) => updateForm("email", e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Client Phone"
+                value={form.phone}
+                onChange={(e) => updateForm("phone", e.target.value)}
+              />
+
+              <input
+                type="number"
+                min="1"
+                placeholder="Travelers"
+                value={form.travelers}
+                onChange={(e) => updateForm("travelers", e.target.value)}
+              />
+
+              <input
+                type="number"
+                min="0"
+                placeholder="Total Price"
+                value={form.totalPrice}
+                onChange={(e) => updateForm("totalPrice", e.target.value)}
+              />
+
+              <textarea
+                placeholder="Notes"
+                value={form.notes}
+                onChange={(e) => updateForm("notes", e.target.value)}
+              />
+
+              <div className="package-popup-actions">
+                <button type="button" onClick={createReservation} disabled={saving}>
+                  {saving ? "Saving..." : "Save Booking"}
+                </button>
+
+                <button
+                  type="button"
+                  className="cancel-package-btn"
+                  onClick={closeCreateForm}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
-    </section>
+    </>
   );
 }

@@ -49,6 +49,43 @@ const InfoItem = ({ label, value }) => (
   </div>
 );
 
+const PHONE_COUNTRIES = [
+  { name: "France", dialCode: "+33" },
+  { name: "Germany", dialCode: "+49" },
+  { name: "Luxembourg", dialCode: "+352" },
+  { name: "Turkey", dialCode: "+90" },
+  { name: "Tunisia", dialCode: "+216" },
+  { name: "Morocco", dialCode: "+212" },
+  { name: "Bosnia", dialCode: "+387" },
+  { name: "Egypt", dialCode: "+20" },
+];
+
+const ROOM_LABELS = {
+  SGL: "Single Room",
+  SINGLE: "Single Room",
+  "SINGLE ROOM": "Single Room",
+  DBL: "Double Room",
+  DOUBLE: "Double Room",
+  "DOUBLE ROOM": "Double Room",
+  TPL: "Triple Room",
+  TRIPLE: "Triple Room",
+  "TRIPLE ROOM": "Triple Room",
+};
+
+const getCountryFromPhone = (phone = "") => {
+  const cleanPhone = String(phone).trim();
+  const country = PHONE_COUNTRIES.find((item) =>
+    cleanPhone.startsWith(item.dialCode)
+  );
+
+  return country?.name || "";
+};
+
+const getRoomLabel = (room = "") => {
+  const cleanRoom = String(room).trim();
+  return ROOM_LABELS[cleanRoom.toUpperCase()] || cleanRoom;
+};
+
 export default function Bookings({
   bookings = [],
   bookingTab = "packages",
@@ -88,6 +125,13 @@ export default function Bookings({
         "selectedPackage.name",
         "selectedPackage.title",
         "selectedPackage.packageName",
+        "search_params.name",
+        "search_params.backendName",
+        "search_params.backend_name",
+        "search_params.route",
+        "searchParams.name",
+        "searchParams.backendName",
+        "searchParams.route",
         "packageData.name",
         "packageData.title",
         "packageData.packageName",
@@ -115,6 +159,11 @@ export default function Bookings({
         "userName",
         "client.name",
         "customer.name",
+        "customer_info.fullName",
+        "customer_info.full_name",
+        "customer_info.name",
+        "customerInfo.fullName",
+        "customerInfo.name",
         "user.name",
         "formData.name",
         "name",
@@ -132,6 +181,8 @@ export default function Bookings({
         "userEmail",
         "client.email",
         "customer.email",
+        "customer_info.email",
+        "customerInfo.email",
         "user.email",
         "formData.email",
       ],
@@ -144,6 +195,10 @@ export default function Bookings({
       booking.clientCountry ||
       booking.customerCountry ||
       booking.nationality ||
+      booking.customer_info?.country ||
+      booking.customerInfo?.country ||
+      booking.search_params?.country ||
+      booking.searchParams?.country ||
       booking.formData?.country;
 
     if (countryValue && typeof countryValue === "object") {
@@ -160,7 +215,7 @@ export default function Bookings({
       return country || city || "No country";
     }
 
-    return toText(countryValue) || "No country";
+    return toText(countryValue) || getCountryFromPhone(getPhone(booking)) || "No country";
   };
 
   const getPhone = (booking) => {
@@ -181,6 +236,8 @@ export default function Bookings({
       "whatsappNumber",
       "clientPhone",
       "customerPhone",
+      "customer_info.phone",
+      "customerInfo.phone",
       "mobile",
       "formData.phone",
       "formData.phoneNumber",
@@ -201,6 +258,12 @@ export default function Bookings({
         "arrivalDate",
         "checkIn",
         "formData.travelDate",
+        "customer_info.travelDate",
+        "customerInfo.travelDate",
+        "search_params.travelDate",
+        "search_params.travel_date",
+        "searchParams.travelDate",
+        "searchParams.date",
         "formData.date",
       ],
       "No date"
@@ -219,12 +282,15 @@ export default function Bookings({
         "persons",
         "numberOfGuests",
         "formData.travelers",
+        "customer_info.travelers",
+        "customerInfo.travelers",
       ],
       "No travelers"
     );
 
   const getRoom = (booking) =>
-    getValue(
+    getRoomLabel(
+      getValue(
       booking,
       [
         "roomType",
@@ -234,9 +300,16 @@ export default function Bookings({
         "selectedRoom.name",
         "selectedRoom.title",
         "formData.roomType",
+        "search_params.roomType",
+        "search_params.room_type",
+        "searchParams.roomType",
+        "selected_hotel.roomType",
+        "selected_hotel.room_type",
+        "selectedHotel.roomType",
         "formData.room",
       ],
       "No room"
+      )
     );
 
   const getNotes = (booking) =>
@@ -249,6 +322,8 @@ export default function Bookings({
       "message",
       "details",
       "formData.notes",
+      "customer_info.notes",
+      "customerInfo.notes",
     ]);
 
   const getStatus = (booking) =>
