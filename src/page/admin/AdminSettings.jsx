@@ -62,12 +62,12 @@ export default function AdminSettings() {
   };
 
   const savePassword = async () => {
-    if (!password.oldPassword.trim()) {
+    if (!password.oldPassword) {
       alert("Please enter your current password");
       return;
     }
 
-    if (!password.newPassword.trim()) {
+    if (!password.newPassword) {
       alert("Please enter a new password");
       return;
     }

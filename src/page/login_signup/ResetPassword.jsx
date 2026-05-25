@@ -7,8 +7,8 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const email = location.state?.email;
-  const code = location.state?.code;
+  const email = location.state?.email?.trim().toLowerCase();
+  const code = location.state?.code?.trim();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -30,37 +30,21 @@ export default function ResetPassword() {
     }
 
     try {
-      // RESET PASSWORD
-      await API.post("/auth/reset-password", {
+      const resetRes = await API.post("/auth/reset-password", {
         email,
         code,
-        password,
+        newPassword: password,
       });
 
-      // AUTO LOGIN
-      const loginRes = await API.post("/auth/login", {
-        email,
-        password,
-      });
+      if (!resetRes.data?.user) {
+        throw new Error("Password reset succeeded but login data is missing");
+      }
 
-      // SAVE TOKEN
-      localStorage.setItem("token", loginRes.data.token);
-
-      // SAVE USER
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: user.id,
-          role: user.role,
-          email: user.email,
-        })
-      );
-
-      // REDIRECT HOME
-      navigate("/");
+      setShowPopup(true);
     } catch (error) {
       setError(
         error.response?.data?.error ||
+        error.message ||
         "Failed to reset password"
       );
     }
@@ -104,7 +88,7 @@ export default function ResetPassword() {
           <div className="popup-card">
             <h3>Password Changed</h3>
             <p>Your password has been reset successfully.</p>
-            <button onClick={() => navigate("/login")}>OK</button>
+            <button onClick={() => navigate("/profile")}>OK</button>
           </div>
         </div>
       )}

@@ -23,12 +23,14 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      await API.post("/auth/forgot-password", { email });
+      await API.post("/auth/forgot-password", {
+        email: email.trim().toLowerCase(),
+      });
 
       setShowCode(true);
       startResendTimer();
     } catch (error) {
-      setError(error.response?.data?.error || "Failed to send code");
+      setError(error.response?.data?.error || "No account found with this email");
     }
   };
 
@@ -41,21 +43,35 @@ export default function ForgotPassword() {
       return;
     }
 
-    navigate("/reset-password", {
-      state: { email, code },
-    });
+    try {
+      await API.post("/auth/verify-reset-code", {
+        email: email.trim().toLowerCase(),
+        code: code.trim(),
+      });
+
+      navigate("/reset-password", {
+        state: {
+          email: email.trim().toLowerCase(),
+          code: code.trim(),
+        },
+      });
+    } catch (error) {
+      setError(error.response?.data?.error || "Invalid or expired reset code");
+    }
   };
 
   const handleResend = async () => {
     setError("");
 
     try {
-      await API.post("/auth/forgot-password", { email });
+      await API.post("/auth/forgot-password", {
+        email: email.trim().toLowerCase(),
+      });
 
       setShowPopup(true);
       startResendTimer();
     } catch (error) {
-      setError(error.response?.data?.error || "Failed to resend code");
+      setError(error.response?.data?.error || "No account found with this email");
     }
   };
 

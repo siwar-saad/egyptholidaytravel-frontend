@@ -2,38 +2,16 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/api",
+  withCredentials: true,
 });
-
-/* REQUEST INTERCEPTOR */
-API.interceptors.request.use(
-  (config) => {
-    const token =
-      localStorage.getItem("token") ||
-      sessionStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 /* RESPONSE INTERCEPTOR */
 API.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("rememberMe");
-
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("user");
-
-      window.location.href = "/login";
+    if (error.response?.status === 401 && !error.config?.skipAuthRedirect) {
+      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
     }
 
     return Promise.reject(error);

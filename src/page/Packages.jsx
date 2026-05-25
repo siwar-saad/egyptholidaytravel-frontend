@@ -520,21 +520,6 @@ const PACKAGE_COUNTRIES = [
   { flag: "https://flagcdn.com/eg.svg", name: "Egypt", dialCode: "+20" },
 ];
 
-const getStoredClient = () => {
-  try {
-    return JSON.parse(
-      localStorage.getItem("user") || sessionStorage.getItem("user") || "{}"
-    );
-  } catch {
-    return {};
-  }
-};
-
-const isStoredAdmin = () => {
-  const user = getStoredClient();
-  return user.role === "admin";
-};
-
 const splitStoredPhone = (phone = "") => {
   const cleanPhone = phone.trim();
   const country =
@@ -557,6 +542,7 @@ export default function Packages() {
   const [bookingPackage, setBookingPackage] = useState(null);
   const [showPackageBookingForm, setShowPackageBookingForm] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingAsAdmin, setBookingAsAdmin] = useState(false);
   const [packageBookingData, setPackageBookingData] = useState(EMPTY_PACKAGE_BOOKING);
   const [selectedPackageCountry, setSelectedPackageCountry] = useState(PACKAGE_COUNTRIES[0]);
   const [openPackageCountry, setOpenPackageCountry] = useState(false);
@@ -667,14 +653,20 @@ export default function Packages() {
   };
 
   const openPackageBooking = async (item) => {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    let authUser = null;
 
-    if (!token) {
+    try {
+      const authRes = await API.get("/auth/me");
+      authUser = authRes.data?.user || null;
+    } catch {
       showPackageAlert("Please login or create an account before booking.", "login");
       return;
     }
 
-    if (isStoredAdmin()) {
+    const isAdmin = (authUser?.role || "").toLowerCase() === "admin";
+
+    if (isAdmin) {
+      setBookingAsAdmin(true);
       setSelectedPackage(null);
       setBookingPackage(item);
       setPackageBookingData({
@@ -687,7 +679,9 @@ export default function Packages() {
       return;
     }
 
-    let storedClient = getStoredClient();
+    let storedClient = {
+      ...authUser,
+    };
 
     try {
       const res = await API.get("/client/profile");
@@ -702,6 +696,7 @@ export default function Packages() {
     const phoneData = splitStoredPhone(storedClient.phone || "");
 
     setSelectedPackage(null);
+    setBookingAsAdmin(false);
     setBookingPackage(item);
     setPackageBookingData({
       ...EMPTY_PACKAGE_BOOKING,
@@ -719,6 +714,7 @@ export default function Packages() {
   const closePackageBooking = () => {
     setShowPackageBookingForm(false);
     setBookingPackage(null);
+    setBookingAsAdmin(false);
     setOpenPackageCountry(false);
   };
 
@@ -770,7 +766,7 @@ export default function Packages() {
     try {
       setBookingLoading(true);
 
-      if (isStoredAdmin()) {
+      if (bookingAsAdmin) {
         await API.post("/admin/reservations", {
           packageName: bookingPackage.name,
           route: bookingPackage.route,
@@ -793,6 +789,7 @@ export default function Packages() {
       setOpenPackageCountry(false);
       setShowPackageBookingForm(false);
       setBookingPackage(null);
+      setBookingAsAdmin(false);
 
       showPackageAlert(
         "Your package booking request has been sent successfully. Our team will contact you soon.",

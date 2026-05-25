@@ -1,22 +1,26 @@
 import "./style.css";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
+import API from "../../api";
 import agency from "../../assets/image/agency.png";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
-  let user = null;
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const res = await API.get("/auth/me", { skipAuthRedirect: true });
+        setUser(res.data?.user || null);
+      } catch {
+        setUser(null);
+      }
+    };
 
-  try {
-    user = JSON.parse(
-      localStorage.getItem("user") ||
-        sessionStorage.getItem("user") ||
-        "null"
-    );
-  } catch {
-    user = null;
-  }
+    loadUser();
+  }, []);
 
   return (
     <header className="navbar">

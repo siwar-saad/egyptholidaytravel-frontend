@@ -108,18 +108,6 @@ export default function Signup() {
       });
 
       if (response.data.success) {
-        localStorage.setItem("token", response.data.token);
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            id: response.data.user.id,
-            email: response.data.user.email,
-            role: response.data.user.role || "user",
-            country: response.data.user.country || selectedCountry.name,
-          }),
-        );
-
         setShowSuccess(true);
 
         setTimeout(() => {

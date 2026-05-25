@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FaPlane,
   FaHome,
@@ -40,27 +40,39 @@ export default function Admin() {
     }, 3000);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    try {
+      await API.post("/auth/logout");
+    } catch (err) {
+      console.log("Admin logout error:", err.response?.data || err.message);
+    }
+
     window.location.href = "/login";
   };
 
-  useEffect(() => {
-    const loadMessageNotifications = async () => {
-      try {
-        const res = await API.get("/admin/messages/unread-count");
-        setAdminMessageNotifications(Number(res.data?.count || 0));
-      } catch (err) {
-        console.log(
-          "Messages notification error:",
-          err.response?.data || err.message
-        );
-      }
-    };
-
-    loadMessageNotifications();
+  const loadMessageNotifications = useCallback(async () => {
+    try {
+      const res = await API.get("/admin/messages/unread-count");
+      setAdminMessageNotifications(Number(res.data?.count || 0));
+    } catch (err) {
+      console.log(
+        "Messages notification error:",
+        err.response?.data || err.message
+      );
+    }
   }, []);
+
+  useEffect(() => {
+    loadMessageNotifications();
+
+    const unreadTimer = setInterval(loadMessageNotifications, 5000);
+
+    return () => clearInterval(unreadTimer);
+  }, [loadMessageNotifications]);
+
+  useEffect(() => {
+    loadMessageNotifications();
+  }, [activeTab, loadMessageNotifications]);
 
   const openTab = (tab) => {
     setActiveTab(tab);

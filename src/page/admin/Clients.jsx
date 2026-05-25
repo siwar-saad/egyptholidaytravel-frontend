@@ -98,15 +98,6 @@ export default function Clients({ showSuccess }) {
     return fallback;
   };
 
-  const splitName = (name = "") => {
-    const parts = name.trim().split(" ");
-
-    return {
-      firstName: parts[0] || "",
-      lastName: parts.slice(1).join(" ") || "",
-    };
-  };
-
   const splitPhone = (phone = "") => {
     const cleanPhone = phone.trim();
 
@@ -163,16 +154,14 @@ export default function Clients({ showSuccess }) {
   };
 
   const openEditClient = (client) => {
-    const clientName = getClientName(client);
-    const { firstName, lastName } = splitName(clientName);
     const phoneData = splitPhone(client?.phone || "");
     const clientCountry = getCountryFromClient(client, phoneData.country);
 
     setEditingClient(client);
 
     setClientForm({
-      firstName: client?.firstName || client?.first_name || firstName,
-      lastName: client?.lastName || client?.last_name || lastName,
+      firstName: client?.firstName || client?.first_name || "",
+      lastName: client?.lastName || client?.last_name || "",
       email: client?.email || "",
       phone: phoneData.phone,
     });
@@ -222,7 +211,6 @@ export default function Clients({ showSuccess }) {
       last_name: lastName,
       firstName,
       lastName,
-      name: `${firstName} ${lastName}`,
       email,
       phone: fullPhone,
       country: selectedCountry.name,

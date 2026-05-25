@@ -26,10 +26,9 @@ export default function Login() {
       // Change this endpoint if your backend login route has another name.
       const res = await API.post("/auth/login", form);
 
-      const token = res.data?.token;
       const user = res.data?.user;
 
-      if (!token || !user) {
+      if (!user) {
         setError("Invalid login response.");
         return;
       }
@@ -38,9 +37,6 @@ export default function Login() {
         setError("Only admins can access this page.");
         return;
       }
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
 
       window.location.href = "/admin";
     } catch (err) {

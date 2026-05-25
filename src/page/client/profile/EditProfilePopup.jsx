@@ -22,9 +22,26 @@ export default function EditProfilePopup({
 
         <input
           type="text"
-          value={editForm.name || ""}
-          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-          placeholder="Name"
+          value={editForm.firstName || ""}
+          onChange={(e) =>
+            setEditForm({
+              ...editForm,
+              firstName: e.target.value,
+            })
+          }
+          placeholder="First Name"
+        />
+
+        <input
+          type="text"
+          value={editForm.lastName || ""}
+          onChange={(e) =>
+            setEditForm({
+              ...editForm,
+              lastName: e.target.value,
+            })
+          }
+          placeholder="Last Name"
         />
 
         <input

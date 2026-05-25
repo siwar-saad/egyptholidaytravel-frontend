@@ -50,15 +50,6 @@ const DEFAULT_REVIEWS = [
   },
 ];
 
-const getInitialReviews = () => {
-  try {
-    const savedReviews = localStorage.getItem("customerReviews");
-    return savedReviews ? JSON.parse(savedReviews) : DEFAULT_REVIEWS;
-  } catch {
-    return DEFAULT_REVIEWS;
-  }
-};
-
 export default function Home() {
   const navigate = useNavigate();
 
@@ -67,7 +58,7 @@ export default function Home() {
   const [selectedInfo, setSelectedInfo] = useState(null);
   const [openWhy, setOpenWhy] = useState(null);
 
-  const [reviews, setReviews] = useState(getInitialReviews);
+  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
 
   const [reviewForm, setReviewForm] = useState({
     name: "",
@@ -133,7 +124,7 @@ export default function Home() {
     if (!email) return;
 
     try {
-      await API.post("/subscribe", { email });
+      await API.post("/subscribers", { email });
 
       alert("Thank you for subscribing!");
       setSubscriberEmail("");
@@ -142,7 +133,7 @@ export default function Home() {
     }
   };
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
 
     if (!reviewForm.name.trim() || !reviewForm.text.trim()) {
@@ -156,33 +147,67 @@ export default function Home() {
       return;
     }
 
-    const newReview = {
-      id: Date.now(),
-      name: reviewForm.name.trim(),
-      rating: Number(reviewForm.rating),
-      text: reviewForm.text.trim(),
-      avatar: null,
+    try {
+      const res = await API.post("/reviews", {
+        name: reviewForm.name.trim(),
+        rating: Number(reviewForm.rating),
+        text: reviewForm.text.trim(),
+      });
+
+      setReviews((prevReviews) => [
+        {
+          ...res.data,
+          avatar: null,
+        },
+        ...prevReviews,
+      ]);
+
+      setReviewForm({
+        name: "",
+        rating: 5,
+        text: "",
+      });
+
+      setReviewPopup({
+        open: true,
+        type: "success",
+        title: "Thank You for Your Review",
+        message:
+          "We sincerely appreciate your time and kind feedback. Your review has been submitted successfully and will help us improve our services while guiding future travelers with confidence.",
+      });
+    } catch (error) {
+      setReviewPopup({
+        open: true,
+        type: "error",
+        title: "Review Not Submitted",
+        message:
+          error.response?.data?.error ||
+          "We could not submit your review right now. Please try again.",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        const res = await API.get("/reviews");
+        const databaseReviews = Array.isArray(res.data) ? res.data : [];
+
+        setReviews([
+          ...databaseReviews.map((review) => ({
+            ...review,
+            avatar: null,
+          })),
+          ...DEFAULT_REVIEWS,
+        ]);
+      } catch (error) {
+        console.log("Reviews load error:", error.response?.data || error.message);
+        setReviews(DEFAULT_REVIEWS);
+      }
     };
 
-    const updatedReviews = [newReview, ...reviews];
-
-    setReviews(updatedReviews);
-    localStorage.setItem("customerReviews", JSON.stringify(updatedReviews));
-
-    setReviewForm({
-      name: "",
-      rating: 5,
-      text: "",
-    });
-
-    setReviewPopup({
-      open: true,
-      type: "success",
-      title: "Thank You for Your Review",
-      message:
-        "We sincerely appreciate your time and kind feedback. Your review has been submitted successfully and will help us improve our services while guiding future travelers with confidence.",
-    });
-  };
+    loadReviews();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {

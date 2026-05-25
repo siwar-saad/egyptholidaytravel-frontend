@@ -22,22 +22,6 @@ import UserProfile from "./page/client/profile/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const token =
-    localStorage.getItem("token") ||
-    sessionStorage.getItem("token");
-
-  let user = null;
-
-  try {
-    user = JSON.parse(
-      localStorage.getItem("user") ||
-        sessionStorage.getItem("user") ||
-        "null"
-    );
-  } catch {
-    user = null;
-  }
-
   return (
     <BrowserRouter>
       <Routes>
@@ -49,21 +33,17 @@ function App() {
 
         <Route
           path="/signup"
-          element={token && user ? <Navigate to="/" replace /> : <Signup />}
+          element={<Signup />}
         />
 
         <Route
           path="/forgot-password"
-          element={
-            token && user ? <Navigate to="/" replace /> : <ForgotPassword />
-          }
+          element={<ForgotPassword />}
         />
 
         <Route
           path="/reset-password"
-          element={
-            token && user ? <Navigate to="/" replace /> : <ResetPassword />
-          }
+          element={<ResetPassword />}
         />
 
         {/* MAIN PAGES */}

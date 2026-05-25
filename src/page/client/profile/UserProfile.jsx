@@ -16,36 +16,19 @@ import ChangePasswordPopup from "./ChangePasswordPopup";
 import ContactPopup from "./ContactPopup";
 import MessageSuccessPopup from "./MessageSuccessPopup";
 
-function getStoredUser() {
-  try {
-    return JSON.parse(
-      localStorage.getItem("user") ||
-        sessionStorage.getItem("user") ||
-        "{}"
-    );
-  } catch {
-    return {};
-  }
-}
-
-function setStoredUser(user) {
-  const storage = localStorage.getItem("token") ? localStorage : sessionStorage;
-  storage.setItem("user", JSON.stringify(user));
-}
-
 export default function UserProfile() {
-  const storedUser = getStoredUser();
-
   const [activePage, setActivePage] = useState("dashboard");
 
   const [user, setUser] = useState({
-    name: storedUser.name || "Client",
-    email: storedUser.email || "",
-    phone: storedUser.phone || "No phone",
-    city: storedUser.city || "Mansoura",
-    country: storedUser.country || "Egypt",
-    avatar: storedUser.avatar || "",
-    role: storedUser.role || "user",
+    firstName: "",
+    lastName: "",
+    name: "Client",
+    email: "",
+    phone: "No phone",
+    city: "Mansoura",
+    country: "Egypt",
+    avatar: "",
+    role: "user",
   });
 
   const [bookings, setBookings] = useState([]);
@@ -81,13 +64,15 @@ export default function UserProfile() {
 
         const profileData = {
           ...profileRes.data,
-          name: profileRes.data?.name || storedUser.name || "Client",
-          email: profileRes.data?.email || storedUser.email || "",
-          phone: profileRes.data?.phone || storedUser.phone || "No phone",
-          city: profileRes.data?.city || storedUser.city || "Mansoura",
-          country: profileRes.data?.country || storedUser.country || "Egypt",
-          avatar: profileRes.data?.avatar || storedUser.avatar || "",
-          role: profileRes.data?.role || storedUser.role || "user",
+          firstName: profileRes.data?.firstName || "",
+          lastName: profileRes.data?.lastName || "",
+          name: profileRes.data?.name || "Client",
+          email: profileRes.data?.email || "",
+          phone: profileRes.data?.phone || "No phone",
+          city: profileRes.data?.city || "Mansoura",
+          country: profileRes.data?.country || "Egypt",
+          avatar: profileRes.data?.avatar || "",
+          role: profileRes.data?.role || "user",
         };
 
         const clientMessages = messagesRes.data || [];
@@ -103,7 +88,6 @@ export default function UserProfile() {
           ).length
         );
 
-        setStoredUser(profileData);
       } catch (err) {
         console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
       }
@@ -167,7 +151,8 @@ export default function UserProfile() {
   const handleSaveProfile = async () => {
     try {
       const res = await API.put("/client/profile", {
-        name: editForm.name,
+        firstName: editForm.firstName,
+        lastName: editForm.lastName,
         phone: editForm.phone,
         city: editForm.city,
         country: editForm.country,
@@ -177,12 +162,11 @@ export default function UserProfile() {
       const updatedUser = {
         ...res.data,
         email: res.data?.email || user.email,
-        role: res.data?.role || user.role || storedUser.role || "user",
+        role: res.data?.role || user.role || "user",
       };
 
       setUser(updatedUser);
       setEditForm(updatedUser);
-      setStoredUser(updatedUser);
       setShowEdit(false);
     } catch (err) {
       alert(err.response?.data?.error || err.message || "Update profile error");
@@ -252,7 +236,8 @@ export default function UserProfile() {
         };
 
         await API.put("/client/profile", {
-          name: updatedUser.name,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
           phone: updatedUser.phone,
           city: updatedUser.city,
           country: updatedUser.country,
@@ -261,7 +246,6 @@ export default function UserProfile() {
 
         setUser(updatedUser);
         setEditForm(updatedUser);
-        setStoredUser(updatedUser);
       } catch (err) {
         console.log("Photo update failed:", err.response?.data || err.message);
         alert("Photo update failed");
@@ -279,11 +263,6 @@ export default function UserProfile() {
       console.log("Logout error:", err.response?.data || err.message);
     }
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("rememberMe");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
     window.location.href = "/login";
   };
 

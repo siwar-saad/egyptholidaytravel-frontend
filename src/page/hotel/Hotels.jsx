@@ -73,21 +73,6 @@ const BOOKING_COUNTRIES = [
   },
 ];
 
-const getStoredClient = () => {
-  try {
-    return JSON.parse(
-      localStorage.getItem("user") || sessionStorage.getItem("user") || "{}"
-    );
-  } catch {
-    return {};
-  }
-};
-
-const isStoredAdmin = () => {
-  const user = getStoredClient();
-  return user.role === "admin";
-};
-
 const splitStoredPhone = (phone = "") => {
   const cleanPhone = phone.trim();
   const country =
@@ -108,6 +93,7 @@ export default function Hotels() {
   const [mainImage, setMainImage] = useState(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingAsAdmin, setBookingAsAdmin] = useState(false);
 
   const [bookingData, setBookingData] = useState(EMPTY_BOOKING_DATA);
 
@@ -183,9 +169,12 @@ export default function Hotels() {
   };
 
   const openBooking = async () => {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    let authUser = null;
 
-    if (!token) {
+    try {
+      const authRes = await API.get("/auth/me");
+      authUser = authRes.data?.user || null;
+    } catch {
       showHotelAlert(
         "Please login or create an account before booking.",
         "login"
@@ -193,7 +182,10 @@ export default function Hotels() {
       return;
     }
 
-    if (isStoredAdmin()) {
+    const isAdmin = (authUser?.role || "").toLowerCase() === "admin";
+
+    if (isAdmin) {
+      setBookingAsAdmin(true);
       setBookingData(EMPTY_BOOKING_DATA);
       setSelectedBookingCountry(BOOKING_COUNTRIES[0]);
       setShowBookingForm(true);
@@ -201,7 +193,9 @@ export default function Hotels() {
       return;
     }
 
-    let storedClient = getStoredClient();
+    let storedClient = {
+      ...authUser,
+    };
 
     try {
       const res = await API.get("/client/profile");
@@ -224,6 +218,7 @@ export default function Hotels() {
       phone: phoneData.phone,
     });
 
+    setBookingAsAdmin(false);
     setSelectedBookingCountry(phoneData.country);
 
     setShowBookingForm(true);
@@ -232,6 +227,7 @@ export default function Hotels() {
 
   const closeBooking = () => {
     setShowBookingForm(false);
+    setBookingAsAdmin(false);
     setOpenBookingCountry(false);
   };
 
@@ -305,7 +301,7 @@ export default function Hotels() {
           0,
       };
 
-      const response = isStoredAdmin()
+      const response = bookingAsAdmin
         ? await API.post("/admin/hotels/reservations", {
             hotelName: selectedHotel.name,
             city: selectedHotel.city,

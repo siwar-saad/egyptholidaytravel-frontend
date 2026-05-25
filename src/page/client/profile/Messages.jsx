@@ -32,14 +32,6 @@ const formatChatTime = (msg) =>
     minute: "2-digit",
   });
 
-const getCurrentUser = () => {
-  try {
-    return JSON.parse(localStorage.getItem("user")) || null;
-  } catch {
-    return null;
-  }
-};
-
 export default function Messages({
   messages = [],
   messageText,
@@ -49,32 +41,12 @@ export default function Messages({
 }) {
   const threadEndRef = useRef(null);
 
-  const currentUser = useMemo(() => getCurrentUser(), []);
-  const currentClientId =
-    currentUser?._id || currentUser?.id || currentUser?.userId;
-
-  const clientMessages = useMemo(() => {
-    if (!currentClientId) return messages;
-
-    return messages.filter((msg) => {
-      const msgClientId =
-        msg.clientId ||
-        msg.userId ||
-        msg.client?._id ||
-        msg.client?.id ||
-        msg.user?._id ||
-        msg.user?.id;
-
-      return !msgClientId || String(msgClientId) === String(currentClientId);
-    });
-  }, [messages, currentClientId]);
-
   const sortedMessages = useMemo(
     () =>
-      [...clientMessages].sort((a, b) => {
+      [...messages].sort((a, b) => {
         return getMessageDate(a).getTime() - getMessageDate(b).getTime();
       }),
-    [clientMessages]
+    [messages]
   );
 
   useEffect(() => {
