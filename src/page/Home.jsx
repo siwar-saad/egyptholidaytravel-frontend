@@ -148,19 +148,11 @@ export default function Home() {
     }
 
     try {
-      const res = await API.post("/reviews", {
+      await API.post("/reviews", {
         name: reviewForm.name.trim(),
         rating: Number(reviewForm.rating),
         text: reviewForm.text.trim(),
       });
-
-      setReviews((prevReviews) => [
-        {
-          ...res.data,
-          avatar: null,
-        },
-        ...prevReviews,
-      ]);
 
       setReviewForm({
         name: "",
@@ -173,7 +165,7 @@ export default function Home() {
         type: "success",
         title: "Thank You for Your Review",
         message:
-          "We sincerely appreciate your time and kind feedback. Your review has been submitted successfully and will help us improve our services while guiding future travelers with confidence.",
+          "We sincerely appreciate your time and kind feedback. Your review has been submitted successfully and will appear after admin approval.",
       });
     } catch (error) {
       setReviewPopup({
