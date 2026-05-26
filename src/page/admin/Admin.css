@@ -3111,3 +3111,419 @@ th {
     grid-template-columns: 1fr;
   }
 }
+/* ================= ADMIN REVIEWS ================= */
+
+.reviews-admin-panel {
+  overflow: visible;
+}
+
+.admin-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.admin-review-card {
+  background: linear-gradient(135deg, #ffffff, #fff9f3);
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  border-radius: 26px;
+  padding: 22px;
+  box-shadow: 0 16px 35px rgba(60, 38, 22, 0.07);
+  transition: 0.28s ease;
+}
+
+.admin-review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 48px rgba(147, 84, 38, 0.14);
+}
+
+.admin-review-head {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.admin-review-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark));
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  box-shadow: 0 12px 24px rgba(147, 84, 38, 0.22);
+}
+
+.admin-review-head h3 {
+  margin: 0;
+  color: var(--admin-text);
+  font-size: 18px;
+}
+
+.admin-review-stars {
+  color: var(--admin-accent);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.review-status {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.review-status.public {
+  background: #e6f7ec;
+  color: var(--admin-green);
+}
+
+.review-status.private {
+  background: #fff1d8;
+  color: var(--admin-warning);
+}
+
+.admin-review-comment {
+  min-height: 75px;
+  margin: 0 0 14px;
+  color: #5c493b;
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+.admin-review-date {
+  display: block;
+  color: var(--admin-muted);
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.admin-review-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.admin-review-actions button {
+  min-height: 44px;
+  border: none;
+  border-radius: 14px;
+  padding: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.make-public-btn {
+  background: #e6f7ec;
+  color: var(--admin-green);
+}
+
+.make-private-btn {
+  background: #fff1d8;
+  color: var(--admin-warning);
+}
+
+.delete-review-btn {
+  background: #ffe6e6;
+  color: var(--admin-danger);
+}
+
+.admin-review-actions button:hover {
+  transform: translateY(-2px);
+}
+
+.admin-review-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .admin-reviews-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-review-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-review-head {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .review-status {
+    grid-column: 1 / -1;
+    width: max-content;
+  }
+}
+/* ================= PRO ADMIN POPUP ================= */
+
+.admin-pro-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999999;
+  background: rgba(18, 10, 5, 0.48);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.admin-pro-popup {
+  width: min(440px, 100%);
+  background: linear-gradient(145deg, #ffffff, #fff8f2);
+  border-radius: 28px;
+  padding: 34px 28px;
+  text-align: center;
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  box-shadow: 0 30px 85px rgba(0, 0, 0, 0.28);
+  animation: adminPopupShow 0.25s ease both;
+}
+
+.admin-pro-popup-icon {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.admin-pro-popup.success .admin-pro-popup-icon {
+  background: linear-gradient(135deg, var(--admin-green), #0d6b2d);
+}
+
+.admin-pro-popup.error .admin-pro-popup-icon,
+.admin-pro-popup.danger .admin-pro-popup-icon {
+  background: linear-gradient(135deg, var(--admin-danger), #8f1b13);
+}
+
+.admin-pro-popup h3 {
+  margin: 0 0 12px;
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  color: var(--admin-text);
+}
+
+.admin-pro-popup p {
+  margin: 0 0 24px;
+  color: var(--admin-muted);
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.admin-pro-popup p strong {
+  color: var(--admin-text);
+}
+
+.admin-pro-popup > button,
+.admin-pro-popup-actions button {
+  height: 50px;
+  border: none;
+  border-radius: 16px;
+  padding: 0 24px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+  font-family: inherit;
+}
+
+.admin-pro-popup > button {
+  min-width: 150px;
+  background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark));
+  color: #ffffff;
+}
+
+.admin-pro-popup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.delete-confirm-btn {
+  background: linear-gradient(135deg, var(--admin-danger), #8f1b13);
+  color: #ffffff;
+}
+
+.cancel-confirm-btn {
+  background: var(--admin-soft-2);
+  color: var(--admin-accent);
+}
+
+.admin-pro-popup > button:hover,
+.admin-pro-popup-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.22);
+}
+
+@keyframes adminPopupShow {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-pro-popup {
+    padding: 28px 18px;
+    border-radius: 22px;
+  }
+
+  .admin-pro-popup-actions {
+    grid-template-columns: 1fr;
+  }
+}/* ================= PRO ADMIN POPUP ================= */
+
+.admin-pro-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999999;
+  background: rgba(18, 10, 5, 0.48);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.admin-pro-popup {
+  width: min(440px, 100%);
+  background: linear-gradient(145deg, #ffffff, #fff8f2);
+  border-radius: 28px;
+  padding: 34px 28px;
+  text-align: center;
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  box-shadow: 0 30px 85px rgba(0, 0, 0, 0.28);
+  animation: adminPopupShow 0.25s ease both;
+}
+
+.admin-pro-popup-icon {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.admin-pro-popup.success .admin-pro-popup-icon {
+  background: linear-gradient(135deg, var(--admin-green), #0d6b2d);
+}
+
+.admin-pro-popup.error .admin-pro-popup-icon,
+.admin-pro-popup.danger .admin-pro-popup-icon {
+  background: linear-gradient(135deg, var(--admin-danger), #8f1b13);
+}
+
+.admin-pro-popup h3 {
+  margin: 0 0 12px;
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  color: var(--admin-text);
+}
+
+.admin-pro-popup p {
+  margin: 0 0 24px;
+  color: var(--admin-muted);
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.admin-pro-popup p strong {
+  color: var(--admin-text);
+}
+
+.admin-pro-popup > button,
+.admin-pro-popup-actions button {
+  height: 50px;
+  border: none;
+  border-radius: 16px;
+  padding: 0 24px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+  font-family: inherit;
+}
+
+.admin-pro-popup > button {
+  min-width: 150px;
+  background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark));
+  color: #ffffff;
+}
+
+.admin-pro-popup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.delete-confirm-btn {
+  background: linear-gradient(135deg, var(--admin-danger), #8f1b13);
+  color: #ffffff;
+}
+
+.cancel-confirm-btn {
+  background: var(--admin-soft-2);
+  color: var(--admin-accent);
+}
+
+.admin-pro-popup > button:hover,
+.admin-pro-popup-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.22);
+}
+
+@keyframes adminPopupShow {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-pro-popup {
+    padding: 28px 18px;
+    border-radius: 22px;
+  }
+
+  .admin-pro-popup-actions {
+    grid-template-columns: 1fr;
+  }
+}

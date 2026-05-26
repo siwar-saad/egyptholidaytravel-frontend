@@ -1252,3 +1252,44 @@
 .signup-title-box span {
   display: none !important;
 }
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 45px !important;
+}
+
+.password-field .password-eye {
+  position: absolute !important;
+  right: 15px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  color: #6b5a4c !important;
+  font-size: 16px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  cursor: pointer !important;
+}
+
+.password-field .password-eye:hover {
+  background: transparent !important;
+  color: #935426 !important;
+  box-shadow: none !important;
+  transform: translateY(-50%) !important;
+}

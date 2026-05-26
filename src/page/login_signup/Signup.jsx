@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaChevronDown } from "react-icons/fa";
+import { FaChevronDown, FaEye, FaEyeSlash } from "react-icons/fa";
 
 import API from "../../api";
 import "./Login.css";
@@ -64,6 +64,9 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
@@ -130,7 +133,12 @@ export default function Signup() {
           <div className="auth-left">
             <div className="auth-shape"></div>
 
-            <img src={login} alt="Egypt Holiday"  loading="lazy" className="auth-brand-image" />
+            <img
+              src={login}
+              alt="Egypt Holiday"
+              loading="lazy"
+              className="auth-brand-image"
+            />
 
             <img
               src={pyramid}
@@ -146,7 +154,12 @@ export default function Signup() {
               alt="passport"
             />
 
-            <img src={visa} className="auth-icon icon-visa" loading="lazy" alt="visa" />
+            <img
+              src={visa}
+              className="auth-icon icon-visa"
+              loading="lazy"
+              alt="visa"
+            />
           </div>
 
           <div className="auth-right signup-right">
@@ -186,27 +199,49 @@ export default function Signup() {
               />
 
               <div className="signup-row">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="password-field">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
 
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                  {password && (
+                    <button
+                      type="button"
+                      className="password-eye"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  )}
+                </div>
+
+                <div className="password-field">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+
+                  {confirmPassword && (
+                    <button
+                      type="button"
+                      className="password-eye"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="phone-field">
-                <div
-                  className={`custom-country ${openCountry ? "active" : ""}`}
-                >
+                <div className={`custom-country ${openCountry ? "active" : ""}`}>
                   <button
                     type="button"
                     className="custom-country-btn"
@@ -216,7 +251,7 @@ export default function Signup() {
                       <img
                         src={selectedCountry.flag}
                         alt={selectedCountry.name}
-                         loading="lazy"
+                        loading="lazy"
                         className="country-flag"
                       />
 
@@ -247,7 +282,7 @@ export default function Signup() {
                           <img
                             src={country.flag}
                             alt={country.name}
-                             loading="lazy"
+                            loading="lazy"
                             className="country-option-flag"
                           />
 

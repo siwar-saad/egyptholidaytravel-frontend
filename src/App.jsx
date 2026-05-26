@@ -1,9 +1,4 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./page/Home";
 
@@ -17,8 +12,10 @@ import Hotels from "./page/hotel/Hotels";
 import FlightComingSoon from "./page/flight/flightcomingsoon";
 
 import Admin from "./page/admin/Admin";
-import UserProfile from "./page/client/profile/UserProfile";
+import AdminLayout from "./page/admin/AdminLayout";
+import AdminReviews from "./page/admin/AdminReviews";
 
+import UserProfile from "./page/client/profile/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -26,25 +23,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* AUTH */}
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        <Route
-          path="/signup"
-          element={<Signup />}
-        />
-
-        <Route
-          path="/forgot-password"
-          element={<ForgotPassword />}
-        />
-
-        <Route
-          path="/reset-password"
-          element={<ResetPassword />}
-        />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* MAIN PAGES */}
         <Route path="/" element={<Home />} />
@@ -65,12 +47,24 @@ function App() {
           }
         />
 
-        {/* ADMIN */}
+        {/* ADMIN DASHBOARD */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute requiredRole="admin">
               <Admin />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN REVIEWS */}
+        <Route
+          path="/admin/reviews"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <AdminReviews />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />

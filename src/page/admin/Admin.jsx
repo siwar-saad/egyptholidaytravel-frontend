@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaPlane,
   FaHome,
@@ -11,6 +11,7 @@ import {
   FaCog,
   FaSignOutAlt,
   FaMailBulk,
+  FaStar,
 } from "react-icons/fa";
 
 import Navbar from "../../components/navbar";
@@ -26,6 +27,7 @@ import Payments from "./Payments";
 import Messages from "./Messages";
 import Subscribers from "./Subscribers";
 import Settings from "./Settings";
+import AdminReviews from "./AdminReviews";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -47,75 +49,79 @@ export default function Admin() {
       console.log("Admin logout error:", err.response?.data || err.message);
     }
 
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+
     window.location.href = "/login";
   };
 
-  const loadMessageNotifications = useCallback(async () => {
-    try {
-      const res = await API.get("/admin/messages/unread-count");
-      setAdminMessageNotifications(Number(res.data?.count || 0));
-    } catch (err) {
-      console.log(
-        "Messages notification error:",
-        err.response?.data || err.message
-      );
-    }
-  }, []);
-
   useEffect(() => {
+    const loadMessageNotifications = async () => {
+      try {
+        const res = await API.get("/admin/messages/unread-count");
+        setAdminMessageNotifications(Number(res.data?.count || 0));
+      } catch (err) {
+        console.log(
+          "Messages notification error:",
+          err.response?.data || err.message
+        );
+      }
+    };
+
     loadMessageNotifications();
 
     const unreadTimer = setInterval(loadMessageNotifications, 5000);
 
     return () => clearInterval(unreadTimer);
-  }, [loadMessageNotifications]);
-
-  useEffect(() => {
-    loadMessageNotifications();
-  }, [activeTab, loadMessageNotifications]);
+  }, [activeTab]);
 
   const openTab = (tab) => {
     setActiveTab(tab);
   };
 
   const renderContent = () => {
-  switch (activeTab) {
-    case "dashboard":
-      return <Dashboard onOpenTab={openTab} />;
+    switch (activeTab) {
+      case "dashboard":
+        return <Dashboard onOpenTab={openTab} />;
 
-    case "packages":
-      return <Packages showSuccess={showSuccess} />;
+      case "packages":
+        return <Packages showSuccess={showSuccess} />;
 
-    case "hotels":
-      return <Hotels showSuccess={showSuccess} />;
+      case "hotels":
+        return <Hotels showSuccess={showSuccess} />;
 
-    case "reservations":
-      return <Reservations showSuccess={showSuccess} />;
+      case "reservations":
+        return <Reservations showSuccess={showSuccess} />;
 
-    case "clients":
-      return <Clients showSuccess={showSuccess} />;
+      case "clients":
+        return <Clients showSuccess={showSuccess} />;
 
-    case "payments":
-      return <Payments />;
+      case "payments":
+        return <Payments />;
 
-    case "messages":
-      return (
-        <Messages
-          showSuccess={showSuccess}
-          onUnreadChange={setAdminMessageNotifications}
-        />
-      );
+      case "messages":
+        return (
+          <Messages
+            showSuccess={showSuccess}
+            onUnreadChange={setAdminMessageNotifications}
+          />
+        );
 
-    case "subscribers":
-      return <Subscribers />;
+      case "subscribers":
+        return <Subscribers />;
 
-    case "settings":
-      return <Settings />;
+      case "reviews":
+        return <AdminReviews />;
 
-    default:
-      return <Dashboard onOpenTab={openTab} />;
-  }
-};
+      case "settings":
+        return <Settings />;
+
+      default:
+        return <Dashboard onOpenTab={openTab} />;
+    }
+  };
 
   return (
     <div className="admin-wrapper">
@@ -141,7 +147,8 @@ export default function Admin() {
                 className={activeTab === "dashboard" ? "active" : ""}
                 onClick={() => openTab("dashboard")}
               >
-                <FaHome /> Dashboard
+                <FaHome />
+                <span>Dashboard</span>
               </button>
 
               <button
@@ -149,7 +156,8 @@ export default function Admin() {
                 className={activeTab === "packages" ? "active" : ""}
                 onClick={() => openTab("packages")}
               >
-                <FaBoxOpen /> Packages
+                <FaBoxOpen />
+                <span>Packages</span>
               </button>
 
               <button
@@ -157,7 +165,8 @@ export default function Admin() {
                 className={activeTab === "hotels" ? "active" : ""}
                 onClick={() => openTab("hotels")}
               >
-                <FaHotel /> Hotels
+                <FaHotel />
+                <span>Hotels</span>
               </button>
 
               <button
@@ -165,7 +174,8 @@ export default function Admin() {
                 className={activeTab === "reservations" ? "active" : ""}
                 onClick={() => openTab("reservations")}
               >
-                <FaCalendarCheck /> Reservations
+                <FaCalendarCheck />
+                <span>Reservations</span>
               </button>
 
               <button
@@ -173,7 +183,8 @@ export default function Admin() {
                 className={activeTab === "clients" ? "active" : ""}
                 onClick={() => openTab("clients")}
               >
-                <FaUsers /> Clients
+                <FaUsers />
+                <span>Clients</span>
               </button>
 
               <button
@@ -181,7 +192,8 @@ export default function Admin() {
                 className={activeTab === "payments" ? "active" : ""}
                 onClick={() => openTab("payments")}
               >
-                <FaCreditCard /> Payments
+                <FaCreditCard />
+                <span>Payments</span>
               </button>
 
               <button
@@ -204,7 +216,17 @@ export default function Admin() {
                 className={activeTab === "subscribers" ? "active" : ""}
                 onClick={() => openTab("subscribers")}
               >
-                <FaMailBulk /> Subscribers
+                <FaMailBulk />
+                <span>Subscribers</span>
+              </button>
+
+              <button
+                type="button"
+                className={activeTab === "reviews" ? "active" : ""}
+                onClick={() => openTab("reviews")}
+              >
+                <FaStar />
+                <span>Reviews</span>
               </button>
 
               <button
@@ -212,13 +234,15 @@ export default function Admin() {
                 className={activeTab === "settings" ? "active" : ""}
                 onClick={() => openTab("settings")}
               >
-                <FaCog /> Settings
+                <FaCog />
+                <span>Settings</span>
               </button>
             </nav>
           </div>
 
           <button type="button" className="admin-logout" onClick={handleLogout}>
-            <FaSignOutAlt /> Logout
+            <FaSignOutAlt />
+            <span>Logout</span>
           </button>
         </aside>
 

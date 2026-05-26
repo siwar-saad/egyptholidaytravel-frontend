@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import API from "../../api";
 import "./Login.css";
@@ -19,9 +20,9 @@ export default function Login() {
     password: "",
   });
 
-  const [rememberMe, setRememberMe] = useState(
-    false
-  );
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -65,8 +66,8 @@ export default function Login() {
 
       setError(
         err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Email or password is incorrect."
+          err.response?.data?.error ||
+          "Email or password is incorrect."
       );
     } finally {
       setLoading(false);
@@ -126,15 +127,27 @@ export default function Login() {
                 required
               />
 
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={form.password}
-                onChange={handleChange}
-                autoComplete="current-password"
-                required
-              />
+              <div className="password-field">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  value={form.password}
+                  onChange={handleChange}
+                  autoComplete="current-password"
+                  required
+                />
+
+                {form.password && (
+                  <button
+                    type="button"
+                    className="password-eye"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                )}
+              </div>
 
               <div className="auth-options">
                 <div className="remember-box">
@@ -158,8 +171,7 @@ export default function Login() {
               </button>
 
               <p className="auth-switch">
-                Don&apos;t have an account?{" "}
-                <Link to="/signup">Sign up</Link>
+                Don&apos;t have an account? <Link to="/signup">Sign up</Link>
               </p>
             </form>
           </div>
