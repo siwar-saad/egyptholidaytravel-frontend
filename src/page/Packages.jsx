@@ -532,6 +532,24 @@ const splitStoredPhone = (phone = "") => {
   };
 };
 
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const isPastDate = (dateValue) => {
+  if (!dateValue) return false;
+
+  const selectedDate = new Date(`${dateValue}T00:00:00`);
+  const today = new Date(`${getTodayDate()}T00:00:00`);
+
+  return selectedDate < today;
+};
+
 export default function Packages() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -543,8 +561,12 @@ export default function Packages() {
   const [showPackageBookingForm, setShowPackageBookingForm] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingAsAdmin, setBookingAsAdmin] = useState(false);
-  const [packageBookingData, setPackageBookingData] = useState(EMPTY_PACKAGE_BOOKING);
-  const [selectedPackageCountry, setSelectedPackageCountry] = useState(PACKAGE_COUNTRIES[0]);
+  const [packageBookingData, setPackageBookingData] = useState(
+    EMPTY_PACKAGE_BOOKING
+  );
+  const [selectedPackageCountry, setSelectedPackageCountry] = useState(
+    PACKAGE_COUNTRIES[0]
+  );
   const [openPackageCountry, setOpenPackageCountry] = useState(false);
 
   const [packageAlert, setPackageAlert] = useState({
@@ -567,7 +589,8 @@ export default function Packages() {
   const normalizePackage = (item) => ({
     id: item.id,
     name: item.name || item.title || "Package",
-    backendName: item.backendName || item.backend_name || item.title || item.name || "",
+    backendName:
+      item.backendName || item.backend_name || item.title || item.name || "",
     route: item.route || "",
     duration: item.duration || "",
     transfer: item.transfer || "",
@@ -589,7 +612,7 @@ export default function Packages() {
         setPackagesData(loadedPackages.map(normalizePackage));
       } catch (err) {
         console.log("Public packages error:", err.response?.data || err.message);
-        setPackagesData([]);
+        setPackagesData(PACKAGES_DATA);
       } finally {
         setPackagesLoading(false);
       }
@@ -738,6 +761,11 @@ export default function Packages() {
       return;
     }
 
+    if (isPastDate(packageBookingData.travelDate)) {
+      showPackageAlert("Please choose today or a future travel date.");
+      return;
+    }
+
     const fullPhone = `${selectedPackageCountry.dialCode} ${packageBookingData.phone.trim()}`;
 
     const reservationData = {
@@ -853,59 +881,61 @@ export default function Packages() {
               <p className="empty-packages-message">Loading packages...</p>
             ) : packagesData.length === 0 ? (
               <p className="empty-packages-message">No published packages yet.</p>
-            ) : packagesData.map((item) => (
-              <article className="package-card-pro" key={item.id}>
-                <div className="package-img-box">
-                  <img src={item.image} alt={item.name} loading="lazy" />
+            ) : (
+              packagesData.map((item) => (
+                <article className="package-card-pro" key={item.id}>
+                  <div className="package-img-box">
+                    <img src={item.image} alt={item.name} loading="lazy" />
 
-                  <div className="package-img-overlay">
-                    <span>{item.duration}</span>
-                  </div>
-                </div>
-
-                <div className="package-card-body">
-                  <span className="package-back-name">
-                    Back Name: {item.backendName}
-                  </span>
-
-                  <h3>{item.name}</h3>
-
-                  <div className="package-info-row">
-                    <FaMapMarkedAlt />
-                    <span>{item.route}</span>
+                    <div className="package-img-overlay">
+                      <span>{item.duration}</span>
+                    </div>
                   </div>
 
-                  <div className="package-info-row">
-                    <FaCalendarAlt />
-                    <span>{item.duration}</span>
-                  </div>
+                  <div className="package-card-body">
+                    <span className="package-back-name">
+                      Back Name: {item.backendName}
+                    </span>
 
-                  <div className="package-info-row">
-                    {item.route.includes("Luxor") ? <FaTrain /> : <FaBus />}
-                    <span>{item.transfer}</span>
-                  </div>
+                    <h3>{item.name}</h3>
 
-                  <div className="package-price-box">
-                    <small>Starting Price</small>
-                    <strong>{item.startPrice}</strong>
-                  </div>
+                    <div className="package-info-row">
+                      <FaMapMarkedAlt />
+                      <span>{item.route}</span>
+                    </div>
 
-                  <div className="package-card-actions">
-                    <button type="button" onClick={() => openPackage(item)}>
-                      View Details
-                    </button>
+                    <div className="package-info-row">
+                      <FaCalendarAlt />
+                      <span>{item.duration}</span>
+                    </div>
 
-                    <button
-                      type="button"
-                      className="package-book-btn"
-                      onClick={() => openPackageBooking(item)}
-                    >
-                      Book Now
-                    </button>
+                    <div className="package-info-row">
+                      {item.route.includes("Luxor") ? <FaTrain /> : <FaBus />}
+                      <span>{item.transfer}</span>
+                    </div>
+
+                    <div className="package-price-box">
+                      <small>Starting Price</small>
+                      <strong>{item.startPrice}</strong>
+                    </div>
+
+                    <div className="package-card-actions">
+                      <button type="button" onClick={() => openPackage(item)}>
+                        View Details
+                      </button>
+
+                      <button
+                        type="button"
+                        className="package-book-btn"
+                        onClick={() => openPackageBooking(item)}
+                      >
+                        Book Now
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            )}
           </div>
         </section>
 
@@ -1119,7 +1149,8 @@ function PackageModal({ item, onClose, onBook }) {
             <div className="package-option-card">
               <h3>Programme</h3>
               <p className="package-programme-text">
-                {item.programme || "Package details will be confirmed by our team."}
+                {item.programme ||
+                  "Package details will be confirmed by our team."}
               </p>
             </div>
           )}
@@ -1181,6 +1212,8 @@ function PackageBookingForm({
   onSubmit,
   loading,
 }) {
+  const todayDate = getTodayDate();
+
   const updateBooking = (field, value) => {
     setBookingData((prev) => ({
       ...prev,
@@ -1303,6 +1336,7 @@ function PackageBookingForm({
 
             <input
               type="date"
+              min={todayDate}
               value={bookingData.travelDate}
               onChange={(e) => updateBooking("travelDate", e.target.value)}
             />

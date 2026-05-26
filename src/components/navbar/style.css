@@ -1,26 +1,44 @@
 /* ================= NAVBAR ================= */
 
+:root {
+  --nav-text: #24160f;
+  --nav-muted: #6b5a4c;
+  --nav-accent: #935426;
+  --nav-accent-dark: #6f3a15;
+  --nav-soft: rgba(239, 228, 211, 0.95);
+  --nav-white: #ffffff;
+  --nav-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  --nav-accent-shadow: 0 12px 25px rgba(147, 84, 38, 0.24);
+}
+
+/* ================= MAIN BAR ================= */
+
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  padding: 8px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   z-index: 999;
-  box-sizing: border-box;
+
+  width: 100%;
+  min-height: 86px;
+  padding: 8px 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
 
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: var(--nav-shadow);
+
+  box-sizing: border-box;
 }
 
-/* ================= LEFT / LOGO ================= */
+/* ================= LOGO ================= */
 
 .navbar-left {
   display: flex;
@@ -33,16 +51,9 @@
   width: 70px;
   height: 70px;
   object-fit: contain;
+  display: block;
   cursor: pointer;
   transition: 0.3s ease;
-  display: block;
-  flex-shrink: 0;
-}
-
-.navbar-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 .navbar-logo:hover {
@@ -55,99 +66,147 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 22px;
-  flex-wrap: nowrap;
+  gap: 18px;
   min-width: 0;
 }
 
-.nav-link-btn,
-.navbar-links a,
-.navbar-links button {
-  background: transparent;
+.nav-link-btn {
+  height: 40px;
+  padding: 0 14px;
+
   border: none;
-  color: #24160f;
-  font-size: 15px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: 0.3s ease;
-  white-space: nowrap;
-  text-decoration: none;
+  border-radius: 999px;
+  background: transparent;
+
+  color: var(--nav-text);
   font-family: "Inika", serif;
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.28s ease;
 }
 
-.nav-link-btn:hover,
-.navbar-links a:hover,
-.navbar-links button:hover {
-  color: #935426;
-  transform: translateY(-1px);
+.nav-link-btn:hover {
+  color: var(--nav-accent);
+  background: rgba(255, 255, 255, 0.45);
+  transform: translateY(-2px);
 }
 
-/* ================= USER / PROFILE ================= */
+/* ================= ACTIVE PAGE ================= */
+
+.nav-link-btn.active {
+  background: linear-gradient(135deg, var(--nav-accent), var(--nav-accent-dark));
+  color: var(--nav-white) !important;
+  box-shadow: var(--nav-accent-shadow);
+}
+
+.nav-link-btn.active:hover {
+  color: var(--nav-white) !important;
+  transform: translateY(-2px);
+}
+
+/* ================= LOGIN ICON BUTTON ================= */
 
 .navbar-user {
   min-width: 44px;
   height: 44px;
-  border-radius: 50%;
+  padding: 0 13px;
+
   border: none;
-  background: rgba(239, 228, 211, 0.9);
-  color: #24160f;
+  border-radius: 999px;
+  background: var(--nav-soft);
+
+  color: var(--nav-text);
+  font-size: 16px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   cursor: pointer;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  font-size: 16px;
-  transition: 0.3s ease;
   flex-shrink: 0;
+  transition: 0.28s ease;
 }
 
-.navbar-user:hover {
-  background: #935426;
-  color: #ffffff;
-  transform: scale(1.05);
+.navbar-user:hover,
+.navbar-user.active {
+  background: linear-gradient(135deg, var(--nav-accent), var(--nav-accent-dark));
+  color: var(--nav-white) !important;
+  box-shadow: var(--nav-accent-shadow);
+  transform: translateY(-2px);
 }
+
+.navbar-user:hover svg,
+.navbar-user.active svg {
+  color: var(--nav-white) !important;
+}
+
+/* ================= PROFILE BUTTON ================= */
 
 .profile-btn {
-  height: 42px;
+  height: 44px;
+  max-width: 220px;
+  padding: 0 16px;
+
+  border: none;
+  border-radius: 999px;
+  background: var(--nav-soft);
+
+  color: var(--nav-text);
+  font-family: "Inika", serif;
+  font-size: 14px;
+  font-weight: 800;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  background: rgba(239, 228, 211, 0.95);
-  border: none;
-  border-radius: 40px;
-  padding: 8px 16px;
-  color: #2a2117;
-  font-size: 14px;
-  font-weight: 700;
+  gap: 8px;
+
   cursor: pointer;
-  transition: 0.3s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: 0.28s ease;
 }
 
 .profile-btn span {
-  display: inline;
+  display: inline-block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  color: inherit;
 }
 
 .profile-btn svg {
   font-size: 13px;
   flex-shrink: 0;
+  color: inherit;
 }
 
-.profile-btn:hover {
-  background: #935426;
-  color: #ffffff;
+.profile-btn:hover,
+.profile-btn.active {
+  background: linear-gradient(135deg, var(--nav-accent), var(--nav-accent-dark));
+  color: var(--nav-white) !important;
+  box-shadow: var(--nav-accent-shadow);
   transform: translateY(-2px);
+}
+
+.profile-btn:hover span,
+.profile-btn:hover svg,
+.profile-btn.active span,
+.profile-btn.active svg {
+  color: var(--nav-white) !important;
 }
 
 /* ================= TABLET ================= */
 
 @media (max-width: 992px) {
   .navbar {
+    min-height: 78px;
     padding: 8px 24px;
+    gap: 16px;
   }
 
   .navbar-logo {
@@ -156,136 +215,116 @@
   }
 
   .navbar-links {
-    gap: 14px;
+    gap: 12px;
   }
 
-  .nav-link-btn,
-  .navbar-links a,
-  .navbar-links button {
+  .nav-link-btn {
+    height: 38px;
+    padding: 0 12px;
     font-size: 14px;
   }
 
   .profile-btn {
-    padding: 8px 13px;
+    height: 40px;
+    max-width: 180px;
+    padding: 0 13px;
     font-size: 13px;
+  }
+
+  .profile-btn span {
+    max-width: 110px;
   }
 }
 
-/* ================= MOBILE BETTER NAVBAR ================= */
+/* ================= MOBILE ================= */
 
 @media (max-width: 768px) {
   .navbar {
-    width: calc(100% - 14px) !important;
-    height: 58px !important;
-    padding: 0 8px !important;
-    border-radius: 20px !important;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
 
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
+    width: calc(100% - 14px);
+    min-height: 58px;
+    height: 58px;
+    padding: 0 8px;
 
-    display: grid !important;
-    grid-template-columns: 30px minmax(0, 1fr) auto !important;
-    align-items: center !important;
-    gap: 7px !important;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    gap: 7px;
 
-    overflow: visible !important;
+    border-radius: 20px;
+    overflow: visible;
   }
 
   .navbar-left {
-    width: 30px !important;
-    min-width: 30px !important;
-    max-width: 30px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    width: 30px;
+    min-width: 30px;
   }
 
-  .navbar-logo,
-  .navbar-logo img {
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    max-width: 26px !important;
-    object-fit: contain !important;
+  .navbar-logo {
+    width: 26px;
+    height: 26px;
   }
 
   .navbar-links {
-    width: 100% !important;
-    min-width: 0 !important;
+    width: 100%;
+    min-width: 0;
 
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 8px !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
 
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    white-space: nowrap !important;
-    scrollbar-width: none !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
   }
 
   .navbar-links::-webkit-scrollbar {
-    display: none !important;
+    display: none;
   }
 
-  .nav-link-btn,
-  .navbar-links a,
-  .navbar-links button {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    height: 34px !important;
+  .nav-link-btn {
+    flex: 0 0 auto;
+    height: 34px;
+    padding: 0 10px;
 
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
 
-    padding: 0 8px !important;
-    border-radius: 12px !important;
-
-    font-size: 12.5px !important;
-    font-weight: 900 !important;
-    line-height: 1 !important;
-    letter-spacing: 0 !important;
-    white-space: nowrap !important;
+    border-radius: 12px;
   }
 
   .nav-link-btn:hover,
-  .navbar-links a:hover,
-  .navbar-links button:hover {
-    transform: none !important;
+  .nav-link-btn.active:hover {
+    transform: none;
   }
 
   .profile-btn,
   .navbar-user {
-    width: auto !important;
-    min-width: 46px !important;
-    max-width: none !important;
-    height: 36px !important;
+    height: 36px;
+    min-width: 42px;
+    padding: 0 9px;
 
-    padding: 0 9px !important;
-    border-radius: 999px !important;
+    font-size: 11px;
+    font-weight: 900;
+    gap: 5px;
+  }
 
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 5px !important;
-
-    font-size: 11px !important;
-    font-weight: 900 !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
+  .profile-btn {
+    max-width: 115px;
   }
 
   .profile-btn span {
-    display: inline !important;
-    white-space: nowrap !important;
+    max-width: 72px;
   }
 
   .profile-btn svg,
   .navbar-user svg {
-    font-size: 11px !important;
-    flex-shrink: 0 !important;
+    font-size: 11px;
   }
 }
 
@@ -293,50 +332,53 @@
 
 @media (max-width: 430px) {
   .navbar {
-    width: calc(100% - 10px) !important;
-    height: 56px !important;
-    padding: 0 7px !important;
-    grid-template-columns: 28px minmax(0, 1fr) auto !important;
-    gap: 5px !important;
+    width: calc(100% - 10px);
+    height: 56px;
+    min-height: 56px;
+    padding: 0 7px;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    gap: 5px;
   }
 
   .navbar-left {
-    width: 28px !important;
-    min-width: 28px !important;
-    max-width: 28px !important;
+    width: 28px;
+    min-width: 28px;
   }
 
-  .navbar-logo,
-  .navbar-logo img {
-    width: 24px !important;
-    height: 24px !important;
-    min-width: 24px !important;
-    max-width: 24px !important;
+  .navbar-logo {
+    width: 24px;
+    height: 24px;
   }
 
   .navbar-links {
-    gap: 7px !important;
+    gap: 7px;
   }
 
-  .nav-link-btn,
-  .navbar-links a,
-  .navbar-links button {
-    height: 32px !important;
-    font-size: 11.5px !important;
-    padding: 0 7px !important;
+  .nav-link-btn {
+    height: 32px;
+    padding: 0 8px;
+    font-size: 11.5px;
   }
 
   .profile-btn,
   .navbar-user {
-    height: 34px !important;
-    min-width: 42px !important;
-    padding: 0 8px !important;
-    font-size: 10.5px !important;
+    height: 34px;
+    min-width: 40px;
+    padding: 0 8px;
+    font-size: 10.5px;
+  }
+
+  .profile-btn {
+    max-width: 96px;
+  }
+
+  .profile-btn span {
+    max-width: 56px;
   }
 
   .profile-btn svg,
   .navbar-user svg {
-    font-size: 10px !important;
+    font-size: 10px;
   }
 }
 
@@ -344,70 +386,52 @@
 
 @media (max-width: 360px) {
   .navbar {
-    width: calc(100% - 8px) !important;
-    height: 54px !important;
-    padding: 0 6px !important;
-    grid-template-columns: 26px minmax(0, 1fr) auto !important;
-    gap: 4px !important;
+    width: calc(100% - 8px);
+    height: 54px;
+    min-height: 54px;
+    padding: 0 6px;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    gap: 4px;
   }
 
   .navbar-left {
-    width: 26px !important;
-    min-width: 26px !important;
-    max-width: 26px !important;
+    width: 26px;
+    min-width: 26px;
   }
 
-  .navbar-logo,
-  .navbar-logo img {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    max-width: 22px !important;
+  .navbar-logo {
+    width: 22px;
+    height: 22px;
   }
 
   .navbar-links {
-    gap: 6px !important;
+    gap: 6px;
   }
 
-  .nav-link-btn,
-  .navbar-links a,
-  .navbar-links button {
-    height: 31px !important;
-    font-size: 10.8px !important;
-    padding: 0 6px !important;
+  .nav-link-btn {
+    height: 31px;
+    padding: 0 7px;
+    font-size: 10.8px;
   }
 
   .profile-btn,
   .navbar-user {
-    height: 32px !important;
-    min-width: 40px !important;
-    padding: 0 7px !important;
-    font-size: 10px !important;
+    height: 32px;
+    min-width: 38px;
+    padding: 0 7px;
+    font-size: 10px;
+  }
+
+  .profile-btn {
+    max-width: 84px;
+  }
+
+  .profile-btn span {
+    max-width: 45px;
   }
 
   .profile-btn svg,
   .navbar-user svg {
-    font-size: 9.5px !important;
-  }
-}
-
-/* ================= CENTER MOBILE NAV LINKS ================= */
-
-@media (max-width: 768px) {
-  .navbar-links {
-    justify-content: center !important;
-    text-align: center !important;
-  }
-
-  .nav-link-btn,
-  .navbar-links a,
-  .navbar-links button {
-    text-align: center !important;
-  }
-}
-
-@media (max-width: 430px) {
-  .navbar-links {
-    justify-content: center !important;
+    font-size: 9.5px;
   }
 }

@@ -1,6 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inika:wght@400;700&family=Playfair+Display:wght@500;600;700&display=swap");
 
-/* ================= ADMIN GLOBAL ================= */
+/* =========================================================
+   ADMIN GLOBAL
+========================================================= */
 
 :root {
   --admin-bg: #f8f4ef;
@@ -41,7 +43,9 @@
   padding-top: 95px;
 }
 
-/* ================= SIDEBAR ================= */
+/* =========================================================
+   SIDEBAR
+========================================================= */
 
 .admin-sidebar {
   position: sticky;
@@ -49,6 +53,7 @@
   height: calc(100vh - 95px);
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   padding: 30px 22px;
   border-right: 1px solid rgba(147, 84, 38, 0.1);
   box-shadow: 14px 0 40px rgba(60, 38, 22, 0.06);
@@ -92,6 +97,7 @@
   color: var(--admin-accent);
   font-size: 25px;
   line-height: 1.1;
+  margin: 0;
 }
 
 .admin-brand span {
@@ -123,6 +129,7 @@
   gap: 11px;
   transition: var(--admin-transition);
   position: relative;
+  font-family: inherit;
 }
 
 .admin-nav button:hover,
@@ -144,7 +151,9 @@
   color: #ffffff;
 }
 
-/* ================= MAIN ================= */
+/* =========================================================
+   MAIN
+========================================================= */
 
 .admin-main {
   min-width: 0;
@@ -174,7 +183,7 @@
   font-family: "Playfair Display", serif;
   font-size: clamp(32px, 4vw, 42px);
   line-height: 1.1;
-  margin-bottom: 6px;
+  margin: 0 0 6px;
   color: var(--admin-text);
 }
 
@@ -183,6 +192,7 @@
 .section-desc {
   color: #6e5b4d;
   line-height: 1.6;
+  margin: 0;
 }
 
 .admin-actions {
@@ -210,6 +220,7 @@
   gap: 8px;
   transition: var(--admin-transition);
   box-shadow: 0 12px 26px rgba(147, 84, 38, 0.18);
+  font-family: inherit;
 }
 
 .admin-actions button:hover,
@@ -228,7 +239,9 @@
   border: 1px solid var(--admin-accent) !important;
 }
 
-/* ================= STAT CARDS ================= */
+/* =========================================================
+   STAT CARDS / DASHBOARD
+========================================================= */
 
 .admin-stats,
 .dashboard-grid {
@@ -265,6 +278,21 @@
   gap: 18px;
 }
 
+.dashboard-card-clickable {
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dashboard-card-clickable:hover {
+  transform: translateY(-7px) scale(1.01);
+}
+
+.dashboard-card-clickable:active {
+  transform: scale(0.98);
+}
+
 .admin-stat-card::before,
 .dashboard-card::before {
   content: "";
@@ -288,7 +316,7 @@
   font-size: 36px;
   color: var(--admin-accent);
   font-weight: 900;
-  margin-bottom: 4px;
+  margin: 0 0 4px;
   position: relative;
   z-index: 2;
 }
@@ -298,6 +326,7 @@
   color: var(--admin-muted);
   font-size: 15px;
   font-weight: 800;
+  margin: 0;
   position: relative;
   z-index: 2;
 }
@@ -318,7 +347,9 @@
   z-index: 2;
 }
 
-/* ================= PANELS ================= */
+/* =========================================================
+   PANELS
+========================================================= */
 
 .admin-content {
   display: grid;
@@ -350,7 +381,7 @@
   font-family: "Playfair Display", serif;
   font-size: clamp(26px, 3vw, 32px);
   color: var(--admin-text);
-  margin-bottom: 18px;
+  margin: 0 0 18px;
 }
 
 .panel-head {
@@ -361,7 +392,18 @@
   margin-bottom: 22px;
 }
 
-/* ================= TABLE ================= */
+.admin-loading,
+.empty-msg,
+.empty-text,
+.empty-packages-message {
+  color: var(--admin-muted);
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   TABLES
+========================================================= */
 
 .table-wrapper {
   width: 100%;
@@ -399,7 +441,38 @@ th {
   font-weight: 900;
 }
 
-/* ================= STATUS ================= */
+.reservation-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 22px;
+}
+
+.reservation-table {
+  width: 100%;
+  min-width: 1150px;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+.reservation-table th {
+  text-align: left;
+  color: #7a421f;
+  font-size: 13px;
+  padding: 0 14px 10px;
+  white-space: nowrap;
+}
+
+.reservation-table td {
+  background: #fffaf6;
+  padding: 16px 14px;
+  color: #24160f;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
 
 .status,
 .pdf-ok,
@@ -415,12 +488,14 @@ th {
   white-space: nowrap;
 }
 
+.paid,
 .confirmed,
 .pdf-ok {
   background: #e6f7ec;
   color: var(--admin-green);
 }
 
+.unpaid,
 .pending {
   background: #fff1d8;
   color: var(--admin-warning);
@@ -432,7 +507,9 @@ th {
   color: #b30000;
 }
 
-/* ================= POPUPS SHARED ================= */
+/* =========================================================
+   SHARED POPUPS
+========================================================= */
 
 .settings-popup-overlay,
 .package-popup-overlay,
@@ -442,6 +519,7 @@ th {
   z-index: 999999;
   background: rgba(18, 10, 5, 0.58);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -464,10 +542,6 @@ th {
   margin: auto;
 }
 
-.settings-popup {
-  max-width: 540px;
-}
-
 .package-popup {
   max-width: 660px;
   max-height: 90vh;
@@ -481,7 +555,6 @@ th {
   text-align: center;
 }
 
-.settings-popup::before,
 .package-popup::before {
   content: "";
   position: absolute;
@@ -493,7 +566,6 @@ th {
   right: -70px;
 }
 
-.settings-popup h2,
 .package-popup-head h2,
 .message-success-popup h2 {
   font-family: "Playfair Display", serif;
@@ -505,8 +577,6 @@ th {
   z-index: 2;
 }
 
-.settings-popup input,
-.settings-popup > input,
 .package-popup-form input,
 .package-popup-form textarea,
 .package-popup-form select,
@@ -525,8 +595,6 @@ th {
   transition: var(--admin-transition);
 }
 
-.settings-popup input,
-.settings-popup > input,
 .contact-item input,
 .client-tools input,
 .admin-search-box input,
@@ -545,8 +613,6 @@ th {
   resize: vertical;
 }
 
-.settings-popup input:focus,
-.settings-popup > input:focus,
 .package-popup-form input:focus,
 .package-popup-form textarea:focus,
 .package-popup-form select:focus,
@@ -558,7 +624,6 @@ th {
   box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08);
 }
 
-.settings-popup-actions,
 .package-popup-actions,
 .contact-popup-actions {
   display: flex;
@@ -566,7 +631,6 @@ th {
   margin-top: 14px;
 }
 
-.settings-popup-actions button,
 .package-popup-actions button,
 .save-contact-btn,
 .cancel-contact-btn {
@@ -582,7 +646,6 @@ th {
   transition: var(--admin-transition);
 }
 
-.settings-popup-actions button:hover,
 .package-popup-actions button:hover,
 .save-contact-btn:hover,
 .cancel-contact-btn:hover {
@@ -590,14 +653,15 @@ th {
   box-shadow: 0 16px 30px rgba(147, 84, 38, 0.24);
 }
 
-.settings-cancel-btn,
 .cancel-package-btn,
 .cancel-contact-btn {
   background: var(--admin-soft-2) !important;
   color: var(--admin-accent) !important;
 }
 
-/* ================= PACKAGES ADMIN ================= */
+/* =========================================================
+   PACKAGE ADMIN
+========================================================= */
 
 .packages-admin-grid {
   display: grid;
@@ -657,13 +721,13 @@ th {
   font-family: "Playfair Display", serif;
   font-size: 27px;
   color: var(--admin-text);
-  margin-bottom: 10px;
+  margin: 0 0 10px;
 }
 
 .package-admin-content p {
   color: var(--admin-muted);
   line-height: 1.6;
-  margin-bottom: 12px;
+  margin: 0 0 12px;
   max-width: 650px;
 }
 
@@ -881,7 +945,9 @@ th {
   cursor: pointer;
 }
 
-/* ================= CONTACT SETTINGS ================= */
+/* =========================================================
+   CONTACT / SETTINGS COMPATIBILITY
+========================================================= */
 
 .contact-list {
   display: grid;
@@ -898,6 +964,25 @@ th {
   z-index: 2;
 }
 
+.contact-number-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.contact-number-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 12px;
+  align-items: center;
+}
+
+.add-contact-row {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
 .remove-contact-btn,
 .add-contact-btn {
   border: none;
@@ -907,6 +992,7 @@ th {
   font-weight: 900;
   cursor: pointer;
   transition: var(--admin-transition);
+  font-family: inherit;
 }
 
 .remove-contact-btn {
@@ -925,10 +1011,10 @@ th {
 
 .add-contact-btn {
   width: 100%;
-  height: 58px;
+  min-height: 54px;
   background: linear-gradient(135deg, #a65f2a, #7b4016);
   color: #ffffff;
-  margin: 14px 0 22px;
+  padding: 13px 18px;
   box-shadow: 0 14px 25px rgba(147, 84, 38, 0.18);
 }
 
@@ -937,7 +1023,9 @@ th {
   box-shadow: 0 20px 35px rgba(147, 84, 38, 0.28);
 }
 
-/* ================= RESERVATIONS / CLIENTS ================= */
+/* =========================================================
+   RESERVATIONS / CLIENTS
+========================================================= */
 
 .reservation-switcher,
 .booking-tabs {
@@ -957,6 +1045,7 @@ th {
   font-weight: 900;
   cursor: pointer;
   transition: var(--admin-transition);
+  font-family: inherit;
 }
 
 .reservation-switcher button.active,
@@ -1007,6 +1096,7 @@ th {
   font-family: "Playfair Display", serif;
   font-size: 23px;
   color: var(--admin-text);
+  margin: 0;
 }
 
 .subscriber-card h3 {
@@ -1043,6 +1133,7 @@ th {
   color: #ffffff;
   font-weight: 900;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .delete-client-btn {
@@ -1055,7 +1146,52 @@ th {
   color: #ffffff !important;
 }
 
-/* ================= ADMIN MESSAGES ================= */
+.reservation-search {
+  width: 100%;
+  height: 58px;
+  border: none;
+  outline: none;
+  border-radius: 18px;
+  background: #fff6ee;
+  padding: 0 20px;
+  font-weight: 800;
+  color: #24160f;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+}
+
+.reservation-search:focus {
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(139, 74, 32, 0.1);
+}
+
+.refresh-btn {
+  border: none !important;
+  border-radius: 18px !important;
+  padding: 14px 28px !important;
+  background: linear-gradient(135deg, #935426, #6f3a15) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.28) !important;
+  transition: 0.25s ease !important;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #a76332, #7a421f) !important;
+  box-shadow: 0 18px 38px rgba(147, 84, 38, 0.35) !important;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* =========================================================
+   ADMIN MESSAGES
+========================================================= */
 
 .admin-messages-wrapper {
   display: grid;
@@ -1111,7 +1247,7 @@ th {
   font-family: "Playfair Display", serif;
   font-size: 24px;
   color: var(--admin-text);
-  margin-bottom: 4px;
+  margin: 0 0 4px;
 }
 
 .admin-message-user p {
@@ -1119,6 +1255,7 @@ th {
   font-weight: 700;
   font-size: 14px;
   word-break: break-word;
+  margin: 0;
 }
 
 .admin-message-date {
@@ -1225,6 +1362,10 @@ th {
   cursor: pointer;
 }
 
+/* =========================================================
+   HOTEL PERIOD EDITOR
+========================================================= */
+
 .hotel-period-editor {
   grid-column: 1 / -1;
   display: grid;
@@ -1253,6 +1394,7 @@ th {
   color: #ffffff;
   font-weight: 900;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .hotel-period-row {
@@ -1266,348 +1408,18 @@ th {
   background: #b42318;
 }
 
-/* ================= SEARCH ================= */
+/* =========================================================
+   SEARCH
+========================================================= */
 
 .admin-search-box {
   width: 320px;
   max-width: 100%;
 }
 
-/* ================= ANIMATIONS ================= */
-
-@keyframes popupFade {
-  from {
-    opacity: 0;
-    transform: translateY(22px) scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* ================= RESPONSIVE TABLET ================= */
-
-@media (max-width: 1200px) {
-  .admin-page {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-sidebar {
-    position: relative;
-    top: 0;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid rgba(147, 84, 38, 0.08);
-    padding: 18px 20px;
-  }
-
-  .admin-brand {
-    margin-bottom: 16px;
-  }
-
-  .admin-nav {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-
-  .admin-nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .admin-nav button {
-    min-width: 145px;
-    justify-content: center;
-    margin-bottom: 0;
-  }
-
-  .admin-logout {
-    margin-top: 12px;
-  }
-
-  .admin-content {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-stats,
-  .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .package-admin-card {
-    grid-template-columns: 120px minmax(0, 1fr);
-  }
-
-  .package-admin-actions {
-    grid-column: 1 / -1;
-    justify-content: stretch;
-  }
-
-  .package-admin-actions button,
-  .package-admin-actions .package-select {
-    flex: 1;
-    width: 100%;
-  }
-}
-
-/* ================= RESPONSIVE MOBILE ================= */
-
-@media (max-width: 700px) {
-  .admin-page {
-    padding-top: 85px;
-  }
-
-  .admin-main {
-    padding: 22px 14px;
-  }
-
-  .admin-top,
-  .panel-head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .admin-actions,
-  .panel-head button,
-  .admin-actions button {
-    width: 100%;
-  }
-
-  .admin-top h1 {
-    font-size: 30px;
-  }
-
-  .admin-stats,
-  .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .admin-stat-card,
-  .dashboard-card {
-    min-height: 130px;
-    padding: 18px;
-    border-radius: 22px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .admin-stat-card h3,
-  .dashboard-card h3 {
-    font-size: 28px;
-  }
-
-  .dashboard-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 16px;
-    font-size: 23px;
-  }
-
-  .admin-panel {
-    padding: 20px;
-    border-radius: 22px;
-  }
-
-  .settings-card-pro {
-    grid-template-columns: 52px minmax(0, 1fr);
-    gap: 14px;
-    padding: 16px;
-  }
-
-  .settings-icon-pro {
-    width: 50px;
-    height: 50px;
-    border-radius: 16px;
-    font-size: 22px;
-  }
-
-  .settings-arrow-pro {
-    display: none;
-  }
-
-  .settings-text-pro strong {
-    font-size: 18px;
-  }
-
-  .settings-text-pro small {
-    font-size: 12.5px;
-  }
-
-  .settings-popup-overlay,
-  .package-popup-overlay,
-  .message-success-overlay {
-    padding: 95px 12px 25px;
-  }
-
-  .settings-popup,
-  .package-popup,
-  .message-success-popup {
-    padding: 24px 18px;
-    border-radius: 24px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .settings-popup-actions,
-  .package-popup-actions,
-  .contact-popup-actions,
-  .reservation-switcher,
-  .booking-tabs {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-  }
-
-  .package-admin-card {
-    grid-template-columns: 1fr;
-    padding: 18px;
-    border-radius: 24px;
-  }
-
-  .package-admin-image {
-    width: 100%;
-    height: 190px;
-  }
-
-  .package-admin-content h3 {
-    font-size: 23px;
-  }
-
-  .package-admin-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .hotel-preview-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hotel-preview-item img {
-    height: 105px;
-  }
-
-  .contact-item,
-  .contact-popup-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .client-card,
-  .subscriber-card {
-    flex-direction: column;
-    align-items: flex-start;
-    border-radius: 22px;
-  }
-
-  .client-actions {
-    width: 100%;
-  }
-
-  .client-actions button {
-    flex: 1;
-  }
-
-  .admin-message-card {
-    padding: 20px;
-    border-radius: 24px;
-  }
-
-  .admin-message-head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .admin-message-actions button {
-    width: 100%;
-  }
-
-  .admin-nav button:hover,
-  .admin-nav button.active {
-    transform: none;
-  }
-}
-
-/* ================= SMALL MOBILE ================= */
-
-@media (max-width: 420px) {
-  .admin-main {
-    padding: 18px 10px;
-  }
-
-  .admin-sidebar {
-    padding: 14px 12px;
-  }
-
-  .admin-nav button {
-    min-width: 120px;
-    padding: 12px;
-    font-size: 12px;
-  }
-
-  .admin-stats,
-  .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .admin-stat-card,
-  .dashboard-card {
-    padding: 14px;
-    min-height: 118px;
-  }
-
-  .admin-stat-card h3,
-  .dashboard-card h3 {
-    font-size: 24px;
-  }
-
-  .admin-stat-card p,
-  .dashboard-card p {
-    font-size: 11.5px;
-  }
-
-  .dashboard-icon {
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
-  }
-
-  .admin-panel {
-    padding: 16px;
-  }
-
-  .admin-panel h2,
-  .settings-header-pro h2 {
-    font-size: 24px;
-  }
-
-  .admin-message-user {
-    align-items: flex-start;
-  }
-
-  .admin-message-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 15px;
-  }
-
-  .admin-message-user h3 {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 340px) {
-  .admin-stats,
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ================= ADD CLIENT SAME AS SIGNUP ================= */
+/* =========================================================
+   ADD CLIENT SAME AS SIGNUP
+========================================================= */
 
 .client-signup-popup {
   max-width: 760px !important;
@@ -1648,15 +1460,14 @@ th {
   background: #fff5ed;
   border-radius: 20px;
   padding: 0 16px;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-
   color: #24160f;
   cursor: pointer;
   transition: 0.3s ease;
+  font-family: inherit;
 }
 
 .admin-country-btn:hover,
@@ -1722,18 +1533,14 @@ th {
   right: 0;
   top: calc(100% + 10px);
   z-index: 999999;
-
   background: #ffffff;
   border: 1px solid rgba(147, 84, 38, 0.14);
   border-radius: 22px;
   padding: 8px;
-
   display: grid;
   gap: 5px;
-
   max-height: 260px;
   overflow-y: auto;
-
   box-shadow: 0 24px 55px rgba(0, 0, 0, 0.18);
 }
 
@@ -1744,15 +1551,14 @@ th {
   background: transparent;
   border-radius: 15px;
   padding: 0 10px;
-
   display: grid;
   grid-template-columns: 28px 1fr auto;
   align-items: center;
   gap: 10px;
-
   color: #24160f;
   cursor: pointer;
   transition: 0.25s ease;
+  font-family: inherit;
 }
 
 .admin-country-option:hover,
@@ -1785,11 +1591,9 @@ th {
   border-radius: 20px;
   background: #fff5ed;
   border: 1px solid transparent;
-
   display: grid;
   grid-template-columns: 58px 1fr;
   align-items: center;
-
   transition: 0.3s ease;
 }
 
@@ -1808,7 +1612,6 @@ th {
   color: #935426;
   font-size: 12px;
   font-weight: 900;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1828,43 +1631,9 @@ th {
   box-shadow: none !important;
 }
 
-@media (max-width: 700px) {
-  .client-signup-popup {
-    max-width: 100% !important;
-  }
-
-  .client-signup-row,
-  .client-phone-field {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .admin-country-menu {
-    position: relative;
-    top: 8px;
-    margin-bottom: 8px;
-    max-height: 230px;
-  }
-}
-
-/* ================= DASHBOARD CLICKABLE CARDS ================= */
-
-.dashboard-card-clickable {
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.dashboard-card-clickable:hover {
-  transform: translateY(-7px) scale(1.01);
-}
-
-.dashboard-card-clickable:active {
-  transform: scale(0.98);
-}
-
-/* ================= CLEAN ADMIN MAILBOX COMPATIBILITY ================= */
+/* =========================================================
+   MAILBOX / MESSENGER
+========================================================= */
 
 .admin-mail-shell {
   display: grid;
@@ -1903,6 +1672,7 @@ th {
   text-align: left;
   cursor: pointer;
   transition: 0.25s ease;
+  font-family: inherit;
 }
 
 .admin-mail-item:hover,
@@ -1988,9 +1758,10 @@ th {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  font-family: inherit;
 }
 
-/* ================= ADMIN MESSENGER FINAL PRO ================= */
+/* Final messenger */
 
 .messages-admin-panel {
   padding: 26px;
@@ -2037,7 +1808,6 @@ th {
   border-radius: 999px;
 }
 
-/* Search */
 .admin-mail-search {
   height: 48px;
   display: flex;
@@ -2073,7 +1843,6 @@ th {
   color: rgba(123, 104, 89, 0.75);
 }
 
-/* List title */
 .admin-mail-list-title {
   display: flex;
   align-items: center;
@@ -2102,7 +1871,6 @@ th {
   box-shadow: 0 10px 20px rgba(147, 84, 38, 0.22);
 }
 
-/* Conversation item */
 .admin-messenger-item {
   width: 100%;
   display: grid;
@@ -2118,6 +1886,7 @@ th {
   cursor: pointer;
   text-align: left;
   transition: 0.25s ease;
+  font-family: inherit;
 }
 
 .admin-messenger-item:hover {
@@ -2153,7 +1922,6 @@ th {
   box-shadow: none;
 }
 
-/* Keep old message cards avatar untouched */
 .admin-message-card .admin-message-avatar {
   width: 58px;
   height: 58px;
@@ -2228,7 +1996,6 @@ th {
   line-height: 1.3;
 }
 
-/* Chat pane */
 .admin-messenger-pane {
   min-width: 0;
   min-height: 0;
@@ -2292,7 +2059,6 @@ th {
   font-size: 8px;
 }
 
-/* Messages thread */
 .admin-messenger-thread {
   flex: 1;
   min-height: 0;
@@ -2373,7 +2139,6 @@ th {
   color: #ffffff;
 }
 
-/* Composer */
 .admin-messenger-composer {
   display: flex;
   align-items: flex-end;
@@ -2437,7 +2202,6 @@ th {
   box-shadow: none !important;
 }
 
-/* Empty states */
 .admin-empty-state {
   padding: 34px 18px;
   text-align: center;
@@ -2463,7 +2227,372 @@ th {
   font-weight: 700;
 }
 
-/* Animation */
+/* =========================================================
+   SETTINGS CLEAN FINAL + POPUP OUTSIDE CARD FIX
+========================================================= */
+
+.settings-panel {
+  position: relative;
+  padding: clamp(22px, 4vw, 34px) !important;
+  border-radius: 28px !important;
+  background: linear-gradient(145deg, #ffffff 0%, #fff8f2 100%) !important;
+  border: 1px solid rgba(147, 84, 38, 0.12) !important;
+  box-shadow: 0 20px 48px rgba(60, 38, 22, 0.09) !important;
+  overflow: visible !important;
+}
+
+.settings-panel:hover {
+  transform: none !important;
+}
+
+.settings-panel::before,
+.settings-panel::after {
+  display: none !important;
+  content: none !important;
+}
+
+.settings-header-pro {
+  margin-bottom: 26px !important;
+  padding-bottom: 20px !important;
+  border-bottom: 1px solid rgba(147, 84, 38, 0.1) !important;
+}
+
+.settings-header-pro h2 {
+  margin: 0 0 9px !important;
+  font-family: "Playfair Display", serif !important;
+  font-size: clamp(30px, 4vw, 40px) !important;
+  line-height: 1.08 !important;
+  color: #24160f !important;
+}
+
+.settings-header-pro p {
+  max-width: 760px !important;
+  margin: 0 !important;
+  color: #6e5b4d !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+}
+
+.settings-grid-pro {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+}
+
+.settings-card-pro {
+  position: relative !important;
+  width: 100% !important;
+  min-height: 112px !important;
+  border: 1px solid rgba(147, 84, 38, 0.12) !important;
+  border-radius: 24px !important;
+  padding: 20px !important;
+  background: #ffffff !important;
+  display: grid !important;
+  grid-template-columns: 58px minmax(0, 1fr) 42px !important;
+  align-items: center !important;
+  gap: 16px !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 32px rgba(60, 38, 22, 0.06) !important;
+  transition: 0.28s ease !important;
+  overflow: hidden !important;
+  font-family: inherit !important;
+}
+
+.settings-card-pro:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(147, 84, 38, 0.24) !important;
+  box-shadow: 0 22px 48px rgba(147, 84, 38, 0.13) !important;
+}
+
+.settings-icon-pro {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #a65f2a, #6f3a15) !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.22) !important;
+}
+
+.settings-text-pro {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 5px !important;
+}
+
+.settings-text-pro strong {
+  font-family: "Playfair Display", serif !important;
+  font-size: 21px !important;
+  line-height: 1.15 !important;
+  color: #24160f !important;
+}
+
+.settings-text-pro small {
+  color: #7b6859 !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
+  font-weight: 700 !important;
+}
+
+.settings-arrow-pro {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: #f3ebe4 !important;
+  color: #935426 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+  transition: 0.28s ease !important;
+}
+
+.settings-card-pro:hover .settings-arrow-pro {
+  background: #935426 !important;
+  color: #ffffff !important;
+  transform: translateX(4px) !important;
+}
+
+/* Settings popup must not be trapped inside the settings card */
+.settings-popup-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 100px 18px 30px !important;
+  overflow-y: auto !important;
+  background: rgba(18, 10, 5, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.settings-popup {
+  width: min(560px, 100%) !important;
+  max-width: 560px !important;
+  max-height: calc(100vh - 130px) !important;
+  overflow-y: auto !important;
+  background: #ffffff !important;
+  border-radius: 28px !important;
+  padding: 30px 26px !important;
+  border: 1px solid rgba(147, 84, 38, 0.14) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28) !important;
+  position: relative !important;
+  animation: simpleSettingsPopupShow 0.22s ease both !important;
+}
+
+.settings-popup::before,
+.settings-popup::after,
+.settings-popup-overlay::before,
+.settings-popup-overlay::after {
+  display: none !important;
+  content: none !important;
+}
+
+.settings-popup h2 {
+  margin: 0 0 22px !important;
+  text-align: center !important;
+  font-family: "Playfair Display", serif !important;
+  font-size: 34px !important;
+  line-height: 1.1 !important;
+  color: #24160f !important;
+  padding-right: 34px !important;
+}
+
+.settings-popup input,
+.settings-popup > input,
+.contact-number-row input,
+.add-contact-row input,
+.contact-item input {
+  width: 100% !important;
+  height: 54px !important;
+  margin-bottom: 12px !important;
+  border: 1px solid rgba(147, 84, 38, 0.13) !important;
+  outline: none !important;
+  border-radius: 16px !important;
+  background: #fbf6f0 !important;
+  color: #24160f !important;
+  padding: 0 16px !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  transition: 0.25s ease !important;
+}
+
+.settings-popup input::placeholder,
+.contact-number-row input::placeholder,
+.add-contact-row input::placeholder,
+.contact-item input::placeholder {
+  color: rgba(123, 104, 89, 0.7) !important;
+}
+
+.settings-popup input:focus,
+.settings-popup > input:focus,
+.contact-number-row input:focus,
+.add-contact-row input:focus,
+.contact-item input:focus {
+  background: #ffffff !important;
+  border-color: #935426 !important;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08) !important;
+}
+
+.settings-popup-actions,
+.contact-popup-actions {
+  display: flex !important;
+  gap: 12px !important;
+  margin-top: 18px !important;
+}
+
+.settings-popup-actions button,
+.save-contact-btn,
+.cancel-contact-btn {
+  flex: 1 !important;
+  height: 52px !important;
+  border: none !important;
+  border-radius: 16px !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  transition: 0.25s ease !important;
+  font-family: inherit !important;
+}
+
+.settings-popup-actions button:not(.settings-cancel-btn),
+.save-contact-btn {
+  background: linear-gradient(135deg, #935426, #6f3a15) !important;
+  color: #ffffff !important;
+}
+
+.settings-popup-actions button:not(.settings-cancel-btn):hover,
+.save-contact-btn:hover,
+.add-contact-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.25) !important;
+}
+
+.settings-cancel-btn,
+.cancel-contact-btn {
+  background: #f0e5dc !important;
+  color: #935426 !important;
+  box-shadow: none !important;
+}
+
+.settings-cancel-btn:hover,
+.cancel-contact-btn:hover {
+  background: #e6d6ca !important;
+  transform: translateY(-2px) !important;
+}
+
+.settings-popup-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: var(--admin-soft-2);
+  color: var(--admin-accent);
+  font-size: 24px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.3s ease;
+  z-index: 5;
+  line-height: 1;
+}
+
+.settings-popup-close:hover {
+  background: var(--admin-accent);
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+/* =========================================================
+   PAYMENTS COMING SOON
+========================================================= */
+
+.payments-coming-soon {
+  min-height: 65vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coming-soon-content {
+  width: 100%;
+  max-width: 620px;
+  min-height: 340px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #ffffff, #fff8f2);
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  box-shadow: 0 20px 48px rgba(60, 38, 22, 0.09);
+  padding: 55px 30px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.coming-soon-badge {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #f3ebe4;
+  color: var(--admin-accent);
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+.coming-soon-content h2 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(38px, 5vw, 56px);
+  color: var(--admin-accent);
+  margin-bottom: 14px;
+}
+
+.coming-soon-content p {
+  max-width: 430px;
+  color: var(--admin-muted);
+  font-size: 16px;
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes simpleSettingsPopupShow {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes adminMessageFade {
   from {
     opacity: 0;
@@ -2476,7 +2605,74 @@ th {
   }
 }
 
-/* ================= RESPONSIVE MAILBOX / MESSENGER ================= */
+/* =========================================================
+   RESPONSIVE TABLET
+========================================================= */
+
+@media (max-width: 1200px) {
+  .admin-page {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: relative;
+    top: 0;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(147, 84, 38, 0.08);
+    padding: 18px 20px;
+  }
+
+  .admin-brand {
+    margin-bottom: 16px;
+  }
+
+  .admin-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .admin-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-nav button {
+    min-width: 145px;
+    justify-content: center;
+    margin-bottom: 0;
+  }
+
+  .admin-logout {
+    margin-top: 12px;
+  }
+
+  .admin-content {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stats,
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .package-admin-card {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
+
+  .package-admin-actions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .package-admin-actions button,
+  .package-admin-actions .package-select {
+    flex: 1;
+    width: 100%;
+  }
+}
 
 @media (max-width: 1100px) {
   .admin-messenger-shell {
@@ -2510,7 +2706,233 @@ th {
   }
 }
 
+/* =========================================================
+   RESPONSIVE MOBILE
+========================================================= */
+
 @media (max-width: 700px) {
+  .admin-page {
+    padding-top: 85px;
+  }
+
+  .admin-main {
+    padding: 22px 14px;
+  }
+
+  .admin-top,
+  .panel-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-actions,
+  .panel-head button,
+  .admin-actions button {
+    width: 100%;
+  }
+
+  .admin-top h1 {
+    font-size: 30px;
+  }
+
+  .admin-stats,
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .admin-stat-card,
+  .dashboard-card {
+    min-height: 130px;
+    padding: 18px;
+    border-radius: 22px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .admin-stat-card h3,
+  .dashboard-card h3 {
+    font-size: 28px;
+  }
+
+  .dashboard-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    font-size: 23px;
+  }
+
+  .admin-panel {
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .settings-grid-pro {
+    grid-template-columns: 1fr !important;
+  }
+
+  .settings-panel {
+    padding: 20px 14px !important;
+    border-radius: 22px !important;
+  }
+
+  .settings-header-pro {
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .settings-header-pro h2 {
+    font-size: 28px !important;
+  }
+
+  .settings-header-pro p {
+    font-size: 13.5px !important;
+  }
+
+  .settings-card-pro {
+    min-height: 96px !important;
+    grid-template-columns: 52px minmax(0, 1fr) !important;
+    padding: 16px !important;
+    gap: 13px !important;
+    border-radius: 20px !important;
+  }
+
+  .settings-icon-pro {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 16px !important;
+    font-size: 21px !important;
+  }
+
+  .settings-arrow-pro {
+    display: none !important;
+  }
+
+  .settings-text-pro strong {
+    font-size: 18.5px !important;
+    white-space: normal !important;
+  }
+
+  .settings-text-pro small {
+    font-size: 12.5px !important;
+  }
+
+  .settings-popup-overlay,
+  .package-popup-overlay,
+  .message-success-overlay {
+    padding: 85px 12px 20px !important;
+    align-items: flex-start !important;
+  }
+
+  .settings-popup,
+  .package-popup,
+  .message-success-popup {
+    max-width: 100% !important;
+    border-radius: 22px !important;
+    padding: 24px 16px !important;
+    max-height: calc(100vh - 105px) !important;
+    overflow-y: auto !important;
+  }
+
+  .settings-popup h2 {
+    font-size: 27px !important;
+  }
+
+  .settings-popup-actions,
+  .package-popup-actions,
+  .contact-popup-actions,
+  .reservation-switcher,
+  .booking-tabs {
+    grid-template-columns: 1fr;
+    flex-direction: column !important;
+  }
+
+  .package-admin-card {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .package-admin-image {
+    width: 100%;
+    height: 190px;
+  }
+
+  .package-admin-content h3 {
+    font-size: 23px;
+  }
+
+  .package-admin-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hotel-preview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hotel-preview-item img {
+    height: 105px;
+  }
+
+  .contact-item,
+  .contact-number-row,
+  .contact-popup-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .client-card,
+  .subscriber-card {
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 22px;
+  }
+
+  .client-actions {
+    width: 100%;
+  }
+
+  .client-actions button {
+    flex: 1;
+  }
+
+  .admin-message-card {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .admin-message-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-message-actions button {
+    width: 100%;
+  }
+
+  .admin-nav button:hover,
+  .admin-nav button.active {
+    transform: none;
+  }
+
+  .client-signup-popup {
+    max-width: 100% !important;
+  }
+
+  .client-signup-row,
+  .client-phone-field {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-country-menu {
+    position: relative;
+    top: 8px;
+    margin-bottom: 8px;
+    max-height: 230px;
+  }
+
   .admin-messenger-shell {
     border-radius: 20px;
     min-height: 680px;
@@ -2568,9 +2990,104 @@ th {
     width: 46px;
     height: 46px;
   }
+
+  .payments-coming-soon {
+    min-height: 55vh;
+  }
+
+  .coming-soon-content {
+    padding: 42px 20px;
+    min-height: 280px;
+    border-radius: 24px;
+  }
+
+  .coming-soon-content p {
+    font-size: 14px;
+  }
 }
 
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
 @media (max-width: 420px) {
+  .admin-main {
+    padding: 18px 10px;
+  }
+
+  .admin-sidebar {
+    padding: 14px 12px;
+  }
+
+  .admin-nav button {
+    min-width: 120px;
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .admin-stats,
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .admin-stat-card,
+  .dashboard-card {
+    padding: 14px;
+    min-height: 118px;
+  }
+
+  .admin-stat-card h3,
+  .dashboard-card h3 {
+    font-size: 24px;
+  }
+
+  .admin-stat-card p,
+  .dashboard-card p {
+    font-size: 11.5px;
+  }
+
+  .dashboard-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .admin-panel {
+    padding: 16px;
+  }
+
+  .admin-panel h2,
+  .settings-header-pro h2 {
+    font-size: 24px;
+  }
+
+  .admin-message-user {
+    align-items: flex-start;
+  }
+
+  .admin-message-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+  }
+
+  .admin-message-user h3 {
+    font-size: 20px;
+  }
+
+  .settings-panel {
+    padding: 18px 10px !important;
+  }
+
+  .settings-card-pro {
+    padding: 14px !important;
+  }
+
+  .settings-popup {
+    padding: 22px 14px !important;
+  }
+
   .admin-messenger-shell {
     min-height: 650px;
   }
@@ -2588,607 +3105,9 @@ th {
   }
 }
 
-/* =========================================================
-   SETTINGS CLEAN SIMPLE FINAL
-   This section replaces the old settings design.
-   Simple white popup, no dark frame, no heavy blur.
-========================================================= */
-
-.settings-panel {
-  position: relative;
-  padding: clamp(22px, 4vw, 34px) !important;
-  border-radius: 28px !important;
-  background: linear-gradient(145deg, #ffffff 0%, #fff8f2 100%) !important;
-  border: 1px solid rgba(147, 84, 38, 0.12) !important;
-  box-shadow: 0 20px 48px rgba(60, 38, 22, 0.09) !important;
-  overflow: hidden !important;
-}
-
-.settings-panel::before,
-.settings-panel::after {
-  display: none !important;
-  content: none !important;
-}
-
-.settings-header-pro {
-  margin-bottom: 26px !important;
-  padding-bottom: 20px !important;
-  border-bottom: 1px solid rgba(147, 84, 38, 0.1) !important;
-}
-
-.settings-header-pro h2 {
-  margin: 0 0 9px !important;
-  font-family: "Playfair Display", serif !important;
-  font-size: clamp(30px, 4vw, 40px) !important;
-  line-height: 1.08 !important;
-  color: #24160f !important;
-}
-
-.settings-header-pro p {
-  max-width: 760px !important;
-  margin: 0 !important;
-  color: #6e5b4d !important;
-  font-size: 15px !important;
-  line-height: 1.7 !important;
-}
-
-.settings-grid-pro {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 18px !important;
-}
-
-.settings-card-pro {
-  position: relative !important;
-  width: 100% !important;
-  min-height: 112px !important;
-  border: 1px solid rgba(147, 84, 38, 0.12) !important;
-  border-radius: 24px !important;
-  padding: 20px !important;
-  background: #ffffff !important;
-  display: grid !important;
-  grid-template-columns: 58px minmax(0, 1fr) 42px !important;
-  align-items: center !important;
-  gap: 16px !important;
-  text-align: left !important;
-  cursor: pointer !important;
-  box-shadow: 0 14px 32px rgba(60, 38, 22, 0.06) !important;
-  transition: 0.28s ease !important;
-  overflow: hidden !important;
-}
-
-.settings-card-pro:hover {
-  transform: translateY(-5px) !important;
-  border-color: rgba(147, 84, 38, 0.24) !important;
-  box-shadow: 0 22px 48px rgba(147, 84, 38, 0.13) !important;
-}
-
-.settings-icon-pro {
-  width: 56px !important;
-  height: 56px !important;
-  border-radius: 18px !important;
-  background: linear-gradient(135deg, #a65f2a, #6f3a15) !important;
-  color: #ffffff !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 24px !important;
-  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.22) !important;
-}
-
-.settings-text-pro {
-  min-width: 0 !important;
-  display: grid !important;
-  gap: 5px !important;
-}
-
-.settings-text-pro strong {
-  font-family: "Playfair Display", serif !important;
-  font-size: 21px !important;
-  line-height: 1.15 !important;
-  color: #24160f !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.settings-text-pro small {
-  color: #7b6859 !important;
-  font-size: 13.2px !important;
-  line-height: 1.5 !important;
-  font-weight: 700 !important;
-}
-
-.settings-arrow-pro {
-  width: 42px !important;
-  height: 42px !important;
-  border-radius: 14px !important;
-  background: #f3ebe4 !important;
-  color: #935426 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 20px !important;
-  font-weight: 900 !important;
-  transition: 0.28s ease !important;
-}
-
-.settings-card-pro:hover .settings-arrow-pro {
-  background: linear-gradient(135deg, #935426, #6f3a15) !important;
-  color: #ffffff !important;
-  transform: translateX(3px) !important;
-}
-
-/* ---------- Simple popup ---------- */
-
-.settings-popup-overlay {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 999999 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 95px 18px 28px !important;
-  overflow-y: auto !important;
-  background: rgba(255, 255, 255, 0.94) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.settings-popup {
-  position: relative !important;
-  width: min(560px, 100%) !important;
-  max-width: 560px !important;
-  max-height: calc(100vh - 125px) !important;
-  overflow-y: auto !important;
-  background: #ffffff !important;
-  border-radius: 26px !important;
-  padding: 30px 26px !important;
-  border: 1px solid rgba(147, 84, 38, 0.14) !important;
-  box-shadow: 0 18px 45px rgba(60, 38, 22, 0.14) !important;
-  margin: auto !important;
-  animation: simpleSettingsPopupShow 0.22s ease both !important;
-}
-
-.settings-popup::before,
-.settings-popup::after,
-.settings-popup-overlay::before,
-.settings-popup-overlay::after {
-  display: none !important;
-  content: none !important;
-}
-
-.settings-popup h2 {
-  margin: 0 0 22px !important;
-  text-align: center !important;
-  font-family: "Playfair Display", serif !important;
-  font-size: 34px !important;
-  line-height: 1.1 !important;
-  color: #24160f !important;
-}
-
-.settings-popup input,
-.settings-popup > input,
-.contact-item input {
-  width: 100% !important;
-  height: 54px !important;
-  margin-bottom: 12px !important;
-  border: 1px solid rgba(147, 84, 38, 0.13) !important;
-  outline: none !important;
-  border-radius: 16px !important;
-  background: #fbf6f0 !important;
-  color: #24160f !important;
-  padding: 0 16px !important;
-  font-size: 15px !important;
-  font-weight: 800 !important;
-  box-shadow: none !important;
-  transition: 0.25s ease !important;
-}
-
-.settings-popup input::placeholder,
-.contact-item input::placeholder {
-  color: rgba(123, 104, 89, 0.7) !important;
-}
-
-.settings-popup input:focus,
-.settings-popup > input:focus,
-.contact-item input:focus {
-  background: #ffffff !important;
-  border-color: #935426 !important;
-  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.08) !important;
-}
-
-.settings-popup-actions,
-.contact-popup-actions {
-  display: flex !important;
-  gap: 12px !important;
-  margin-top: 18px !important;
-}
-
-.settings-popup-actions button,
-.save-contact-btn,
-.cancel-contact-btn {
-  flex: 1 !important;
-  height: 52px !important;
-  border: none !important;
-  border-radius: 16px !important;
-  font-size: 15px !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  transition: 0.25s ease !important;
-}
-
-.settings-popup-actions button:not(.settings-cancel-btn),
-.save-contact-btn {
-  background: linear-gradient(135deg, #935426, #6f3a15) !important;
-  color: #ffffff !important;
-}
-
-.settings-popup-actions button:not(.settings-cancel-btn):hover,
-.save-contact-btn:hover,
-.add-contact-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 14px 28px rgba(147, 84, 38, 0.25) !important;
-}
-
-.settings-cancel-btn,
-.cancel-contact-btn {
-  background: #f0e5dc !important;
-  color: #935426 !important;
-  box-shadow: none !important;
-}
-
-.settings-cancel-btn:hover,
-.cancel-contact-btn:hover {
-  background: #e6d6ca !important;
-  transform: translateY(-2px) !important;
-}
-
-/* ---------- Contact settings inside popup ---------- */
-
-.contact-list {
-  display: grid !important;
-  gap: 12px !important;
-  margin-bottom: 16px !important;
-}
-
-.contact-item {
-  display: grid !important;
-  grid-template-columns: 1fr 105px !important;
-  gap: 10px !important;
-  align-items: center !important;
-}
-
-.contact-item input {
-  margin-bottom: 0 !important;
-}
-
-.remove-contact-btn {
-  width: 100% !important;
-  height: 54px !important;
-  border: none !important;
-  border-radius: 16px !important;
-  background: #fff1f1 !important;
-  color: #b42318 !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  transition: 0.25s ease !important;
-}
-
-.remove-contact-btn:hover {
-  background: #b42318 !important;
-  color: #ffffff !important;
-}
-
-.add-contact-btn {
-  width: 100% !important;
-  height: 54px !important;
-  border: none !important;
-  border-radius: 16px !important;
-  background: linear-gradient(135deg, #935426, #6f3a15) !important;
-  color: #ffffff !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  margin: 12px 0 0 !important;
-  transition: 0.25s ease !important;
-}
-
-@keyframes simpleSettingsPopupShow {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+@media (max-width: 340px) {
+  .admin-stats,
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
 }
-
-/* ---------- Responsive settings ---------- */
-
-@media (max-width: 900px) {
-  .settings-grid-pro {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-@media (max-width: 700px) {
-  .settings-panel {
-    padding: 20px 14px !important;
-    border-radius: 22px !important;
-  }
-
-  .settings-header-pro {
-    margin-bottom: 20px !important;
-    padding-bottom: 16px !important;
-  }
-
-  .settings-header-pro h2 {
-    font-size: 28px !important;
-  }
-
-  .settings-header-pro p {
-    font-size: 13.5px !important;
-  }
-
-  .settings-card-pro {
-    min-height: 96px !important;
-    grid-template-columns: 52px minmax(0, 1fr) !important;
-    padding: 16px !important;
-    gap: 13px !important;
-    border-radius: 20px !important;
-  }
-
-  .settings-icon-pro {
-    width: 50px !important;
-    height: 50px !important;
-    border-radius: 16px !important;
-    font-size: 21px !important;
-  }
-
-  .settings-arrow-pro {
-    display: none !important;
-  }
-
-  .settings-text-pro strong {
-    font-size: 18.5px !important;
-    white-space: normal !important;
-  }
-
-  .settings-text-pro small {
-    font-size: 12.5px !important;
-  }
-
-  .settings-popup-overlay {
-    padding: 85px 12px 20px !important;
-    align-items: flex-start !important;
-    background: rgba(255, 255, 255, 0.96) !important;
-  }
-
-  .settings-popup {
-    max-width: 100% !important;
-    border-radius: 22px !important;
-    padding: 24px 16px !important;
-    max-height: calc(100vh - 105px) !important;
-  }
-
-  .settings-popup h2 {
-    font-size: 27px !important;
-  }
-
-  .settings-popup-actions,
-  .contact-popup-actions {
-    flex-direction: column !important;
-  }
-
-  .contact-item {
-    grid-template-columns: 1fr !important;
-  }
-
-  .settings-popup-actions button,
-  .save-contact-btn,
-  .cancel-contact-btn,
-  .remove-contact-btn,
-  .add-contact-btn {
-    width: 100% !important;
-  }
-}
-
-@media (max-width: 420px) {
-  .settings-panel {
-    padding: 18px 10px !important;
-  }
-
-  .settings-card-pro {
-    padding: 14px !important;
-  }
-
-  .settings-popup {
-    padding: 22px 14px !important;
-  }
-}
-.reservation-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  margin-top: 22px;
-}
-
-.reservation-table {
-  width: 100%;
-  min-width: 1150px;
-  border-collapse: separate;
-  border-spacing: 0 12px;
-}
-
-.reservation-table th {
-  text-align: left;
-  color: #7a421f;
-  font-size: 13px;
-  padding: 0 14px 10px;
-  white-space: nowrap;
-}
-
-.reservation-table td {
-  background: #fffaf6;
-  padding: 16px 14px;
-  color: #24160f;
-  font-size: 14px;
-  vertical-align: top;
-}
-
-.reservation-table tr td:first-child {
-  border-radius: 14px 0 0 14px;
-}
-
-.reservation-table tr td:last-child {
-  border-radius: 0 14px 14px 0;
-}
-
-.reservation-note {
-  display: block;
-  max-width: 220px;
-  line-height: 1.5;
-  color: #6e5b4d;
-}
-
-.reservation-status {
-  min-width: 120px;
-  height: 36px;
-  border: 1px solid rgba(139, 74, 32, 0.25);
-  border-radius: 8px;
-  background: #fffaf6;
-  color: #7a421f;
-  font-weight: 800;
-  padding: 0 8px;
-  outline: none;
-}
-
-.reservation-status.confirmed {
-  background: #e8f8ee;
-  color: #16833a;
-}
-
-.reservation-status.pending {
-  background: #fff1d8;
-  color: #a86700;
-}
-
-.reservation-status.cancelled {
-  background: #ffe8e8;
-  color: #b42318;
-}
-.reservations-section {
-  background: #ffffff;
-  border-radius: 30px;
-  padding: 28px;
-  box-shadow: 0 22px 55px rgba(60, 38, 22, 0.09);
-  border: 1px solid rgba(147, 84, 38, 0.1);
-}
-
-.admin-section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 18px;
-  margin-bottom: 28px;
-}
-
-.admin-section-head h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 34px;
-  color: #24160f;
-  margin: 0 0 8px;
-}
-
-.admin-section-head p {
-  margin: 0;
-  color: #6e5b4d;
-  font-weight: 700;
-}
-
-.refresh-btn {
-  border: none;
-  border-radius: 18px;
-  padding: 14px 26px;
-  background: linear-gradient(135deg, #8b4a20, #6f3a15);
-  color: #ffffff;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 14px 28px rgba(139, 74, 32, 0.2);
-  transition: 0.25s ease;
-}
-
-.refresh-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 36px rgba(139, 74, 32, 0.28);
-}
-
-.reservation-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 24px;
-}
-
-.reservation-tabs button {
-  border: none;
-  padding: 18px;
-  border-radius: 18px;
-  background: #f3ebe4;
-  color: #7a421f;
-  font-size: 15px;
-  font-weight: 900;
-  cursor: pointer;
-  transition: 0.25s ease;
-}
-
-.reservation-tabs button.active {
-  background: linear-gradient(135deg, #8b4a20, #6f3a15);
-  color: #ffffff;
-  box-shadow: 0 12px 24px rgba(139, 74, 32, 0.25);
-}
-
-.reservation-search {
-  width: 100%;
-  height: 58px;
-  border: none;
-  outline: none;
-  border-radius: 18px;
-  background: #fff6ee;
-  padding: 0 20px;
-  font-weight: 800;
-  color: #24160f;
-  box-sizing: border-box;
-  margin-bottom: 24px;
-}
-
-.reservation-search:focus {
-  background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(139, 74, 32, 0.1);
-}
-.refresh-btn {
-  border: none !important;
-  border-radius: 18px !important;
-  padding: 14px 28px !important;
-  background: linear-gradient(135deg, #935426, #6f3a15) !important;
-  color: #ffffff !important;
-  font-weight: 900 !important;
-  cursor: pointer !important;
-  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.28) !important;
-  transition: 0.25s ease !important;
-}
-
-.refresh-btn:hover {
-  transform: translateY(-2px);
-  background: linear-gradient(135deg, #a76332, #7a421f) !important;
-  box-shadow: 0 18px 38px rgba(147, 84, 38, 0.35) !important;
-}
-
-.refresh-btn:disabled {
-  opacity: 0.65 !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-}
-
-

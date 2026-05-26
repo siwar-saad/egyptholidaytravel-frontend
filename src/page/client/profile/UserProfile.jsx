@@ -14,7 +14,6 @@ import Settings from "./Settings";
 import EditProfilePopup from "./EditProfilePopup";
 import ChangePasswordPopup from "./ChangePasswordPopup";
 import ContactPopup from "./ContactPopup";
-import MessageSuccessPopup from "./MessageSuccessPopup";
 
 export default function UserProfile() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -38,9 +37,6 @@ export default function UserProfile() {
   const [messageText, setMessageText] = useState("");
   const [messageNotifications, setMessageNotifications] = useState(0);
 
-  const [showClientPopup, setShowClientPopup] = useState(false);
-  const [sentMessageText, setSentMessageText] = useState("");
-
   const [showEdit, setShowEdit] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showContact, setShowContact] = useState(false);
@@ -53,6 +49,33 @@ export default function UserProfile() {
     newPassword: "",
     confirmPassword: "",
   });
+
+  const fetchClientMessages = async () => {
+    try {
+      const res = await API.get("/client/messages");
+      let refreshedMessages = res.data || [];
+
+      const unreadAdminMessages = refreshedMessages.filter(
+        (msg) => (msg.sender || "client") === "admin" && !msg.isRead
+      );
+
+      if (activePage === "messages" && unreadAdminMessages.length > 0) {
+        await API.put("/client/messages/read");
+
+        refreshedMessages = refreshedMessages.map((msg) =>
+          (msg.sender || "client") === "admin"
+            ? { ...msg, isRead: true }
+            : msg
+        );
+
+        setMessageNotifications(0);
+      }
+
+      setMessages(refreshedMessages);
+    } catch (err) {
+      console.log("Messages refresh error:", err.response?.data || err.message);
+    }
+  };
 
   useEffect(() => {
     const loadClientData = async () => {
@@ -82,12 +105,12 @@ export default function UserProfile() {
         setBookings(bookingsRes.data || []);
         setPayments(paymentsRes.data || []);
         setMessages(clientMessages);
+
         setMessageNotifications(
           clientMessages.filter(
             (msg) => (msg.sender || "client") === "admin" && !msg.isRead
           ).length
         );
-
       } catch (err) {
         console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
       }
@@ -212,9 +235,7 @@ export default function UserProfile() {
     try {
       const res = await API.post("/client/messages", { message });
 
-      setMessages((prevMessages) => [res.data, ...prevMessages]);
-      setSentMessageText(message);
-      setShowClientPopup(true);
+      setMessages((prevMessages) => [...prevMessages, res.data]);
       setMessageText("");
     } catch (err) {
       alert(err.response?.data?.error || err.message || "Message not sent");
@@ -292,33 +313,7 @@ export default function UserProfile() {
           messageText={messageText}
           setMessageText={setMessageText}
           onSendMessage={handleSendMessage}
-          onRefreshMessages={async () => {
-            try {
-              const res = await API.get("/client/messages");
-              let refreshedMessages = res.data || [];
-              const unreadAdminMessages = refreshedMessages.filter(
-                (msg) => (msg.sender || "client") === "admin" && !msg.isRead
-              );
-
-              if (unreadAdminMessages.length > 0) {
-                await API.put("/client/messages/read");
-
-                refreshedMessages = refreshedMessages.map((msg) =>
-                  (msg.sender || "client") === "admin"
-                    ? { ...msg, isRead: true }
-                    : msg
-                );
-
-                setMessageNotifications(0);
-              } else {
-                setMessageNotifications(0);
-              }
-
-              setMessages(refreshedMessages);
-            } catch (err) {
-              alert(err.response?.data?.error || "Unable to refresh messages");
-            }
-          }}
+          onRefreshMessages={fetchClientMessages}
         />
       );
     }
@@ -372,13 +367,6 @@ export default function UserProfile() {
       )}
 
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
-
-      {showClientPopup && (
-        <MessageSuccessPopup
-          sentMessageText={sentMessageText}
-          onClose={() => setShowClientPopup(false)}
-        />
-      )}
     </div>
   );
 }
