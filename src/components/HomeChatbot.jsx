@@ -45,52 +45,67 @@ export default function HomeChatbot() {
     },
   ]);
 
-  const makeArray = (data) => {
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data?.data)) return data.data;
-    if (Array.isArray(data?.packages)) return data.packages;
-    if (Array.isArray(data?.hotels)) return data.hotels;
-    return [];
-  };
+  const openLink = (url, target = "_self") => {
+    if (!url) return;
 
-  const loadUser = async () => {
-    const savedUser =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
-
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-        return;
-      } catch {
-        setUser(null);
-      }
-    }
-
-    try {
-      const res = await API.get("/auth/me", { skipAuthRedirect: true });
-      if (res.data?.user) setUser(res.data.user);
-    } catch {
-      setUser(null);
-    }
-  };
-
-  const loadBotData = async () => {
-    try {
-      const res = await API.get("/packages");
-      setPackagesData(makeArray(res.data));
-    } catch (err) {
-      console.log("Chatbot packages error:", err.response?.data || err.message);
-    }
-
-    try {
-      const res = await API.get("/hotels");
-      setHotelsData(makeArray(res.data));
-    } catch (err) {
-      console.log("Chatbot hotels error:", err.response?.data || err.message);
+    if (typeof globalThis !== "undefined" && typeof globalThis.open === "function") {
+      globalThis.open(
+        url,
+        target,
+        target === "_blank" ? "noopener,noreferrer" : undefined
+      );
     }
   };
 
   useEffect(() => {
+    const makeArray = (data) => {
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data)) return data.data;
+      if (Array.isArray(data?.packages)) return data.packages;
+      if (Array.isArray(data?.hotels)) return data.hotels;
+      return [];
+    };
+
+    const loadUser = async () => {
+      const savedUser =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
+
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+          return;
+        } catch {
+          setUser(null);
+        }
+      }
+
+      try {
+        const res = await API.get("/auth/me", { skipAuthRedirect: true });
+
+        if (res.data?.user) {
+          setUser(res.data.user);
+        }
+      } catch {
+        setUser(null);
+      }
+    };
+
+    const loadBotData = async () => {
+      try {
+        const res = await API.get("/packages");
+        setPackagesData(makeArray(res.data));
+      } catch (err) {
+        console.log("Chatbot packages error:", err.response?.data || err.message);
+      }
+
+      try {
+        const res = await API.get("/hotels");
+        setHotelsData(makeArray(res.data));
+      } catch (err) {
+        console.log("Chatbot hotels error:", err.response?.data || err.message);
+      }
+    };
+
     loadUser();
     loadBotData();
   }, []);
@@ -468,8 +483,14 @@ export default function HomeChatbot() {
           `${index + 1}. ${getHotelName(option.hotel)}\n` +
           `   City: ${getHotelCity(option.hotel)}\n` +
           `   Meal Plan: ${getHotelMeal(option.hotel)}\n` +
-          `${getHotelStars(option.hotel) ? `   Category: ${getHotelStars(option.hotel)}\n` : ""}` +
-          `   Period: ${getPeriodFrom(option.period)} → ${getPeriodTo(option.period)}\n` +
+          `${
+            getHotelStars(option.hotel)
+              ? `   Category: ${getHotelStars(option.hotel)}\n`
+              : ""
+          }` +
+          `   Period: ${getPeriodFrom(option.period)} → ${getPeriodTo(
+            option.period
+          )}\n` +
           `   Room: ${option.room}\n` +
           `   Price: ${option.priceText}`
         );
@@ -498,7 +519,6 @@ export default function HomeChatbot() {
     const type = detectType(question);
 
     if (!budget) return askBudget(type);
-
     if (type === "hotel") return recommendHotelsByBudget(budget);
 
     return recommendPackagesByBudget(budget);
@@ -508,8 +528,16 @@ export default function HomeChatbot() {
     return {
       text:
         `${getPackageName(item)}\n\n` +
-        `${getPackagePlace(item) ? `Destination: ${getPackagePlace(item)}\n` : ""}` +
-        `${getPackageDuration(item) ? `Duration: ${getPackageDuration(item)}\n` : ""}` +
+        `${
+          getPackagePlace(item)
+            ? `Destination: ${getPackagePlace(item)}\n`
+            : ""
+        }` +
+        `${
+          getPackageDuration(item)
+            ? `Duration: ${getPackageDuration(item)}\n`
+            : ""
+        }` +
         `Price: ${getPackagePriceText(item) || "Contact us"}\n\n` +
         "Tell me your budget and I will check if this package fits you.",
       actions: ["Budget 300$", "Budget 500$", "Budget 900$", "Open Packages"],
@@ -526,15 +554,26 @@ export default function HomeChatbot() {
             .slice(0, 3)
             .map((period, index) => {
               return (
-                `${index + 1}. ${getPeriodFrom(period)} → ${getPeriodTo(period)}\n` +
+                `${index + 1}. ${getPeriodFrom(period)} → ${getPeriodTo(
+                  period
+                )}\n` +
                 `   Single: ${
-                  period.single || period.singleRoom || period.single_room || "—"
+                  period.single ||
+                  period.singleRoom ||
+                  period.single_room ||
+                  "—"
                 }\n` +
                 `   Double: ${
-                  period.double || period.doubleRoom || period.double_room || "—"
+                  period.double ||
+                  period.doubleRoom ||
+                  period.double_room ||
+                  "—"
                 }\n` +
                 `   Triple: ${
-                  period.triple || period.tripleRoom || period.triple_room || "—"
+                  period.triple ||
+                  period.tripleRoom ||
+                  period.triple_room ||
+                  "—"
                 }`
               );
             })
@@ -656,12 +695,14 @@ export default function HomeChatbot() {
     }
 
     const selectedHotel = findHotel(question);
+
     if (selectedHotel) {
       setTripType("hotel");
       return hotelDetails(selectedHotel);
     }
 
     const selectedPackage = findPackage(question);
+
     if (selectedPackage) {
       setTripType("package");
       return packageDetails(selectedPackage);
@@ -735,17 +776,17 @@ export default function HomeChatbot() {
     }
 
     if (action === "WhatsApp") {
-      window.open(AGENCY_CONTACT.whatsappUrl, "_blank", "noopener,noreferrer");
+      openLink(AGENCY_CONTACT.whatsappUrl, "_blank");
       return;
     }
 
     if (action === "Call Agency") {
-      window.location.href = `tel:${AGENCY_CONTACT.phoneCall}`;
+      openLink(`tel:${AGENCY_CONTACT.phoneCall}`);
       return;
     }
 
     if (action === "Email Agency") {
-      window.location.href = `mailto:${AGENCY_CONTACT.email}`;
+      openLink(`mailto:${AGENCY_CONTACT.email}`);
       return;
     }
 
@@ -848,6 +889,7 @@ export default function HomeChatbot() {
                         {action.includes("WhatsApp") && <FaWhatsapp />}
                         {action.includes("Call") && <FaPhoneAlt />}
                         {action.includes("Email") && <FaEnvelope />}
+
                         <span>{action}</span>
                       </button>
                     ))}
