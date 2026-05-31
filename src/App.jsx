@@ -18,6 +18,8 @@ import AdminReviews from "./page/admin/AdminReviews";
 import UserProfile from "./page/client/profile/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import HomeChatbot from "./components/HomeChatbot";
+
 function App() {
   return (
     <BrowserRouter>
@@ -72,6 +74,7 @@ function App() {
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <HomeChatbot />
     </BrowserRouter>
   );
 }

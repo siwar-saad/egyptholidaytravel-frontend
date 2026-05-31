@@ -1652,3 +1652,36 @@
     font-size: 11px;
   }
 }
+
+/* ================= WHITE BACKGROUND FIX - PACKAGES ================= */
+
+.packages-page {
+  background: #ffffff !important;
+}
+
+.packages-main,
+.packages-list-section,
+.packages-section-head,
+.packages-grid-pro,
+.packages-contact-pro {
+  background: #ffffff !important;
+}
+
+/* cards/contact yeb9aw clean */
+.packages-contact-card,
+.empty-packages-message {
+  background: #ffffff !important;
+}
+
+/* modal/popups yeb9aw light ama clean */
+.package-modal-box,
+.package-booking-box {
+  background: #ffffff !important;
+}
+
+.package-modal-content,
+.package-option-card,
+.package-note-box,
+.package-booking-summary {
+  background-color: #ffffff !important;
+}

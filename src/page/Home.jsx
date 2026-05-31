@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import "./Home.css";
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
+import { FaSuitcaseRolling } from "react-icons/fa";
 import API from "../api";
 import Footer from "../components/footer";
+
 
 import HomeInfoSection from "./homeInfo/HomeInfoSection";
 import InfoPopup from "./homeInfo/InfoPopup";
@@ -125,7 +127,6 @@ export default function Home() {
 
     try {
       await API.post("/subscribers", { email });
-
       alert("Thank you for subscribing!");
       setSubscriberEmail("");
     } catch (err) {
@@ -570,13 +571,20 @@ export default function Home() {
         </div>
       )}
 
+      
       <Footer />
 
       {showButton && (
-        <button className="book-now-btn" type="button" onClick={handleBookNow}>
-          Book Now
-        </button>
-      )}
+  <button
+    className="book-now-btn"
+    type="button"
+    onClick={handleBookNow}
+    aria-label="Book now"
+    title="Book Now"
+  >
+    <FaSuitcaseRolling />
+  </button>
+)}
 
       <InfoPopup item={selectedInfo} onClose={() => setSelectedInfo(null)} />
     </div>

@@ -1209,3 +1209,36 @@
     padding: 0 16px !important;
   }
 }
+/* ================= WHITE BACKGROUND FIX - HOTELS ================= */
+
+.hotels-page {
+  background: #ffffff !important;
+}
+
+.hotel-section,
+.hotel-section-head,
+.hotels-grid {
+  background: #ffffff !important;
+}
+
+/* empty message */
+.empty-msg {
+  background: #ffffff !important;
+}
+
+/* modal/popups yeb9aw light ama clean */
+.hotel-modal-box,
+.booking-box {
+  background: #ffffff !important;
+}
+
+.modal-content,
+.modal-prices,
+.modal-info,
+.booking-hotel-summary {
+  background-color: #ffffff !important;
+}
+
+.period-card {
+  background: #ffffff !important;
+}
