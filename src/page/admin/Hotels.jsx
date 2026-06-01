@@ -143,7 +143,7 @@ export default function Hotels({ showSuccess }) {
 
       for (const file of files) {
         const dataUrl = await readFileAsDataUrl(file);
-        const res = await API.post("/admin/hotels/upload-image", {
+        const res = await API.post("/admin/upload-image", {
           fileName: file.name,
           dataUrl,
         });
@@ -212,13 +212,13 @@ export default function Hotels({ showSuccess }) {
       setSaving(true);
 
       if (editingHotel) {
-        const res = await API.put(`/admin/hotels/${editingHotel.id}`, payload);
+        const res = await API.put(`/admin/${editingHotel.id}`, payload);
         setHotels((current) =>
           current.map((hotel) => (hotel.id === editingHotel.id ? res.data : hotel))
         );
         notify("Hotel updated successfully.");
       } else {
-        const res = await API.post("/admin/hotels/add", payload);
+        const res = await API.post("/admin/add", payload);
         setHotels((current) => [res.data, ...current]);
         notify("Hotel added successfully.");
       }
@@ -235,7 +235,7 @@ export default function Hotels({ showSuccess }) {
 
   const deleteHotel = async (hotelId) => {
     try {
-      await API.delete(`/admin/hotels/${hotelId}`);
+      await API.delete(`/admin/${hotelId}`);
       setHotels((current) => current.filter((hotel) => hotel.id !== hotelId));
       notify("Hotel deleted successfully.");
     } catch (err) {
