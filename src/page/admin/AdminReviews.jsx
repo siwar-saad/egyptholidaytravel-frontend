@@ -36,7 +36,7 @@ export default function AdminReviews() {
     try {
       setLoading(true);
 
-      const res = await API.get("/reviews/admin/all");
+      const res = await API.get("/admin/reviews/all");
       setReviews(res.data || []);
     } catch {
       showNotice(
@@ -55,7 +55,7 @@ export default function AdminReviews() {
 
   const updateStatus = async (id, status) => {
     try {
-      const res = await API.put(`/reviews/admin/${id}/status`, { status });
+      const res = await API.put(`/admin/reviews/${id}/status`, { status });
 
       setReviews((prev) =>
         prev.map((review) => (review._id === id ? res.data : review))
@@ -81,7 +81,7 @@ export default function AdminReviews() {
     if (!deleteTarget?._id) return;
 
     try {
-      await API.delete(`/reviews/admin/${deleteTarget._id}`);
+      await API.delete(`/admin/reviews/${deleteTarget._id}`);
 
       setReviews((prev) =>
         prev.filter((review) => review._id !== deleteTarget._id)

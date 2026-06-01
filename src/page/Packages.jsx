@@ -809,7 +809,7 @@ export default function Packages() {
           totalPrice: 0,
         });
       } else {
-        await API.post("/bookings", reservationData);
+        await API.post("/client/bookings", reservationData);
       }
 
       setPackageBookingData(EMPTY_PACKAGE_BOOKING);
