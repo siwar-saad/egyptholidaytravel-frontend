@@ -1,52 +1,106 @@
-export default function ChangePasswordPopup({
-  passwordForm,
-  setPasswordForm,
-  onSave,
-  onClose,
-}) {
+import { useState } from "react";
+
+export default function ChangePasswordPopup({ onSave, onClose }) {
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  const [showPassword, setShowPassword] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+
+  const togglePassword = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  const handleChange = (field, value) => {
+    setPasswordForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSave = () => {
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      alert("Please fill all password fields");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert("New password and confirm password are not the same");
+      return;
+    }
+
+    if (typeof onSave === "function") {
+      onSave(passwordForm);
+    }
+  };
+
   return (
     <div className="popup-overlay">
       <div className="profile-popup">
         <h2>Change Password</h2>
 
-        <input
-          type="password"
-          placeholder="Current password"
-          value={passwordForm.currentPassword}
-          onChange={(e) =>
-            setPasswordForm({
-              ...passwordForm,
-              currentPassword: e.target.value,
-            })
-          }
-        />
+        <div className="password-input-wrap">
+          <input
+            type={showPassword.currentPassword ? "text" : "password"}
+            value={passwordForm.currentPassword}
+            onChange={(e) => handleChange("currentPassword", e.target.value)}
+            placeholder="Current password"
+          />
 
-        <input
-          type="password"
-          placeholder="New password"
-          value={passwordForm.newPassword}
-          onChange={(e) =>
-            setPasswordForm({
-              ...passwordForm,
-              newPassword: e.target.value,
-            })
-          }
-        />
+          <button
+            type="button"
+            className="password-eye-btn"
+            onClick={() => togglePassword("currentPassword")}
+          >
+            {showPassword.currentPassword ? "🙈" : "👁"}
+          </button>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Confirm password"
-          value={passwordForm.confirmPassword}
-          onChange={(e) =>
-            setPasswordForm({
-              ...passwordForm,
-              confirmPassword: e.target.value,
-            })
-          }
-        />
+        <div className="password-input-wrap">
+          <input
+            type={showPassword.newPassword ? "text" : "password"}
+            value={passwordForm.newPassword}
+            onChange={(e) => handleChange("newPassword", e.target.value)}
+            placeholder="New password"
+          />
+
+          <button
+            type="button"
+            className="password-eye-btn"
+            onClick={() => togglePassword("newPassword")}
+          >
+            {showPassword.newPassword ? "🙈" : "👁"}
+          </button>
+        </div>
+
+        <div className="password-input-wrap">
+          <input
+            type={showPassword.confirmPassword ? "text" : "password"}
+            value={passwordForm.confirmPassword}
+            onChange={(e) => handleChange("confirmPassword", e.target.value)}
+            placeholder="Confirm password"
+          />
+
+          <button
+            type="button"
+            className="password-eye-btn"
+            onClick={() => togglePassword("confirmPassword")}
+          >
+            {showPassword.confirmPassword ? "🙈" : "👁"}
+          </button>
+        </div>
 
         <div className="popup-actions">
-          <button type="button" onClick={onSave}>
+          <button type="button" onClick={handleSave}>
             Save
           </button>
 

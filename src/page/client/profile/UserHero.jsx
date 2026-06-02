@@ -1,21 +1,50 @@
-export default function UserHero({ user, onPhotoChange }) {
-  const initials = user.name ? user.name.charAt(0).toUpperCase() : "U";
+export default function UserHero({ user, onPhotoChange, onRemovePhoto }) {
+  const fullName =
+    user?.name ||
+    `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+    "Client";
+
+  const profilePhoto =
+    user?.avatar ||
+    user?.profileImage ||
+    user?.photo ||
+    user?.image ||
+    "";
+
+  const firstLetter = fullName.charAt(0).toUpperCase() || "U";
 
   return (
     <section className="user-hero">
       <div className="user-main-info">
         <div className="profile-avatar">
-          {user.avatar ? <img src={user.avatar} alt="profile"  loading="lazy" /> : initials}
+          {profilePhoto ? (
+            <img src={profilePhoto} alt={fullName} />
+          ) : (
+            <span>{firstLetter}</span>
+          )}
         </div>
 
         <div>
-          <h1>Hello, {user.name || "Client"}</h1>
+          <h1>Hello, {fullName}</h1>
+
           <p>Manage your account, bookings, payments, and settings.</p>
 
-          <label className="upload-btn">
-            Change photo
-            <input type="file" accept="image/*" onChange={onPhotoChange} />
-          </label>
+          <div className="profile-photo-actions">
+            <label className="upload-btn">
+              Change photo
+              <input type="file" accept="image/*" onChange={onPhotoChange} />
+            </label>
+
+            {profilePhoto && (
+              <button
+                type="button"
+                className="remove-photo-btn"
+                onClick={onRemovePhoto}
+              >
+                Remove photo
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </section>

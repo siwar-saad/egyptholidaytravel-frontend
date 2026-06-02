@@ -435,3 +435,25 @@
     font-size: 9.5px;
   }
 }
+/* ================= NAVBAR PROFILE IMAGE ================= */
+
+.navbar-profile-img {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.profile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.profile-btn svg {
+  flex-shrink: 0;
+}

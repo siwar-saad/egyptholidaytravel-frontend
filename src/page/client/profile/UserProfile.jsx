@@ -29,24 +29,48 @@ const safeParse = (value, fallback) => {
 const getStoredUser = () => {
   return safeParse(
     localStorage.getItem("user") || sessionStorage.getItem("user"),
-    null,
+    null
+  );
+};
+
+const saveStoredUser = (updatedUser) => {
+  const hasLocalUser = Boolean(localStorage.getItem("user"));
+  const hasSessionUser = Boolean(sessionStorage.getItem("user"));
+
+  if (hasLocalUser) {
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  } else if (hasSessionUser) {
+    sessionStorage.setItem("user", JSON.stringify(updatedUser));
+  } else {
+    sessionStorage.setItem("user", JSON.stringify(updatedUser));
+  }
+
+  window.dispatchEvent(
+    new CustomEvent("profileUpdated", {
+      detail: updatedUser,
+    })
   );
 };
 
 const normalizeUser = (data = {}) => {
+  const firstName = data?.firstName || "";
+  const lastName = data?.lastName || "";
+
   return {
     ...data,
-    firstName: data?.firstName || "",
-    lastName: data?.lastName || "",
+    firstName,
+    lastName,
     name:
       data?.name ||
-      `${data?.firstName || ""} ${data?.lastName || ""}`.trim() ||
+      `${firstName} ${lastName}`.trim() ||
+      data?.email ||
       "Client",
     email: data?.email || "",
     phone: data?.phone || "No phone",
     city: data?.city || "Mansoura",
     country: data?.country || "Egypt",
-    avatar: data?.avatar || "",
+    avatar: data?.avatar || data?.profileImage || "",
+    profileImage: data?.profileImage || data?.avatar || "",
     role: data?.role || "user",
   };
 };
@@ -125,13 +149,13 @@ const getAdminCreatedBookingsForClient = (email) => {
 
   const allReservations = safeParse(
     localStorage.getItem(ADMIN_CREATED_RESERVATIONS_KEY),
-    [],
+    []
   );
 
   return allReservations
     .filter(
       (reservation) =>
-        reservation?.clientEmail?.toLowerCase() === email.toLowerCase(),
+        reservation?.clientEmail?.toLowerCase() === email.toLowerCase()
     )
     .map(normalizeAdminReservation);
 };
@@ -141,7 +165,7 @@ const mergeBookings = (apiBookings = [], adminBookings = []) => {
   const normalAdminBookings = Array.isArray(adminBookings) ? adminBookings : [];
 
   const withoutOldAdminBookings = normalApiBookings.filter(
-    (booking) => booking?.createdBy !== "admin" && !booking?.isAdminCreated,
+    (booking) => booking?.createdBy !== "admin" && !booking?.isAdminCreated
   );
 
   const merged = [...normalAdminBookings, ...withoutOldAdminBookings];
@@ -152,7 +176,7 @@ const mergeBookings = (apiBookings = [], adminBookings = []) => {
     const key = String(
       booking?._id ||
         booking?.id ||
-        `${booking?.clientEmail}-${booking?.type}-${booking?.travelDate}`,
+        `${booking?.clientEmail}-${booking?.type}-${booking?.travelDate}`
     );
 
     if (seen.has(key)) return false;
@@ -174,6 +198,7 @@ export default function UserProfile() {
     city: "Mansoura",
     country: "Egypt",
     avatar: "",
+    profileImage: "",
     role: "user",
   });
 
@@ -187,6 +212,7 @@ export default function UserProfile() {
   const [showEdit, setShowEdit] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [showRemovePhotoConfirm, setShowRemovePhotoConfirm] = useState(false);
 
   const [editForm, setEditForm] = useState(user);
   const [bookingTab, setBookingTab] = useState("packages");
@@ -203,14 +229,14 @@ export default function UserProfile() {
       let refreshedMessages = res.data || [];
 
       const unreadAdminMessages = refreshedMessages.filter(
-        (msg) => (msg.sender || "client") === "admin" && !msg.isRead,
+        (msg) => (msg.sender || "client") === "admin" && !msg.isRead
       );
 
       if (activePage === "messages" && unreadAdminMessages.length > 0) {
         await API.put("/client/messages/read");
 
         refreshedMessages = refreshedMessages.map((msg) =>
-          (msg.sender || "client") === "admin" ? { ...msg, isRead: true } : msg,
+          (msg.sender || "client") === "admin" ? { ...msg, isRead: true } : msg
         );
 
         setMessageNotifications(0);
@@ -232,28 +258,46 @@ export default function UserProfile() {
         const paymentsRes = await API.get("/client/payments");
         const messagesRes = await API.get("/client/messages");
 
-        const profileData = normalizeUser(profileRes.data || storedUser);
+        const profileData = normalizeUser({
+          ...storedUser,
+          ...(profileRes.data || {}),
+          avatar:
+            profileRes.data?.avatar ||
+            profileRes.data?.profileImage ||
+            storedUser.avatar ||
+            storedUser.profileImage ||
+            "",
+          profileImage:
+            profileRes.data?.profileImage ||
+            profileRes.data?.avatar ||
+            storedUser.profileImage ||
+            storedUser.avatar ||
+            "",
+        });
+
         const clientMessages = messagesRes.data || [];
 
         const adminBookings = getAdminCreatedBookingsForClient(
-          profileData.email,
+          profileData.email
         );
 
         const finalBookings = mergeBookings(
           bookingsRes.data || [],
-          adminBookings,
+          adminBookings
         );
 
         setUser(profileData);
         setEditForm(profileData);
+        saveStoredUser(profileData);
+
         setBookings(finalBookings);
         setPayments(paymentsRes.data || []);
         setMessages(clientMessages);
 
         setMessageNotifications(
           clientMessages.filter(
-            (msg) => (msg.sender || "client") === "admin" && !msg.isRead,
-          ).length,
+            (msg) => (msg.sender || "client") === "admin" && !msg.isRead
+          ).length
         );
       } catch (err) {
         console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
@@ -261,11 +305,13 @@ export default function UserProfile() {
         const fallbackUser = normalizeUser(storedUser);
 
         const adminBookings = getAdminCreatedBookingsForClient(
-          fallbackUser.email,
+          fallbackUser.email
         );
 
         setUser(fallbackUser);
         setEditForm(fallbackUser);
+        saveStoredUser(fallbackUser);
+
         setBookings(adminBookings);
         setPayments([]);
         setMessages([]);
@@ -283,7 +329,7 @@ export default function UserProfile() {
       const adminBookings = getAdminCreatedBookingsForClient(user.email);
 
       setBookings((prevBookings) =>
-        mergeBookings(prevBookings || [], adminBookings),
+        mergeBookings(prevBookings || [], adminBookings)
       );
     };
 
@@ -309,7 +355,7 @@ export default function UserProfile() {
       } catch (err) {
         console.log(
           "Client message notification error:",
-          err.response?.data || err.message,
+          err.response?.data || err.message
         );
       }
     };
@@ -332,15 +378,15 @@ export default function UserProfile() {
           prevMessages.map((msg) =>
             (msg.sender || "client") === "admin"
               ? { ...msg, isRead: true }
-              : msg,
-          ),
+              : msg
+          )
         );
 
         setMessageNotifications(0);
       } catch (err) {
         console.log(
           "Client mark messages read error:",
-          err.response?.data || err.message,
+          err.response?.data || err.message
         );
       }
     };
@@ -356,22 +402,46 @@ export default function UserProfile() {
         phone: editForm.phone,
         city: editForm.city,
         country: editForm.country,
-        avatar: editForm.avatar,
+        avatar: editForm.avatar || editForm.profileImage || "",
+        profileImage: editForm.profileImage || editForm.avatar || "",
       });
 
       const updatedUser = normalizeUser({
+        ...user,
+        ...editForm,
         ...res.data,
         email: res.data?.email || user.email,
         role: res.data?.role || user.role || "user",
+        avatar:
+          res.data?.avatar ||
+          res.data?.profileImage ||
+          editForm.avatar ||
+          editForm.profileImage ||
+          user.avatar ||
+          "",
+        profileImage:
+          res.data?.profileImage ||
+          res.data?.avatar ||
+          editForm.profileImage ||
+          editForm.avatar ||
+          user.profileImage ||
+          "",
       });
 
       setUser(updatedUser);
       setEditForm(updatedUser);
+      saveStoredUser(updatedUser);
+
+      window.dispatchEvent(
+        new CustomEvent("profilePhotoUpdated", {
+          detail: updatedUser,
+        })
+      );
 
       const adminBookings = getAdminCreatedBookingsForClient(updatedUser.email);
 
       setBookings((prevBookings) =>
-        mergeBookings(prevBookings || [], adminBookings),
+        mergeBookings(prevBookings || [], adminBookings)
       );
 
       setShowEdit(false);
@@ -381,7 +451,11 @@ export default function UserProfile() {
   };
 
   const handleChangePassword = async () => {
-    if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+    if (
+      !passwordForm.currentPassword ||
+      !passwordForm.newPassword ||
+      !passwordForm.confirmPassword
+    ) {
       alert("Please fill all password fields");
       return;
     }
@@ -434,12 +508,25 @@ export default function UserProfile() {
     const reader = new FileReader();
 
     reader.onloadend = async () => {
-      try {
-        const updatedUser = {
-          ...user,
-          avatar: reader.result,
-        };
+      const imageBase64 = reader.result;
 
+      const updatedUser = normalizeUser({
+        ...user,
+        avatar: imageBase64,
+        profileImage: imageBase64,
+      });
+
+      setUser(updatedUser);
+      setEditForm(updatedUser);
+      saveStoredUser(updatedUser);
+
+      window.dispatchEvent(
+        new CustomEvent("profilePhotoUpdated", {
+          detail: updatedUser,
+        })
+      );
+
+      try {
         await API.put("/client/profile", {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
@@ -447,18 +534,57 @@ export default function UserProfile() {
           city: updatedUser.city,
           country: updatedUser.country,
           avatar: updatedUser.avatar,
+          profileImage: updatedUser.profileImage,
         });
-
-        setUser(updatedUser);
-        setEditForm(updatedUser);
       } catch (err) {
         console.log("Photo update failed:", err.response?.data || err.message);
-        alert("Photo update failed");
+        alert("Photo saved locally, but backend update failed");
       }
     };
 
     reader.readAsDataURL(file);
     e.target.value = "";
+  };
+
+  const handleRemovePhoto = () => {
+    setShowRemovePhotoConfirm(true);
+  };
+
+  const confirmRemovePhoto = async () => {
+    const updatedUser = normalizeUser({
+      ...user,
+      avatar: "",
+      profileImage: "",
+      photo: "",
+      image: "",
+    });
+
+    setUser(updatedUser);
+    setEditForm(updatedUser);
+    saveStoredUser(updatedUser);
+
+    window.dispatchEvent(
+      new CustomEvent("profilePhotoUpdated", {
+        detail: updatedUser,
+      })
+    );
+
+    setShowRemovePhotoConfirm(false);
+
+    try {
+      await API.put("/client/profile", {
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        phone: updatedUser.phone,
+        city: updatedUser.city,
+        country: updatedUser.country,
+        avatar: "",
+        profileImage: "",
+      });
+    } catch (err) {
+      console.log("Remove photo failed:", err.response?.data || err.message);
+      alert("Photo removed locally, but backend update failed");
+    }
   };
 
   const logout = async () => {
@@ -472,6 +598,8 @@ export default function UserProfile() {
     localStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("token");
+
+    window.dispatchEvent(new Event("authChanged"));
 
     window.location.href = "/login";
   };
@@ -532,13 +660,20 @@ export default function UserProfile() {
         />
 
         <main className="client-content">
-          <UserHero user={user} onPhotoChange={handlePhotoChange} />
+          <UserHero
+            user={user}
+            onPhotoChange={handlePhotoChange}
+            onRemovePhoto={handleRemovePhoto}
+          />
+
           {renderPage()}
         </main>
       </div>
+
       <div className="client-profile-footer">
         <Footer />
       </div>
+
       {showEdit && (
         <EditProfilePopup
           editForm={editForm}
@@ -558,6 +693,39 @@ export default function UserProfile() {
       )}
 
       {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
+
+      {showRemovePhotoConfirm && (
+        <div className="photo-confirm-overlay">
+          <div className="photo-confirm-popup">
+            <div className="photo-confirm-icon">!</div>
+
+            <h2>Remove Profile Photo?</h2>
+
+            <p>
+              Are you sure you want to remove your profile photo? You can upload
+              a new one anytime.
+            </p>
+
+            <div className="photo-confirm-actions">
+              <button
+                type="button"
+                className="photo-confirm-delete"
+                onClick={confirmRemovePhoto}
+              >
+                Remove photo
+              </button>
+
+              <button
+                type="button"
+                className="photo-confirm-cancel"
+                onClick={() => setShowRemovePhotoConfirm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
