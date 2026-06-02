@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import API from "../../api";
 import "./Admin.css";
 
@@ -10,17 +11,32 @@ const DEFAULT_AGENCY = {
   instagram: "",
 };
 
+const DEFAULT_NOTICE = {
+  type: "",
+  message: "",
+};
+
+const DEFAULT_PASSWORD = {
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
+
+const DEFAULT_SHOW_PASSWORDS = {
+  oldPassword: false,
+  newPassword: false,
+  confirmPassword: false,
+};
+
 export default function AdminSettings() {
   const [activePopup, setActivePopup] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
+  const [notice, setNotice] = useState(DEFAULT_NOTICE);
   const [agency, setAgency] = useState(DEFAULT_AGENCY);
-
-  const [password, setPassword] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const [password, setPassword] = useState(DEFAULT_PASSWORD);
+  const [showPasswords, setShowPasswords] = useState(DEFAULT_SHOW_PASSWORDS);
 
   const [contacts, setContacts] = useState([]);
   const [newContact, setNewContact] = useState("");
@@ -28,6 +44,43 @@ export default function AdminSettings() {
   useEffect(() => {
     loadSettings();
   }, []);
+
+  const showNotice = (type, message) => {
+    setNotice({ type, message });
+  };
+
+  const clearNotice = () => {
+    setNotice(DEFAULT_NOTICE);
+  };
+
+  const resetPasswordForm = () => {
+    setPassword(DEFAULT_PASSWORD);
+    setShowPasswords(DEFAULT_SHOW_PASSWORDS);
+  };
+
+  const openPopup = (popupName) => {
+    clearNotice();
+
+    if (popupName === "password") {
+      resetPasswordForm();
+    }
+
+    setActivePopup(popupName);
+  };
+
+  const closePopup = () => {
+    setActivePopup(null);
+    clearNotice();
+    setActionLoading(false);
+    resetPasswordForm();
+  };
+
+  const togglePassword = (field) => {
+    setShowPasswords((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   const loadSettings = async () => {
     try {
@@ -52,62 +105,114 @@ export default function AdminSettings() {
   };
 
   const saveAgency = async () => {
+    clearNotice();
+
+    if (!agency.name.trim()) {
+      showNotice("error", "Please enter agency name.");
+      return;
+    }
+
+    if (!agency.email.trim()) {
+      showNotice("error", "Please enter agency email.");
+      return;
+    }
+
     try {
+      setActionLoading(true);
+
       await API.put("/admin/settings/agency", agency);
-      alert("Agency information updated successfully");
-      setActivePopup(null);
+
+      showNotice("success", "Agency information updated successfully.");
+
+      setTimeout(() => {
+        closePopup();
+      }, 1000);
     } catch (error) {
-      alert(error.response?.data?.error || "Unable to update agency");
+      showNotice(
+        "error",
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Unable to update agency information."
+      );
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const savePassword = async () => {
-    if (!password.oldPassword) {
-      alert("Please enter your current password");
+    clearNotice();
+
+    if (!password.oldPassword.trim()) {
+      showNotice("error", "Please enter your current password.");
       return;
     }
 
-    if (!password.newPassword) {
-      alert("Please enter a new password");
+    if (!password.newPassword.trim()) {
+      showNotice("error", "Please enter a new password.");
+      return;
+    }
+
+    if (password.newPassword.length < 6) {
+      showNotice("error", "New password must contain at least 6 characters.");
       return;
     }
 
     if (password.newPassword !== password.confirmPassword) {
-      alert("Passwords do not match");
+      showNotice("error", "New password and confirmation do not match.");
       return;
     }
 
     try {
+      setActionLoading(true);
+
       await API.put("/admin/settings/password", password);
 
-      alert("Password updated successfully");
+      showNotice("success", "Password updated successfully.");
 
-      setPassword({
-        oldPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      resetPasswordForm();
 
-      setActivePopup(null);
+      setTimeout(() => {
+        closePopup();
+      }, 1200);
     } catch (error) {
-      alert(error.response?.data?.error || "Unable to update password");
+      showNotice(
+        "error",
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Current password is incorrect."
+      );
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const addContact = () => {
+    clearNotice();
+
     const phone = newContact.trim();
 
-    if (!phone) return;
+    if (!phone) {
+      showNotice("error", "Please enter a phone number.");
+      return;
+    }
 
     setContacts((prev) => [...prev, phone]);
     setNewContact("");
+    showNotice("success", "Phone number added. Click Save Contacts to confirm.");
   };
 
   const removeContact = (index) => {
+    clearNotice();
     setContacts((prev) => prev.filter((_, i) => i !== index));
+    showNotice(
+      "success",
+      "Phone number removed. Click Save Contacts to confirm."
+    );
   };
 
   const updateContact = (index, value) => {
+    clearNotice();
+
     setContacts((prev) => {
       const updated = [...prev];
       updated[index] = value;
@@ -116,7 +221,11 @@ export default function AdminSettings() {
   };
 
   const saveContacts = async () => {
+    clearNotice();
+
     try {
+      setActionLoading(true);
+
       const cleanContacts = contacts
         .map((phone) => phone.trim())
         .filter((phone) => phone !== "");
@@ -126,15 +235,59 @@ export default function AdminSettings() {
       });
 
       setContacts(cleanContacts);
-      alert("Contacts updated successfully");
-      setActivePopup(null);
+
+      showNotice("success", "Contact numbers updated successfully.");
+
+      setTimeout(() => {
+        closePopup();
+      }, 1000);
     } catch (error) {
-      alert(error.response?.data?.error || "Unable to update contacts");
+      showNotice(
+        "error",
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Unable to update contact numbers."
+      );
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const closePopup = () => {
-    setActivePopup(null);
+  const renderNotice = () => {
+    if (!notice.message) return null;
+
+    return (
+      <div className={`settings-notice ${notice.type}`}>
+        {notice.message}
+      </div>
+    );
+  };
+
+  const renderPasswordInput = (field, placeholder) => {
+    return (
+      <div className="settings-password-field">
+        <input
+          type={showPasswords[field] ? "text" : "password"}
+          placeholder={placeholder}
+          value={password[field]}
+          onChange={(e) =>
+            setPassword({
+              ...password,
+              [field]: e.target.value,
+            })
+          }
+        />
+
+        <button
+          type="button"
+          className="settings-eye-btn"
+          onClick={() => togglePassword(field)}
+          aria-label={showPasswords[field] ? "Hide password" : "Show password"}
+        >
+          {showPasswords[field] ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -154,7 +307,7 @@ export default function AdminSettings() {
             <button
               type="button"
               className="settings-card-pro"
-              onClick={() => setActivePopup("agency")}
+              onClick={() => openPopup("agency")}
             >
               <span className="settings-icon-pro">🏢</span>
 
@@ -171,7 +324,7 @@ export default function AdminSettings() {
             <button
               type="button"
               className="settings-card-pro"
-              onClick={() => setActivePopup("password")}
+              onClick={() => openPopup("password")}
             >
               <span className="settings-icon-pro">🔒</span>
 
@@ -186,7 +339,7 @@ export default function AdminSettings() {
             <button
               type="button"
               className="settings-card-pro"
-              onClick={() => setActivePopup("contacts")}
+              onClick={() => openPopup("contacts")}
             >
               <span className="settings-icon-pro">☎️</span>
 
@@ -208,28 +361,27 @@ export default function AdminSettings() {
               type="button"
               className="settings-popup-close"
               onClick={closePopup}
+              disabled={actionLoading}
             >
               ×
             </button>
 
             <h2>Agency Information</h2>
 
+            {renderNotice()}
+
             <input
               type="text"
               placeholder="Agency Name"
               value={agency.name}
-              onChange={(e) =>
-                setAgency({ ...agency, name: e.target.value })
-              }
+              onChange={(e) => setAgency({ ...agency, name: e.target.value })}
             />
 
             <input
               type="email"
               placeholder="Agency Email"
               value={agency.email}
-              onChange={(e) =>
-                setAgency({ ...agency, email: e.target.value })
-              }
+              onChange={(e) => setAgency({ ...agency, email: e.target.value })}
             />
 
             <input
@@ -260,14 +412,19 @@ export default function AdminSettings() {
             />
 
             <div className="settings-popup-actions">
-              <button type="button" onClick={saveAgency}>
-                Save Changes
+              <button
+                type="button"
+                onClick={saveAgency}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Saving..." : "Save Changes"}
               </button>
 
               <button
                 type="button"
                 className="settings-cancel-btn"
                 onClick={closePopup}
+                disabled={actionLoading}
               >
                 Cancel
               </button>
@@ -283,57 +440,33 @@ export default function AdminSettings() {
               type="button"
               className="settings-popup-close"
               onClick={closePopup}
+              disabled={actionLoading}
             >
               ×
             </button>
 
             <h2>Change Admin Password</h2>
 
-            <input
-              type="password"
-              placeholder="Current Password"
-              value={password.oldPassword}
-              onChange={(e) =>
-                setPassword({
-                  ...password,
-                  oldPassword: e.target.value,
-                })
-              }
-            />
+            {renderNotice()}
 
-            <input
-              type="password"
-              placeholder="New Password"
-              value={password.newPassword}
-              onChange={(e) =>
-                setPassword({
-                  ...password,
-                  newPassword: e.target.value,
-                })
-              }
-            />
-
-            <input
-              type="password"
-              placeholder="Confirm New Password"
-              value={password.confirmPassword}
-              onChange={(e) =>
-                setPassword({
-                  ...password,
-                  confirmPassword: e.target.value,
-                })
-              }
-            />
+            {renderPasswordInput("oldPassword", "Current Password")}
+            {renderPasswordInput("newPassword", "New Password")}
+            {renderPasswordInput("confirmPassword", "Confirm New Password")}
 
             <div className="settings-popup-actions">
-              <button type="button" onClick={savePassword}>
-                Update Password
+              <button
+                type="button"
+                onClick={savePassword}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Updating..." : "Update Password"}
               </button>
 
               <button
                 type="button"
                 className="settings-cancel-btn"
                 onClick={closePopup}
+                disabled={actionLoading}
               >
                 Cancel
               </button>
@@ -349,11 +482,14 @@ export default function AdminSettings() {
               type="button"
               className="settings-popup-close"
               onClick={closePopup}
+              disabled={actionLoading}
             >
               ×
             </button>
 
             <h2>Contact Numbers</h2>
+
+            {renderNotice()}
 
             <div className="contact-number-list">
               {contacts.length > 0 ? (
@@ -369,6 +505,7 @@ export default function AdminSettings() {
                       type="button"
                       className="remove-contact-btn"
                       onClick={() => removeContact(index)}
+                      disabled={actionLoading}
                     >
                       Remove
                     </button>
@@ -391,20 +528,26 @@ export default function AdminSettings() {
                 type="button"
                 className="add-contact-btn"
                 onClick={addContact}
+                disabled={actionLoading}
               >
                 + Add New Phone Number
               </button>
             </div>
 
             <div className="settings-popup-actions">
-              <button type="button" onClick={saveContacts}>
-                Save Contacts
+              <button
+                type="button"
+                onClick={saveContacts}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Saving..." : "Save Contacts"}
               </button>
 
               <button
                 type="button"
                 className="settings-cancel-btn"
                 onClick={closePopup}
+                disabled={actionLoading}
               >
                 Cancel
               </button>

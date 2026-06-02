@@ -14,6 +14,7 @@ import FlightComingSoon from "./page/flight/flightcomingsoon";
 import Admin from "./page/admin/Admin";
 import AdminLayout from "./page/admin/AdminLayout";
 import AdminReviews from "./page/admin/AdminReviews";
+import CreateReservation from "./page/admin/CreateReservation";
 
 import UserProfile from "./page/client/profile/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -49,12 +50,24 @@ function App() {
           }
         />
 
-        {/* ADMIN DASHBOARD */}
+        {/* ADMIN */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute requiredRole="admin">
               <Admin />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN CREATE RESERVATION */}
+        <Route
+          path="/admin/create-reservation"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <CreateReservation />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
@@ -74,6 +87,7 @@ function App() {
         {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
       <HomeChatbot />
     </BrowserRouter>
   );

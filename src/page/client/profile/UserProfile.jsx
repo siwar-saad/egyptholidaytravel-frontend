@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import API from "../../../api";
 import "./UserProfile.css";
 import Navbar from "../../../components/navbar";
+import Footer from "../../../components/footer";
 
 import ProfileSidebar from "./ProfileSidebar";
 import UserHero from "./UserHero";
@@ -14,6 +15,152 @@ import Settings from "./Settings";
 import EditProfilePopup from "./EditProfilePopup";
 import ChangePasswordPopup from "./ChangePasswordPopup";
 import ContactPopup from "./ContactPopup";
+
+const ADMIN_CREATED_RESERVATIONS_KEY = "adminCreatedReservations";
+
+const safeParse = (value, fallback) => {
+  try {
+    return JSON.parse(value) || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const getStoredUser = () => {
+  return safeParse(
+    localStorage.getItem("user") || sessionStorage.getItem("user"),
+    null,
+  );
+};
+
+const normalizeUser = (data = {}) => {
+  return {
+    ...data,
+    firstName: data?.firstName || "",
+    lastName: data?.lastName || "",
+    name:
+      data?.name ||
+      `${data?.firstName || ""} ${data?.lastName || ""}`.trim() ||
+      "Client",
+    email: data?.email || "",
+    phone: data?.phone || "No phone",
+    city: data?.city || "Mansoura",
+    country: data?.country || "Egypt",
+    avatar: data?.avatar || "",
+    role: data?.role || "user",
+  };
+};
+
+const normalizeAdminReservation = (reservation) => {
+  const id = reservation?._id || reservation?.id || `admin-${Date.now()}`;
+  const type =
+    reservation?.type || (reservation?.hotelName ? "hotel" : "package");
+
+  const packageName =
+    reservation?.packageName ||
+    reservation?.trip ||
+    reservation?.title ||
+    reservation?.name ||
+    "";
+
+  const hotelName =
+    reservation?.hotelName ||
+    reservation?.hotel ||
+    reservation?.title ||
+    reservation?.name ||
+    "";
+
+  const travelDate =
+    reservation?.travelDate ||
+    reservation?.date ||
+    reservation?.bookingDate ||
+    reservation?.createdAt ||
+    "";
+
+  return {
+    ...reservation,
+
+    _id: id,
+    id,
+
+    type,
+
+    clientName: reservation?.clientName || "",
+    clientEmail: reservation?.clientEmail || "",
+    clientPhone: reservation?.clientPhone || "",
+
+    packageName: type === "package" ? packageName : "",
+    trip: type === "package" ? packageName : "",
+    hotelName: type === "hotel" ? hotelName : "",
+
+    name: type === "hotel" ? hotelName : packageName,
+    title: type === "hotel" ? hotelName : packageName,
+
+    travelDate,
+    date: travelDate,
+    bookingDate: travelDate,
+
+    travelers: reservation?.travelers || reservation?.numberOfTravelers || 1,
+    numberOfTravelers:
+      reservation?.numberOfTravelers || reservation?.travelers || 1,
+
+    roomType: reservation?.roomType || "Double Room",
+
+    notes: reservation?.notes || reservation?.note || "",
+    note: reservation?.note || reservation?.notes || "",
+
+    status: reservation?.status || "confirmed",
+
+    createdBy: "admin",
+    adminName: reservation?.adminName || "Admin EgyptHoliday",
+    adminEmail: reservation?.adminEmail || "",
+    createdAt: reservation?.createdAt || new Date().toISOString(),
+
+    isAdminCreated: true,
+  };
+};
+
+const getAdminCreatedBookingsForClient = (email) => {
+  if (!email) return [];
+
+  const allReservations = safeParse(
+    localStorage.getItem(ADMIN_CREATED_RESERVATIONS_KEY),
+    [],
+  );
+
+  return allReservations
+    .filter(
+      (reservation) =>
+        reservation?.clientEmail?.toLowerCase() === email.toLowerCase(),
+    )
+    .map(normalizeAdminReservation);
+};
+
+const mergeBookings = (apiBookings = [], adminBookings = []) => {
+  const normalApiBookings = Array.isArray(apiBookings) ? apiBookings : [];
+  const normalAdminBookings = Array.isArray(adminBookings) ? adminBookings : [];
+
+  const withoutOldAdminBookings = normalApiBookings.filter(
+    (booking) => booking?.createdBy !== "admin" && !booking?.isAdminCreated,
+  );
+
+  const merged = [...normalAdminBookings, ...withoutOldAdminBookings];
+
+  const seen = new Set();
+
+  return merged.filter((booking) => {
+    const key = String(
+      booking?._id ||
+        booking?.id ||
+        `${booking?.clientEmail}-${booking?.type}-${booking?.travelDate}`,
+    );
+
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
+};
 
 export default function UserProfile() {
   const [activePage, setActivePage] = useState("dashboard");
@@ -56,16 +203,14 @@ export default function UserProfile() {
       let refreshedMessages = res.data || [];
 
       const unreadAdminMessages = refreshedMessages.filter(
-        (msg) => (msg.sender || "client") === "admin" && !msg.isRead
+        (msg) => (msg.sender || "client") === "admin" && !msg.isRead,
       );
 
       if (activePage === "messages" && unreadAdminMessages.length > 0) {
         await API.put("/client/messages/read");
 
         refreshedMessages = refreshedMessages.map((msg) =>
-          (msg.sender || "client") === "admin"
-            ? { ...msg, isRead: true }
-            : msg
+          (msg.sender || "client") === "admin" ? { ...msg, isRead: true } : msg,
         );
 
         setMessageNotifications(0);
@@ -79,45 +224,77 @@ export default function UserProfile() {
 
   useEffect(() => {
     const loadClientData = async () => {
+      const storedUser = normalizeUser(getStoredUser() || {});
+
       try {
         const profileRes = await API.get("/client/profile");
         const bookingsRes = await API.get("/client/bookings");
         const paymentsRes = await API.get("/client/payments");
         const messagesRes = await API.get("/client/messages");
 
-        const profileData = {
-          ...profileRes.data,
-          firstName: profileRes.data?.firstName || "",
-          lastName: profileRes.data?.lastName || "",
-          name: profileRes.data?.name || "Client",
-          email: profileRes.data?.email || "",
-          phone: profileRes.data?.phone || "No phone",
-          city: profileRes.data?.city || "Mansoura",
-          country: profileRes.data?.country || "Egypt",
-          avatar: profileRes.data?.avatar || "",
-          role: profileRes.data?.role || "user",
-        };
-
+        const profileData = normalizeUser(profileRes.data || storedUser);
         const clientMessages = messagesRes.data || [];
+
+        const adminBookings = getAdminCreatedBookingsForClient(
+          profileData.email,
+        );
+
+        const finalBookings = mergeBookings(
+          bookingsRes.data || [],
+          adminBookings,
+        );
 
         setUser(profileData);
         setEditForm(profileData);
-        setBookings(bookingsRes.data || []);
+        setBookings(finalBookings);
         setPayments(paymentsRes.data || []);
         setMessages(clientMessages);
 
         setMessageNotifications(
           clientMessages.filter(
-            (msg) => (msg.sender || "client") === "admin" && !msg.isRead
-          ).length
+            (msg) => (msg.sender || "client") === "admin" && !msg.isRead,
+          ).length,
         );
       } catch (err) {
         console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
+
+        const fallbackUser = normalizeUser(storedUser);
+
+        const adminBookings = getAdminCreatedBookingsForClient(
+          fallbackUser.email,
+        );
+
+        setUser(fallbackUser);
+        setEditForm(fallbackUser);
+        setBookings(adminBookings);
+        setPayments([]);
+        setMessages([]);
+        setMessageNotifications(0);
       }
     };
 
     loadClientData();
   }, []);
+
+  useEffect(() => {
+    if (!user?.email) return undefined;
+
+    const refreshAdminCreatedBookings = () => {
+      const adminBookings = getAdminCreatedBookingsForClient(user.email);
+
+      setBookings((prevBookings) =>
+        mergeBookings(prevBookings || [], adminBookings),
+      );
+    };
+
+    refreshAdminCreatedBookings();
+
+    window.addEventListener("storage", refreshAdminCreatedBookings);
+
+    return () => {
+      window.removeEventListener("storage", refreshAdminCreatedBookings);
+    };
+  }, [user.email]);
 
   useEffect(() => {
     if (activePage === "messages") {
@@ -132,7 +309,7 @@ export default function UserProfile() {
       } catch (err) {
         console.log(
           "Client message notification error:",
-          err.response?.data || err.message
+          err.response?.data || err.message,
         );
       }
     };
@@ -155,15 +332,15 @@ export default function UserProfile() {
           prevMessages.map((msg) =>
             (msg.sender || "client") === "admin"
               ? { ...msg, isRead: true }
-              : msg
-          )
+              : msg,
+          ),
         );
 
         setMessageNotifications(0);
       } catch (err) {
         console.log(
           "Client mark messages read error:",
-          err.response?.data || err.message
+          err.response?.data || err.message,
         );
       }
     };
@@ -182,14 +359,21 @@ export default function UserProfile() {
         avatar: editForm.avatar,
       });
 
-      const updatedUser = {
+      const updatedUser = normalizeUser({
         ...res.data,
         email: res.data?.email || user.email,
         role: res.data?.role || user.role || "user",
-      };
+      });
 
       setUser(updatedUser);
       setEditForm(updatedUser);
+
+      const adminBookings = getAdminCreatedBookingsForClient(updatedUser.email);
+
+      setBookings((prevBookings) =>
+        mergeBookings(prevBookings || [], adminBookings),
+      );
+
       setShowEdit(false);
     } catch (err) {
       alert(err.response?.data?.error || err.message || "Update profile error");
@@ -284,6 +468,11 @@ export default function UserProfile() {
       console.log("Logout error:", err.response?.data || err.message);
     }
 
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+
     window.location.href = "/login";
   };
 
@@ -347,7 +536,9 @@ export default function UserProfile() {
           {renderPage()}
         </main>
       </div>
-
+      <div className="client-profile-footer">
+        <Footer />
+      </div>
       {showEdit && (
         <EditProfilePopup
           editForm={editForm}

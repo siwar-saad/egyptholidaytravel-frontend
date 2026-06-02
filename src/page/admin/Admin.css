@@ -3527,3 +3527,223 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+.users-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.users-head-actions .add-admin-btn {
+  background: #5f3518;
+}
+
+.user-tabs {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.user-tabs button {
+  height: 52px;
+  border: none;
+  border-radius: 16px;
+  background: #f7efe8;
+  color: #8b4d1f;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: 0.25s ease;
+}
+
+.user-tabs button.active {
+  background: #8b4d1f;
+  color: #fff;
+  box-shadow: 0 12px 25px rgba(139, 77, 31, 0.18);
+}
+
+.user-tabs button:hover {
+  transform: translateY(-2px);
+}
+
+.user-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user-role-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.user-role-badge.client {
+  background: #f7efe8;
+  color: #8b4d1f;
+}
+
+.user-role-badge.admin {
+  background: #fff1d8;
+  color: #9a5a10;
+}
+
+.form-role-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-role-box label {
+  font-size: 14px;
+  font-weight: 800;
+  color: #3f2a1d;
+}
+
+.form-role-box select {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #ead8c8;
+  border-radius: 14px;
+  padding: 0 15px;
+  font-size: 15px;
+  outline: none;
+  background: #fff;
+  color: #2c2c2c;
+}
+
+.form-role-box select:focus {
+  border-color: #a87446;
+  box-shadow: 0 0 0 3px rgba(168, 116, 70, 0.12);
+}
+
+@media (max-width: 700px) {
+  .users-head-actions {
+    width: 100%;
+  }
+
+  .users-head-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .user-tabs {
+    grid-template-columns: 1fr;
+  }
+}
+.settings-notice {
+  width: 100%;
+  padding: 13px 15px;
+  margin: 10px 0 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.settings-notice.error {
+  background: #fff1f1;
+  color: #b42318;
+  border: 1px solid #ffd1d1;
+}
+
+.settings-notice.success {
+  background: #ecfdf3;
+  color: #067647;
+  border: 1px solid #b7ebc6;
+}
+
+.settings-popup-actions button:disabled,
+.add-contact-btn:disabled,
+.remove-contact-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+/* PASSWORD FIELDS WITH EYE ICON */
+.settings-password-field {
+  position: relative !important;
+  width: 100% !important;
+  margin-bottom: 14px !important;
+}
+
+.settings-password-field input {
+  width: 100% !important;
+  height: 48px !important;
+  padding: 0 52px 0 16px !important;
+  border: 1px solid #ead8c8 !important;
+  border-radius: 14px !important;
+  background: #fbf7f2 !important;
+  color: #2b1b12 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+.settings-password-field input::placeholder {
+  color: #9b8b80 !important;
+  font-weight: 700 !important;
+}
+
+.settings-password-field input:focus {
+  border-color: #8b4d1f !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(139, 77, 31, 0.12) !important;
+}
+
+.settings-password-field .settings-eye-btn {
+  position: absolute !important;
+  top: 50% !important;
+  right: 14px !important;
+  transform: translateY(-50%) !important;
+
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border: none !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: #8b4d1f !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  cursor: pointer !important;
+  box-shadow: none !important;
+  z-index: 5 !important;
+}
+
+.settings-password-field .settings-eye-btn:hover {
+  background: #f0e4da !important;
+  color: #5f3518 !important;
+  transform: translateY(-50%) !important;
+}
+
+.settings-password-field .settings-eye-btn svg {
+  font-size: 17px !important;
+  display: block !important;
+}
+
+/* PASSWORD POPUP CLEAN LOOK */
+.settings-popup h2 {
+  margin-bottom: 22px !important;
+}
+
+.settings-popup .settings-popup-actions {
+  margin-top: 24px !important;
+}

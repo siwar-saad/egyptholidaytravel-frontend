@@ -1685,3 +1685,120 @@
 .package-booking-summary {
   background-color: #ffffff !important;
 }
+.booking-locked-input {
+  background: #f7efe8 !important;
+  color: #6b4b35 !important;
+  cursor: not-allowed !important;
+  border-color: #ead8c8 !important;
+}
+
+.booking-locked-input:focus {
+  box-shadow: none !important;
+  border-color: #ead8c8 !important;
+}
+
+.booking-locked-country {
+  opacity: 0.88;
+}
+
+.booking-locked-country button {
+  cursor: not-allowed !important;
+  background: #f7efe8 !important;
+}
+
+.booking-locked-country svg {
+  opacity: 0.35;
+}
+
+.booking-locked-note {
+  margin: 16px 0 8px;
+  padding: 13px 15px;
+  border-radius: 14px;
+  background: #f7efe8;
+  border: 1px solid #ead8c8;
+  color: #7a4a25;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+/* Keep booking popup close button visible while scrolling */
+.package-booking-box {
+  position: relative !important;
+  max-height: calc(100vh - 34px) !important;
+  overflow-y: auto !important;
+}
+
+.package-booking-close {
+  position: sticky !important;
+  top: 14px !important;
+  margin-left: auto !important;
+  margin-bottom: -10px !important;
+
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+
+  border: none !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  color: #2b1b12 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  cursor: pointer !important;
+  z-index: 999 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.package-booking-close:hover {
+  background: #f7efe8 !important;
+  color: #8b4d1f !important;
+  transform: scale(1.05) !important;
+}
+
+.package-booking-close svg {
+  font-size: 18px !important;
+}
+/* ================= NEW HILTON PACKAGES DETAILS ================= */
+
+.package-included-card {
+  margin-top: 22px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  box-shadow: 0 14px 34px rgba(147, 84, 38, 0.08);
+}
+
+.package-included-card h3 {
+  margin: 0 0 16px;
+  color: #935426;
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+}
+
+.package-included-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 11px;
+}
+
+.package-included-card li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #4f3c2e;
+  line-height: 1.55;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.package-included-card li svg {
+  color: #935426;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
