@@ -59,7 +59,7 @@ export default function EditProfilePopup({
         />
 
         <select
-          value={editForm.country || "France"}
+          value={editForm.country || ""}
           onChange={(e) =>
             setEditForm({ ...editForm, country: e.target.value })
           }

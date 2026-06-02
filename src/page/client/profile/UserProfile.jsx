@@ -24,8 +24,8 @@ export default function UserProfile() {
     name: "Client",
     email: "",
     phone: "No phone",
-    city: "Mansoura",
-    country: "Egypt",
+    city: "",
+    country: "",
     avatar: "",
     role: "user",
   });
@@ -81,9 +81,6 @@ export default function UserProfile() {
     const loadClientData = async () => {
       try {
         const profileRes = await API.get("/client/profile");
-        const bookingsRes = await API.get("/client/bookings");
-        const paymentsRes = await API.get("/client/payments");
-        const messagesRes = await API.get("/client/messages");
 
         const profileData = {
           ...profileRes.data,
@@ -92,18 +89,36 @@ export default function UserProfile() {
           name: profileRes.data?.name || "Client",
           email: profileRes.data?.email || "",
           phone: profileRes.data?.phone || "No phone",
-          city: profileRes.data?.city || "Mansoura",
-          country: profileRes.data?.country || "Egypt",
+          city: profileRes.data?.city || "",
+          country: profileRes.data?.country || "",
           avatar: profileRes.data?.avatar || "",
           role: profileRes.data?.role || "user",
         };
 
-        const clientMessages = messagesRes.data || [];
-
         setUser(profileData);
         setEditForm(profileData);
+      } catch (err) {
+        console.log("CLIENT PROFILE ERROR:", err.response?.data || err.message);
+      }
+
+      try {
+        const bookingsRes = await API.get("/client/mybookings");
         setBookings(bookingsRes.data || []);
+      } catch (err) {
+        console.log("CLIENT BOOKINGS ERROR:", err.response?.data || err.message);
+      }
+
+      try {
+        const paymentsRes = await API.get("/client/payments");
         setPayments(paymentsRes.data || []);
+      } catch (err) {
+        console.log("CLIENT PAYMENTS ERROR:", err.response?.data || err.message);
+      }
+
+      try {
+        const messagesRes = await API.get("/client/messages");
+        const clientMessages = messagesRes.data || [];
+
         setMessages(clientMessages);
 
         setMessageNotifications(
@@ -112,7 +127,7 @@ export default function UserProfile() {
           ).length
         );
       } catch (err) {
-        console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
+        console.log("CLIENT MESSAGES ERROR:", err.response?.data || err.message);
       }
     };
 
