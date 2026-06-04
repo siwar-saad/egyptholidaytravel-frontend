@@ -577,3 +577,13 @@
     padding: 10px !important;
   }
 }
+/* ================= HIDE LOGIN / SIGNUP ACTIONS IN CHATBOT ================= */
+
+.eht-actions button[title="Create Account"],
+.eht-actions button[title="Log In"] {
+  display: none !important;
+}
+
+.eht-client-card {
+  display: none !important;
+}

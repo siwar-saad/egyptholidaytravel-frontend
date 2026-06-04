@@ -31,9 +31,9 @@ import {
 
 const PACKAGES_DATA = [
   {
-    id: "cairo-hurghada-5",
-    name: "( Cairo – Hurghada ) 5 Nights",
-    backendName: "( Cairo – Hurghada ) 5 Nights",
+     id: "cairo-hurghada-5",
+     name: "( Cairo – Hurghada ) 5 Nights",
+     backendName: "( Cairo – Hurghada ) 5 Nights",
     route: "Cairo – Hurghada",
     duration: "5 Nights",
     transfer: "Round-trip transfer by Bus from Cairo to Hurghada",
@@ -1118,9 +1118,6 @@ export default function Packages() {
                   </div>
 
                   <div className="package-card-body">
-                    <span className="package-back-name">
-                      Back Name: {item.backendName}
-                    </span>
 
                     <h3>{item.name}</h3>
 

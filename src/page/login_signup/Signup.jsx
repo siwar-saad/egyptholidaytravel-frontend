@@ -1,10 +1,9 @@
+import "./Login.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaChevronDown, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaChevronDown, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
 import API from "../../api";
-import "./Login.css";
-
 import pyramid from "../../assets/image/pyramid.webp";
 import passport from "../../assets/image/passport.webp";
 import visa from "../../assets/image/visa.webp";
@@ -12,52 +11,25 @@ import login from "../../assets/image/login.png";
 import Navbar from "../../components/navbar";
 
 const COUNTRIES = [
-  {
-    flag: "https://flagcdn.com/fr.svg",
-    name: "France",
-    dialCode: "+33",
-  },
-  {
-    flag: "https://flagcdn.com/de.svg",
-    name: "Germany",
-    dialCode: "+49",
-  },
-  {
-    flag: "https://flagcdn.com/lu.svg",
-    name: "Luxembourg",
-    dialCode: "+352",
-  },
-  {
-    flag: "https://flagcdn.com/tr.svg",
-    name: "Turkey",
-    dialCode: "+90",
-  },
-  {
-    flag: "https://flagcdn.com/tn.svg",
-    name: "Tunisia",
-    dialCode: "+216",
-  },
-  {
-    flag: "https://flagcdn.com/ma.svg",
-    name: "Morocco",
-    dialCode: "+212",
-  },
-  {
-    flag: "https://flagcdn.com/ba.svg",
-    name: "Bosnia",
-    dialCode: "+387",
-  },
+  { flag: "https://flagcdn.com/fr.svg", name: "France", dialCode: "+33" },
+  { flag: "https://flagcdn.com/de.svg", name: "Germany", dialCode: "+49" },
+  { flag: "https://flagcdn.com/lu.svg", name: "Luxembourg", dialCode: "+352" },
+  { flag: "https://flagcdn.com/tr.svg", name: "Turkey", dialCode: "+90" },
+  { flag: "https://flagcdn.com/tn.svg", name: "Tunisia", dialCode: "+216" },
+  { flag: "https://flagcdn.com/ma.svg", name: "Morocco", dialCode: "+212" },
+  { flag: "https://flagcdn.com/ba.svg", name: "Bosnia", dialCode: "+387" },
 ];
 
 export default function Signup() {
   const navigate = useNavigate();
 
   const [checkingAuth, setCheckingAuth] = useState(true);
-
   const [showSuccess, setShowSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [openCountry, setOpenCountry] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+
+  const [openCountry, setOpenCountry] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
 
   const [firstName, setFirstName] = useState("");
@@ -67,11 +39,17 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [phone, setPhone] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+
+  const [showCodePopup, setShowCodePopup] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [codeError, setCodeError] = useState("");
+  const [codeMessage, setCodeMessage] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -104,7 +82,7 @@ export default function Signup() {
           return;
         }
       } catch {
-        // User is not logged in, keep signup page open
+        // User is not logged in
       } finally {
         if (mounted) {
           setCheckingAuth(false);
@@ -124,48 +102,114 @@ export default function Signup() {
     setOpenCountry(false);
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setError("");
-
+  const validateForm = () => {
     if (!firstName.trim() || !lastName.trim()) {
       setError("Please enter your first and last name.");
-      return;
+      return false;
     }
 
     if (!email.trim()) {
-      setError("Please enter your email.");
-      return;
+      setError("Please enter your email address.");
+      return false;
     }
 
     if (!password || !confirmPassword) {
       setError("Please enter and confirm your password.");
-      return;
+      return false;
+    }
+
+    if (password.length < 6) {
+      setError("Password must contain at least 6 characters.");
+      return false;
     }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
-      return;
+      return false;
     }
 
     if (!phone.trim()) {
       setError("Please enter your phone number.");
-      return;
+      return false;
     }
 
-    const fullPhone = `${selectedCountry.dialCode} ${phone.trim()}`;
+    return true;
+  };
+
+  const getFullPhone = () => `${selectedCountry.dialCode} ${phone.trim()}`;
+
+  const sendVerificationCode = async () => {
+    const fullPhone = getFullPhone();
+
+    await API.post("/auth/signup/send-code", {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim().toLowerCase(),
+      phone: fullPhone,
+      country: selectedCountry.name,
+    });
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+
+    setError("");
+    setCodeError("");
+    setCodeMessage("");
+    setVerificationCode("");
+
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
 
-      const response = await API.post("/auth/signup", {
+      await sendVerificationCode();
+
+      setShowCodePopup(true);
+      setCodeMessage(
+        "We sent a verification code to your email. Please enter it below to activate your account."
+      );
+    } catch (err) {
+      console.log("Send code error:", err.response?.data || err.message);
+
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "We could not send the verification code. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    setCodeError("");
+    setCodeMessage("");
+
+    if (!verificationCode.trim()) {
+      setCodeError("Please enter the verification code.");
+      return;
+    }
+
+    if (verificationCode.trim().length !== 6) {
+      setCodeError("The verification code must contain 6 digits.");
+      return;
+    }
+
+    try {
+      setVerifyLoading(true);
+
+      const fullPhone = getFullPhone();
+
+      const response = await API.post("/auth/signup/verify", {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
         confirmPassword,
         phone: fullPhone,
         country: selectedCountry.name,
+        code: verificationCode.trim(),
       });
 
       if (response.data?.user) {
@@ -176,23 +220,44 @@ export default function Signup() {
         }
       }
 
-      if (response.data?.success || response.data?.user) {
-        setShowSuccess(true);
+      setShowCodePopup(false);
+      setShowSuccess(true);
 
-        setTimeout(() => {
-          navigate("/profile", { replace: true });
-        }, 1000);
-      }
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 1000);
     } catch (err) {
-      console.log("Signup error:", err.response?.data || err.message);
+      console.log("Verify code error:", err.response?.data || err.message);
 
-      setError(
+      setCodeError(
         err.response?.data?.message ||
           err.response?.data?.error ||
-          "Signup failed ❌"
+          "The verification code is incorrect. Please check your email and try again."
       );
     } finally {
-      setLoading(false);
+      setVerifyLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setCodeError("");
+    setCodeMessage("");
+
+    try {
+      setVerifyLoading(true);
+
+      await sendVerificationCode();
+
+      setVerificationCode("");
+      setCodeMessage("A new verification code has been sent to your email.");
+    } catch (err) {
+      setCodeError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Could not resend the code. Please try again."
+      );
+    } finally {
+      setVerifyLoading(false);
     }
   };
 
@@ -395,7 +460,7 @@ export default function Signup() {
               {error && <span className="auth-error">{error}</span>}
 
               <button type="submit" disabled={loading}>
-                {loading ? "Creating Account..." : "Sign Up"}
+                {loading ? "Sending Code..." : "Sign Up"}
               </button>
 
               <p className="auth-switch">
@@ -406,6 +471,67 @@ export default function Signup() {
           </div>
         </div>
       </div>
+
+      {showCodePopup && (
+        <div className="verify-popup-overlay">
+          <div className="verify-popup">
+            <button
+              type="button"
+              className="verify-close"
+              onClick={() => {
+                setShowCodePopup(false);
+                setVerificationCode("");
+                setCodeError("");
+                setCodeMessage("");
+              }}
+            >
+              <FaTimes />
+            </button>
+
+            <div className="verify-icon">✉</div>
+
+            <h2>Email Verification</h2>
+
+            <p>
+              Enter the 6-digit code sent to{" "}
+              <strong>{email.trim().toLowerCase()}</strong>
+            </p>
+
+            <input
+              className="verify-code-input"
+              type="text"
+              inputMode="numeric"
+              maxLength="6"
+              placeholder="000000"
+              value={verificationCode}
+              onChange={(e) =>
+                setVerificationCode(e.target.value.replace(/\D/g, ""))
+              }
+            />
+
+            {codeError && <div className="verify-error">{codeError}</div>}
+            {codeMessage && <div className="verify-success">{codeMessage}</div>}
+
+            <button
+              type="button"
+              className="verify-main-btn"
+              disabled={verifyLoading}
+              onClick={handleVerifyCode}
+            >
+              {verifyLoading ? "Verifying..." : "Verify & Create Account"}
+            </button>
+
+            <button
+              type="button"
+              className="verify-resend-btn"
+              disabled={verifyLoading}
+              onClick={handleResendCode}
+            >
+              Resend Code
+            </button>
+          </div>
+        </div>
+      )}
 
       {showSuccess && (
         <div className="success-popup-overlay">
@@ -420,7 +546,7 @@ export default function Signup() {
               type="button"
               onClick={() => {
                 setShowSuccess(false);
-                navigate("/profile", { replace: true });
+                navigate("/", { replace: true });
               }}
             >
               Continue

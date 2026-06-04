@@ -4,10 +4,8 @@ import {
   FaTimes,
   FaRobot,
   FaPaperPlane,
-  FaUserPlus,
   FaSuitcaseRolling,
   FaHotel,
-  FaSignInAlt,
   FaMoneyBillWave,
   FaPhoneAlt,
   FaWhatsapp,
@@ -41,14 +39,17 @@ export default function HomeChatbot() {
       sender: "bot",
       text:
         "Welcome to Egypt Holiday Travel 👋\n\nI am your smart travel advisor. I can help you choose the best package or hotel according to your budget, travel dates, and destination.\n\nWhat are you looking for?",
-      actions: ["I want a package", "I want a hotel", "Create Account", "Log In"],
+      actions: ["I want a package", "I want a hotel"],
     },
   ]);
 
   const openLink = (url, target = "_self") => {
     if (!url) return;
 
-    if (typeof globalThis !== "undefined" && typeof globalThis.open === "function") {
+    if (
+      typeof globalThis !== "undefined" &&
+      typeof globalThis.open === "function"
+    ) {
       globalThis.open(
         url,
         target,
@@ -387,7 +388,7 @@ export default function HomeChatbot() {
         "• 300 dollars\n" +
         "• 500 dollars\n" +
         "• 900 dollars",
-      actions: ["Budget 300$", "Budget 500$", "Budget 900$", "Create Account"],
+      actions: ["Budget 300$", "Budget 500$", "Budget 900$"],
     };
   };
 
@@ -411,10 +412,8 @@ export default function HomeChatbot() {
           (closest
             ? `The closest package I found is:\n${closest.name} — ${closest.priceText}\n\n`
             : "") +
-          "Professional advice: create an account and send a request. Our team can check updated prices, travel dates, and availability to find the closest offer for you.",
-        actions: isLoggedIn
-          ? ["Open Packages", "Contact"]
-          : ["Create Account", "Open Packages", "Contact"],
+          "Professional advice: contact our team to check updated prices, travel dates, and availability.",
+        actions: ["Open Packages", "Contact"],
       };
     }
 
@@ -439,10 +438,8 @@ export default function HomeChatbot() {
         "Why? It gives you the strongest value while staying inside your budget.\n\n" +
         (isLoggedIn
           ? "You can now open Packages and send your booking request."
-          : "To book faster and follow your request, create an account first."),
-      actions: isLoggedIn
-        ? ["Open Packages", "Contact"]
-        : ["Create Account", "Open Packages", "Contact"],
+          : "You can open Packages or contact our team for more details."),
+      actions: ["Open Packages", "Contact"],
     };
   };
 
@@ -470,10 +467,8 @@ export default function HomeChatbot() {
                 closest.hotel
               )} — ${closest.room} — ${closest.priceText}\n\n`
             : "") +
-          "Professional advice: create an account and send a request. Our team can check updated hotel prices, dates, and availability for you.",
-        actions: isLoggedIn
-          ? ["Open Hotels", "Contact"]
-          : ["Create Account", "Open Hotels", "Contact"],
+          "Professional advice: contact our team to check updated hotel prices, dates, and availability.",
+        actions: ["Open Hotels", "Contact"],
       };
     }
 
@@ -507,10 +502,8 @@ export default function HomeChatbot() {
         "Why? It fits your budget, has a clear travel period, and gives you a suitable room price without going above your limit.\n\n" +
         (isLoggedIn
           ? "You can now open Hotels and send your booking request."
-          : "To book faster and follow your request, create an account first."),
-      actions: isLoggedIn
-        ? ["Open Hotels", "Contact"]
-        : ["Create Account", "Open Hotels", "Contact"],
+          : "You can open Hotels or contact our team for more details."),
+      actions: ["Open Hotels", "Contact"],
     };
   };
 
@@ -604,8 +597,8 @@ export default function HomeChatbot() {
 
     return {
       text:
-        "Creating an account is the best first step.\n\nWith an account you become an official client, you can send booking requests, follow your reservations, and our team can contact you faster with the best available offer.",
-      actions: ["Create Account", "Log In", "I want a package", "I want a hotel"],
+        "You can create an account from the website navigation. With an account, you can send booking requests, follow your reservations, and receive faster support from our team.",
+      actions: ["I want a package", "I want a hotel", "Contact"],
     };
   };
 
@@ -613,10 +606,8 @@ export default function HomeChatbot() {
     return {
       text: isLoggedIn
         ? "To book: open Packages or Hotels, choose your offer, click Book Now, select your date, and send the request. You can follow it later from your profile."
-        : "To book: create an account first, then choose a package or hotel, select your date, and send your request. This helps our team confirm your booking faster.",
-      actions: isLoggedIn
-        ? ["Open Packages", "Open Hotels"]
-        : ["Create Account", "Open Packages", "Open Hotels"],
+        : "To book: open Packages or Hotels, choose your offer, then follow the booking steps. For faster confirmation, contact our agency team.",
+      actions: ["Open Packages", "Open Hotels", "Contact"],
     };
   };
 
@@ -628,7 +619,7 @@ export default function HomeChatbot() {
         `Phone: ${AGENCY_CONTACT.phoneDisplay}\n` +
         `Email: ${AGENCY_CONTACT.email}\n\n` +
         "You can contact us to confirm prices, travel dates, hotel availability, packages, and booking details.",
-      actions: ["WhatsApp", "Call Agency", "Email Agency", "Create Account"],
+      actions: ["WhatsApp", "Call Agency", "Email Agency"],
     };
   };
 
@@ -730,7 +721,7 @@ export default function HomeChatbot() {
     return {
       text:
         "I can guide you professionally.\n\nPlease tell me what you want first: a package or a hotel. After that, give me your budget and I will recommend the best suitable option from the site.\n\nIf you need our agency contact, write: WhatsApp, phone number, or email.",
-      actions: ["I want a package", "I want a hotel", "Contact", "Create Account"],
+      actions: ["I want a package", "I want a hotel", "Contact"],
     };
   };
 
@@ -750,16 +741,6 @@ export default function HomeChatbot() {
   };
 
   const handleAction = (action) => {
-    if (action === "Create Account") {
-      navigate("/signup");
-      return;
-    }
-
-    if (action === "Log In") {
-      navigate("/login");
-      return;
-    }
-
     if (action === "Open Packages") {
       navigate("/packages");
       return;
@@ -847,23 +828,6 @@ export default function HomeChatbot() {
             </button>
           </div>
 
-          {!isLoggedIn && (
-            <div className="eht-client-card">
-              <div className="eht-client-icon">
-                <FaUserPlus />
-              </div>
-
-              <div>
-                <strong>Become our client</strong>
-                <span>Create an account to book and follow your request.</span>
-              </div>
-
-              <button type="button" onClick={() => navigate("/signup")}>
-                Sign Up
-              </button>
-            </div>
-          )}
-
           <div className="eht-chatbot-messages">
             {messages.map((msg, index) => (
               <div key={index} className={`eht-message ${msg.sender}`}>
@@ -878,8 +842,6 @@ export default function HomeChatbot() {
                         onClick={() => handleAction(action)}
                         title={action}
                       >
-                        {action.includes("Account") && <FaUserPlus />}
-                        {action.includes("Log") && <FaSignInAlt />}
                         {action.toLowerCase().includes("package") && (
                           <FaSuitcaseRolling />
                         )}
