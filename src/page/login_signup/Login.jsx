@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -25,6 +25,53 @@ export default function Login() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const redirectIfLoggedIn = async () => {
+      try {
+        const storedUser = JSON.parse(
+          localStorage.getItem("user") ||
+            sessionStorage.getItem("user") ||
+            "null"
+        );
+
+        if (storedUser) {
+          navigate(storedUser.role === "admin" ? "/admin" : "/profile", {
+            replace: true,
+          });
+          return;
+        }
+
+        const res = await API.get("/auth/me", {
+          skipAuthRedirect: true,
+        });
+
+        const user = res.data?.user || res.data;
+
+        if (user) {
+          navigate(user.role === "admin" ? "/admin" : "/profile", {
+            replace: true,
+          });
+          return;
+        }
+      } catch {
+        // User is not logged in, keep login page open
+      } finally {
+        if (mounted) {
+          setCheckingAuth(false);
+        }
+      }
+    };
+
+    redirectIfLoggedIn();
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({
@@ -56,11 +103,18 @@ export default function Login() {
         return;
       }
 
-      if (res.data.user?.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/profile");
+      const user = res.data.user;
+      const storage = rememberMe ? localStorage : sessionStorage;
+
+      storage.setItem("user", JSON.stringify(user));
+
+      if (res.data?.token) {
+        storage.setItem("token", res.data.token);
       }
+
+      navigate(user.role === "admin" ? "/admin" : "/profile", {
+        replace: true,
+      });
     } catch (err) {
       console.log("Login error:", err.response?.data || err.message);
 
@@ -73,6 +127,10 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return null;
+  }
 
   return (
     <>
@@ -100,6 +158,7 @@ export default function Login() {
             <img
               src={passportIcon}
               alt="Passport"
+              loading="lazy"
               className="auth-icon icon-passport"
             />
 

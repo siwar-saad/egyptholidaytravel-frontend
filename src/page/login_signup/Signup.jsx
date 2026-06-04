@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaChevronDown, FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -52,6 +52,8 @@ const COUNTRIES = [
 export default function Signup() {
   const navigate = useNavigate();
 
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [openCountry, setOpenCountry] = useState(false);
@@ -71,6 +73,52 @@ export default function Signup() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    let mounted = true;
+
+    const redirectIfLoggedIn = async () => {
+      try {
+        const storedUser = JSON.parse(
+          localStorage.getItem("user") ||
+            sessionStorage.getItem("user") ||
+            "null"
+        );
+
+        if (storedUser) {
+          navigate(storedUser.role === "admin" ? "/admin" : "/profile", {
+            replace: true,
+          });
+          return;
+        }
+
+        const res = await API.get("/auth/me", {
+          skipAuthRedirect: true,
+        });
+
+        const user = res.data?.user || res.data;
+
+        if (user) {
+          navigate(user.role === "admin" ? "/admin" : "/profile", {
+            replace: true,
+          });
+          return;
+        }
+      } catch {
+        // User is not logged in, keep signup page open
+      } finally {
+        if (mounted) {
+          setCheckingAuth(false);
+        }
+      }
+    };
+
+    redirectIfLoggedIn();
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate]);
+
   const chooseCountry = (country) => {
     setSelectedCountry(country);
     setOpenCountry(false);
@@ -82,6 +130,16 @@ export default function Signup() {
 
     if (!firstName.trim() || !lastName.trim()) {
       setError("Please enter your first and last name.");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
+
+    if (!password || !confirmPassword) {
+      setError("Please enter and confirm your password.");
       return;
     }
 
@@ -101,28 +159,46 @@ export default function Signup() {
       setLoading(true);
 
       const response = await API.post("/auth/signup", {
-        firstName,
-        lastName,
-        email,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
         password,
         confirmPassword,
         phone: fullPhone,
         country: selectedCountry.name,
       });
 
-      if (response.data.success) {
+      if (response.data?.user) {
+        sessionStorage.setItem("user", JSON.stringify(response.data.user));
+
+        if (response.data?.token) {
+          sessionStorage.setItem("token", response.data.token);
+        }
+      }
+
+      if (response.data?.success || response.data?.user) {
         setShowSuccess(true);
 
         setTimeout(() => {
-          navigate("/profile");
+          navigate("/profile", { replace: true });
         }, 1000);
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Signup failed ❌");
+      console.log("Signup error:", err.response?.data || err.message);
+
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Signup failed ❌"
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return null;
+  }
 
   return (
     <div>
@@ -241,7 +317,9 @@ export default function Signup() {
               </div>
 
               <div className="phone-field">
-                <div className={`custom-country ${openCountry ? "active" : ""}`}>
+                <div
+                  className={`custom-country ${openCountry ? "active" : ""}`}
+                >
                   <button
                     type="button"
                     className="custom-country-btn"
@@ -342,7 +420,7 @@ export default function Signup() {
               type="button"
               onClick={() => {
                 setShowSuccess(false);
-                navigate("/profile");
+                navigate("/profile", { replace: true });
               }}
             >
               Continue
