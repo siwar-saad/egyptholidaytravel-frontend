@@ -341,7 +341,8 @@ const PACKAGES_DATA = [
     backendName: "Cairo & North Coast Package – 6 Nights / 7 Days",
     route: "Cairo – North Coast",
     duration: "6 Nights / 7 Days",
-    transfer: "3 Nights in Cairo + 3 Nights in North Coast with transfer included",
+    transfer:
+      "3 Nights in Cairo + 3 Nights in North Coast with transfer included",
     startPrice: "From 1,293$",
     image: cairoNorthCoast,
     options: [
@@ -422,7 +423,8 @@ const PACKAGES_DATA = [
     backendName: "Cairo & Ain El Sokhna Package – 6 Nights / 7 Days",
     route: "Cairo – Ain El Sokhna",
     duration: "6 Nights / 7 Days",
-    transfer: "3 Nights in Cairo + 3 Nights in Ain El Sokhna with transfer included",
+    transfer:
+      "3 Nights in Cairo + 3 Nights in Ain El Sokhna with transfer included",
     startPrice: "From 1,072$",
     image: cairoAinSokhna,
     options: [
@@ -497,7 +499,173 @@ const PACKAGES_DATA = [
       },
     ],
   },
+  {
+    id: "hilton-zamalek-5-6",
+    name: "Hilton Zamalek Package",
+    backendName: "Hilton Zamalek – 5 Nights / 6 Days",
+    route: "Cairo",
+    duration: "5 Nights / 6 Days",
+    transfer: "Pick up & drop off with Cairo tours and transportation included",
+    startPrice: "From 414$",
+    image: cairoNorthCoast,
+    included: [
+      "Accommodation in hotel with breakfast",
+      "Pick up & drop off",
+      "Pyramids & Sphinx tour with ticket & transportation",
+      "Grand Egyptian Museum tour with ticket & transportation",
+      "Khan El Khalili and Old Egypt tour & mall",
+      "All taxes included",
+      "Flight ticket optional by request",
+    ],
+    options: [
+      {
+        title: "Price Per Person",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "5 Nights",
+            hotel: "Hilton Zamalek",
+            meal: "Breakfast",
+            sgl: "555$",
+            dbl: "444$",
+            tpl: "414$",
+          },
+        ],
+      },
+      {
+        title: "Children Price",
+        rows: [
+          { city: "Child", nights: "0 - 2 Year", hotel: "—", meal: "—", sgl: "Free", dbl: "Free", tpl: "Free" },
+          { city: "Child", nights: "2 - 12 Year", hotel: "—", meal: "—", sgl: "99$", dbl: "99$", tpl: "99$" },
+          { city: "Child", nights: "6 - 12 Year", hotel: "—", meal: "—", sgl: "265$", dbl: "265$", tpl: "Second child: 265$" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "hilton-ramsis-3-4",
+    name: "Hilton Ramsis Package",
+    backendName: "Hilton Ramsis – 3 Nights / 4 Days",
+    route: "Cairo",
+    duration: "3 Nights / 4 Days",
+    transfer: "Pick up & drop off with Cairo tours and transportation included",
+    startPrice: "From 249$",
+    image: cairoAinSokhna,
+    included: [
+      "Accommodation in hotel with breakfast",
+      "Pick up & drop off",
+      "Pyramids & Sphinx tour with ticket & transportation",
+      "Grand Egyptian Museum tour with ticket & transportation",
+      "All taxes included",
+      "Flight ticket optional by request",
+    ],
+    options: [
+      {
+        title: "Price Per Person",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "3 Nights",
+            hotel: "Hilton Ramsis",
+            meal: "Breakfast",
+            sgl: "370$",
+            dbl: "269$",
+            tpl: "249$",
+          },
+        ],
+      },
+      {
+        title: "Children Price",
+        rows: [
+          { city: "Child", nights: "0 - 2 Year", hotel: "—", meal: "—", sgl: "Free", dbl: "Free", tpl: "Free" },
+          { city: "Child", nights: "2 - 12 Year", hotel: "—", meal: "—", sgl: "99$", dbl: "99$", tpl: "99$" },
+          { city: "Child", nights: "6 - 12 Year", hotel: "—", meal: "—", sgl: "199$", dbl: "199$", tpl: "Second child: 199$" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "hilton-ramsis-5-6",
+    name: "Hilton Ramsis Package",
+    backendName: "Hilton Ramsis – 5 Nights / 6 Days",
+    route: "Cairo",
+    duration: "5 Nights / 6 Days",
+    transfer: "Pick up & drop off with Cairo tours and transportation included",
+    startPrice: "From 379$",
+    image: cairoAlexandria6,
+    included: [
+      "Accommodation in hotel with breakfast",
+      "Pick up & drop off",
+      "Pyramids & Sphinx tour with ticket & transportation",
+      "Grand Egyptian Museum tour with ticket & transportation",
+      "Khan El Khalili and Old Egypt tour & mall",
+      "All taxes included",
+      "Flight ticket optional by request",
+    ],
+    options: [
+      {
+        title: "Price Per Person",
+        rows: [
+          {
+            city: "Cairo",
+            nights: "5 Nights",
+            hotel: "Hilton Ramsis",
+            meal: "Breakfast",
+            sgl: "499$",
+            dbl: "389$",
+            tpl: "379$",
+          },
+        ],
+      },
+      {
+        title: "Children Price",
+        rows: [
+          { city: "Child", nights: "0 - 2 Year", hotel: "—", meal: "—", sgl: "Free", dbl: "Free", tpl: "Free" },
+          { city: "Child", nights: "2 - 12 Year", hotel: "—", meal: "—", sgl: "99$", dbl: "99$", tpl: "99$" },
+          { city: "Child", nights: "6 - 12 Year", hotel: "—", meal: "—", sgl: "265$", dbl: "265$", tpl: "Second child: 265$" },
+        ],
+      },
+    ],
+  }
 ];
+
+const NEW_HILTON_PACKAGE_IDS = new Set([
+  "hilton-zamalek-5-6",
+  "hilton-ramsis-3-4",
+  "hilton-ramsis-5-6",
+]);
+
+const getPackageKey = (item) =>
+  String(item?.id || item?.backendName || item?.backend_name || item?.name || item?.title || "")
+    .trim()
+    .toLowerCase();
+
+const mergeBackendWithLocalPackages = (backendPackages, localPackages) => {
+  const result = [];
+  const addedKeys = new Set();
+
+  const addPackage = (item) => {
+    const key = getPackageKey(item);
+    if (!key || addedKeys.has(key)) return;
+
+    addedKeys.add(key);
+    result.push(item);
+  };
+
+  // Put the new Hilton offers first so they are easy to find.
+  localPackages
+    .filter((item) => NEW_HILTON_PACKAGE_IDS.has(item.id))
+    .forEach(addPackage);
+
+  backendPackages.forEach(addPackage);
+
+  // Keep the old local packages as a fallback, without duplicating backend data.
+  localPackages
+    .filter((item) => !NEW_HILTON_PACKAGE_IDS.has(item.id))
+    .forEach(addPackage);
+
+  return result;
+};
 
 const EMPTY_PACKAGE_BOOKING = {
   fullName: "",
@@ -509,8 +677,18 @@ const EMPTY_PACKAGE_BOOKING = {
   notes: "",
 };
 
+const EMPTY_LOCKED_FIELDS = {
+  fullName: false,
+  email: false,
+  phone: false,
+};
+
 const PACKAGE_COUNTRIES = [
-  { flag: "https://flagcdn.com/fr.svg", name: "Paris / France", dialCode: "+33" },
+  {
+    flag: "https://flagcdn.com/fr.svg",
+    name: "Paris / France",
+    dialCode: "+33",
+  },
   { flag: "https://flagcdn.com/de.svg", name: "Germany", dialCode: "+49" },
   { flag: "https://flagcdn.com/lu.svg", name: "Luxembourg", dialCode: "+352" },
   { flag: "https://flagcdn.com/tr.svg", name: "Turkey", dialCode: "+90" },
@@ -561,12 +739,18 @@ export default function Packages() {
   const [showPackageBookingForm, setShowPackageBookingForm] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingAsAdmin, setBookingAsAdmin] = useState(false);
+
   const [packageBookingData, setPackageBookingData] = useState(
     EMPTY_PACKAGE_BOOKING
   );
+
+  const [lockedClientFields, setLockedClientFields] =
+    useState(EMPTY_LOCKED_FIELDS);
+
   const [selectedPackageCountry, setSelectedPackageCountry] = useState(
     PACKAGE_COUNTRIES[0]
   );
+
   const [openPackageCountry, setOpenPackageCountry] = useState(false);
 
   const [packageAlert, setPackageAlert] = useState({
@@ -578,12 +762,24 @@ export default function Packages() {
 
   const getImageUrl = (image) => {
     if (!image) return "";
-    if (image.startsWith("http") || image.startsWith("data:")) return image;
+
+    const imageValue = String(image);
+
+    if (
+      imageValue.startsWith("http") ||
+      imageValue.startsWith("data:") ||
+      imageValue.startsWith("blob:") ||
+      imageValue.startsWith("/src/") ||
+      imageValue.startsWith("/assets/")
+    ) {
+      return imageValue;
+    }
 
     const apiBase = API.defaults.baseURL || "/api";
     const origin = apiBase.replace(/\/api\/?$/, "");
+    const cleanPath = imageValue.startsWith("/") ? imageValue : `/${imageValue}`;
 
-    return `${origin}${image}`;
+    return `${origin}${cleanPath}`;
   };
 
   const normalizePackage = (item) => ({
@@ -595,24 +791,31 @@ export default function Packages() {
     duration: item.duration || "",
     transfer: item.transfer || "",
     transferReduction: item.transferReduction || item.transfer_reduction || "",
-    startPrice: item.startPrice || item.start_price || item.price || "Contact us",
+    startPrice:
+      item.startPrice || item.start_price || item.price || "Contact us",
     image: getImageUrl(item.image) || cairoHurghada5,
     options: Array.isArray(item.options) ? item.options : [],
     itinerary: Array.isArray(item.itinerary) ? item.itinerary : [],
     programme: item.programme || "",
+    included: Array.isArray(item.included) ? item.included : [],
   });
 
   useEffect(() => {
     const fetchPackages = async () => {
+      const localPackages = PACKAGES_DATA.map(normalizePackage);
+
       try {
         setPackagesLoading(true);
         const res = await API.get("/packages");
         const loadedPackages = Array.isArray(res.data) ? res.data : [];
+        const backendPackages = loadedPackages.map(normalizePackage);
 
-        setPackagesData(loadedPackages.map(normalizePackage));
+        setPackagesData(
+          mergeBackendWithLocalPackages(backendPackages, localPackages)
+        );
       } catch (err) {
         console.log("Public packages error:", err.response?.data || err.message);
-        setPackagesData(PACKAGES_DATA);
+        setPackagesData(localPackages);
       } finally {
         setPackagesLoading(false);
       }
@@ -682,7 +885,10 @@ export default function Packages() {
       const authRes = await API.get("/auth/me");
       authUser = authRes.data?.user || null;
     } catch {
-      showPackageAlert("Please login or create an account before booking.", "login");
+      showPackageAlert(
+        "Please login or create an account before booking.",
+        "login"
+      );
       return;
     }
 
@@ -696,6 +902,8 @@ export default function Packages() {
         ...EMPTY_PACKAGE_BOOKING,
         roomType: "DBL",
       });
+
+      setLockedClientFields(EMPTY_LOCKED_FIELDS);
       setSelectedPackageCountry(PACKAGE_COUNTRIES[0]);
       setShowPackageBookingForm(true);
       setOpenPackageCountry(false);
@@ -708,6 +916,7 @@ export default function Packages() {
 
     try {
       const res = await API.get("/client/profile");
+
       storedClient = {
         ...storedClient,
         ...res.data,
@@ -718,17 +927,31 @@ export default function Packages() {
 
     const phoneData = splitStoredPhone(storedClient.phone || "");
 
+    const clientFullName =
+      storedClient.name ||
+      `${storedClient.firstName || ""} ${storedClient.lastName || ""}`.trim();
+
+    const clientEmail = storedClient.email || "";
+    const clientPhone = phoneData.phone || "";
+
     setSelectedPackage(null);
     setBookingAsAdmin(false);
     setBookingPackage(item);
+
     setPackageBookingData({
       ...EMPTY_PACKAGE_BOOKING,
-      fullName:
-        storedClient.name ||
-        `${storedClient.firstName || ""} ${storedClient.lastName || ""}`.trim(),
-      email: storedClient.email || "",
-      phone: phoneData.phone,
+      fullName: clientFullName,
+      email: clientEmail,
+      phone: clientPhone,
+      roomType: "DBL",
     });
+
+    setLockedClientFields({
+      fullName: Boolean(clientFullName),
+      email: Boolean(clientEmail),
+      phone: Boolean(clientPhone),
+    });
+
     setSelectedPackageCountry(phoneData.country);
     setShowPackageBookingForm(true);
     setOpenPackageCountry(false);
@@ -739,6 +962,7 @@ export default function Packages() {
     setBookingPackage(null);
     setBookingAsAdmin(false);
     setOpenPackageCountry(false);
+    setLockedClientFields(EMPTY_LOCKED_FIELDS);
   };
 
   const submitPackageBooking = async () => {
@@ -818,6 +1042,7 @@ export default function Packages() {
       setShowPackageBookingForm(false);
       setBookingPackage(null);
       setBookingAsAdmin(false);
+      setLockedClientFields(EMPTY_LOCKED_FIELDS);
 
       showPackageAlert(
         "Your package booking request has been sent successfully. Our team will contact you soon.",
@@ -1006,6 +1231,7 @@ export default function Packages() {
           onClose={closePackageBooking}
           onSubmit={submitPackageBooking}
           loading={bookingLoading}
+          lockedClientFields={lockedClientFields}
         />
       )}
 
@@ -1155,6 +1381,22 @@ function PackageModal({ item, onClose, onBook }) {
             </div>
           )}
 
+
+          {Array.isArray(item.included) && item.included.length > 0 && (
+            <div className="package-included-card">
+              <h3>Price Included</h3>
+
+              <ul>
+                {item.included.map((text, index) => (
+                  <li key={`${item.id}-included-${index}`}>
+                    <FaCheckCircle />
+                    <span>{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="package-note-box">
             <FaHotel />
 
@@ -1211,10 +1453,18 @@ function PackageBookingForm({
   onClose,
   onSubmit,
   loading,
+  lockedClientFields,
 }) {
   const todayDate = getTodayDate();
 
+  const isClientDataLocked =
+    lockedClientFields?.fullName ||
+    lockedClientFields?.email ||
+    lockedClientFields?.phone;
+
   const updateBooking = (field, value) => {
+    if (lockedClientFields?.[field]) return;
+
     setBookingData((prev) => ({
       ...prev,
       [field]: value,
@@ -1222,6 +1472,8 @@ function PackageBookingForm({
   };
 
   const chooseCountry = (country) => {
+    if (lockedClientFields?.phone) return;
+
     setSelectedCountry(country);
     setOpenCountry(false);
   };
@@ -1251,11 +1503,20 @@ function PackageBookingForm({
           <span>{item.startPrice}</span>
         </div>
 
+        {isClientDataLocked && (
+          <div className="booking-locked-note">
+            Your name, email and phone are taken from your account and cannot be
+            changed here.
+          </div>
+        )}
+
         <div className="package-booking-form">
           <input
             type="text"
             placeholder="Full Name"
             value={bookingData.fullName}
+            readOnly={lockedClientFields?.fullName}
+            className={lockedClientFields?.fullName ? "booking-locked-input" : ""}
             onChange={(e) => updateBooking("fullName", e.target.value)}
           />
 
@@ -1263,6 +1524,8 @@ function PackageBookingForm({
             type="email"
             placeholder="Email Address"
             value={bookingData.email}
+            readOnly={lockedClientFields?.email}
+            className={lockedClientFields?.email ? "booking-locked-input" : ""}
             onChange={(e) => updateBooking("email", e.target.value)}
           />
 
@@ -1270,12 +1533,16 @@ function PackageBookingForm({
             <div
               className={`package-booking-country ${
                 openCountry ? "active" : ""
-              }`}
+              } ${lockedClientFields?.phone ? "booking-locked-country" : ""}`}
             >
               <button
                 type="button"
                 className="package-booking-country-btn"
-                onClick={() => setOpenCountry((prev) => !prev)}
+                disabled={lockedClientFields?.phone}
+                onClick={() => {
+                  if (lockedClientFields?.phone) return;
+                  setOpenCountry((prev) => !prev);
+                }}
               >
                 <div className="package-booking-country-left">
                   <img src={selectedCountry.flag} alt={selectedCountry.name} />
@@ -1289,7 +1556,7 @@ function PackageBookingForm({
                 <FaChevronDown />
               </button>
 
-              {openCountry && (
+              {openCountry && !lockedClientFields?.phone && (
                 <div className="package-booking-country-menu">
                   {countries.map((country) => (
                     <button
@@ -1318,6 +1585,8 @@ function PackageBookingForm({
                 type="tel"
                 placeholder="Phone Number / WhatsApp"
                 value={bookingData.phone}
+                readOnly={lockedClientFields?.phone}
+                className={lockedClientFields?.phone ? "booking-locked-input" : ""}
                 onChange={(e) => updateBooking("phone", e.target.value)}
               />
             </div>

@@ -5,6 +5,7 @@ import {
   FaBoxOpen,
   FaHotel,
   FaCalendarCheck,
+  FaCalendarPlus,
   FaUsers,
   FaCreditCard,
   FaEnvelope,
@@ -22,7 +23,8 @@ import Dashboard from "./Dashboard";
 import Packages from "./Packages";
 import Hotels from "./Hotels";
 import Reservations from "./Reservations";
-import Clients from "./Clients";
+import CreateReservation from "./CreateReservation";
+import Users from "./Users";
 import Payments from "./Payments";
 import Messages from "./Messages";
 import Subscribers from "./Subscribers";
@@ -95,8 +97,12 @@ export default function Admin() {
       case "reservations":
         return <Reservations showSuccess={showSuccess} />;
 
+      case "create-reservation":
+        return <CreateReservation showSuccess={showSuccess} />;
+
+      case "users":
       case "clients":
-        return <Clients showSuccess={showSuccess} />;
+        return <Users showSuccess={showSuccess} />;
 
       case "payments":
         return <Payments />;
@@ -180,11 +186,24 @@ export default function Admin() {
 
               <button
                 type="button"
-                className={activeTab === "clients" ? "active" : ""}
-                onClick={() => openTab("clients")}
+                className={activeTab === "create-reservation" ? "active" : ""}
+                onClick={() => openTab("create-reservation")}
+              >
+                <FaCalendarPlus />
+                <span>Create Reservation</span>
+              </button>
+
+              <button
+                type="button"
+                className={
+                  activeTab === "users" || activeTab === "clients"
+                    ? "active"
+                    : ""
+                }
+                onClick={() => openTab("users")}
               >
                 <FaUsers />
-                <span>Clients</span>
+                <span>Users</span>
               </button>
 
               <button
