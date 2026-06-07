@@ -1242,3 +1242,150 @@
 .period-card {
   background: #ffffff !important;
 }
+/* ============================= */
+/* FIX BOOKING POPUP CLOSE BUTTON */
+/* ============================= */
+
+.booking-popup {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  background: rgba(20, 14, 10, 0.72) !important;
+  backdrop-filter: blur(5px);
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 18px !important;
+  overflow: hidden !important;
+}
+
+.booking-box-fixed {
+  width: min(560px, 96vw) !important;
+  max-height: 92vh !important;
+  background: #fffaf5 !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Header ثابت: العنوان و X ما يتنحاوش */
+.booking-fixed-head {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+  background: #fffaf5 !important;
+  padding: 28px 32px 18px !important;
+  border-bottom: 1px solid rgba(147, 84, 38, 0.12) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 16px !important;
+  flex-shrink: 0 !important;
+}
+
+.booking-fixed-head h2 {
+  margin: 0 0 8px !important;
+  color: #2e2219 !important;
+  font-size: 30px !important;
+  font-weight: 900 !important;
+}
+
+.booking-fixed-head p {
+  margin: 0 !important;
+  color: #75695f !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+/* X تبقى ديما ظاهرة */
+.booking-close {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: #f1e6dc !important;
+  color: #935426 !important;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 8px 22px rgba(91, 52, 25, 0.14) !important;
+  transition: 0.25s ease !important;
+}
+
+.booking-close:hover {
+  background: #935426 !important;
+  color: #fff !important;
+  transform: rotate(90deg) !important;
+}
+
+/* Scroll يكون داخل الفورم فقط */
+.booking-scroll-content {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 22px 32px 32px !important;
+}
+
+.booking-scroll-content::-webkit-scrollbar {
+  width: 7px;
+}
+
+.booking-scroll-content::-webkit-scrollbar-track {
+  background: #f4ebe3;
+  border-radius: 999px;
+}
+
+.booking-scroll-content::-webkit-scrollbar-thumb {
+  background: #935426;
+  border-radius: 999px;
+}
+
+/* باش ما يصيرش تضارب مع CSS القديم */
+.booking-box {
+  padding-top: 0 !important;
+}
+
+/* Responsive */
+@media (max-width: 650px) {
+  .booking-popup {
+    padding: 10px !important;
+    align-items: center !important;
+  }
+
+  .booking-box-fixed {
+    width: 100% !important;
+    max-height: 94vh !important;
+    border-radius: 22px !important;
+  }
+
+  .booking-fixed-head {
+    padding: 22px 18px 16px !important;
+  }
+
+  .booking-fixed-head h2 {
+    font-size: 24px !important;
+  }
+
+  .booking-fixed-head p {
+    font-size: 13px !important;
+  }
+
+  .booking-scroll-content {
+    padding: 18px !important;
+  }
+
+  .booking-close {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    font-size: 22px !important;
+  }
+}

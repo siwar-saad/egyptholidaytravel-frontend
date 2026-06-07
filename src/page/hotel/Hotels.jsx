@@ -7,7 +7,7 @@ import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
 import "./Hotels.css";
 
-import heroImg from "../../assets/image/bghotel.jpg";
+import heroImg from "../../assets/image/bghotel.png";
 
 const apiOrigin =
   (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
@@ -75,6 +75,7 @@ const BOOKING_COUNTRIES = [
 
 const splitStoredPhone = (phone = "") => {
   const cleanPhone = phone.trim();
+
   const country =
     BOOKING_COUNTRIES.find((item) => cleanPhone.startsWith(item.dialCode)) ||
     BOOKING_COUNTRIES[0];
@@ -109,6 +110,40 @@ export default function Hotels() {
     title: "",
     message: "",
   });
+
+  /* 
+    يمنع الصفحة اللي ورا popup من scroll
+    ويخلي scroll كان داخل popup
+  */
+  useEffect(() => {
+    const isPopupOpen = Boolean(selectedHotel || showBookingForm || hotelAlert.show);
+
+    if (!isPopupOpen) return;
+
+    const scrollY = window.scrollY;
+
+    const oldBodyOverflow = document.body.style.overflow;
+    const oldBodyPosition = document.body.style.position;
+    const oldBodyTop = document.body.style.top;
+    const oldBodyWidth = document.body.style.width;
+    const oldHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = oldBodyOverflow;
+      document.body.style.position = oldBodyPosition;
+      document.body.style.top = oldBodyTop;
+      document.body.style.width = oldBodyWidth;
+      document.documentElement.style.overflow = oldHtmlOverflow;
+
+      window.scrollTo(0, scrollY);
+    };
+  }, [selectedHotel, showBookingForm, hotelAlert.show]);
 
   const showHotelAlert = (message, type = "error") => {
     const titles = {
@@ -199,12 +234,16 @@ export default function Hotels() {
 
     try {
       const res = await API.get("/client/profile");
+
       storedClient = {
         ...storedClient,
         ...res.data,
       };
     } catch (err) {
-      console.log("Hotel profile prefill error:", err.response?.data || err.message);
+      console.log(
+        "Hotel profile prefill error:",
+        err.response?.data || err.message
+      );
     }
 
     const phoneData = splitStoredPhone(storedClient.phone || "");
@@ -220,7 +259,6 @@ export default function Hotels() {
 
     setBookingAsAdmin(false);
     setSelectedBookingCountry(phoneData.country);
-
     setShowBookingForm(true);
     setOpenBookingCountry(false);
   };
@@ -591,149 +629,155 @@ function BookingForm({
 
   return (
     <div className="booking-popup">
-      <div className="booking-box">
-        <button type="button" className="booking-close" onClick={onClose}>
-          ×
-        </button>
+      <div className="booking-box booking-box-fixed">
+        <div className="booking-fixed-head">
+          <div>
+            <h2>Book Your Stay</h2>
 
-        <h2>Book Your Stay</h2>
+            <p>
+              Complete the form below and our travel team will contact you with
+              the best offer.
+            </p>
+          </div>
 
-        <p>
-          Complete the form below and our travel team will contact you with the
-          best offer.
-        </p>
-
-        <div className="booking-hotel-summary">
-          <strong>{hotel.name}</strong>
-          <span>{hotel.city}</span>
-          <span>{hotel.meal}</span>
+          <button type="button" className="booking-close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
-        <div className="booking-form">
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={bookingData.fullName}
-            onChange={(e) => updateBooking("fullName", e.target.value)}
-          />
+        <div className="booking-scroll-content">
+          <div className="booking-hotel-summary">
+            <strong>{hotel.name}</strong>
+            <span>{hotel.city}</span>
+            <span>{hotel.meal}</span>
+          </div>
 
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={bookingData.email}
-            onChange={(e) => updateBooking("email", e.target.value)}
-          />
+          <div className="booking-form">
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={bookingData.fullName}
+              onChange={(e) => updateBooking("fullName", e.target.value)}
+            />
 
-          <div className="hotel-booking-phone">
-            <div
-              className={`hotel-booking-country ${
-                openCountry ? "active" : ""
-              }`}
-            >
-              <button
-                type="button"
-                className="hotel-booking-country-btn"
-                onClick={() => setOpenCountry((prev) => !prev)}
+            <input
+              type="email"
+              placeholder="Email Address"
+              value={bookingData.email}
+              onChange={(e) => updateBooking("email", e.target.value)}
+            />
+
+            <div className="hotel-booking-phone">
+              <div
+                className={`hotel-booking-country ${
+                  openCountry ? "active" : ""
+                }`}
               >
-                <div className="hotel-booking-country-left">
-                  <img src={selectedCountry.flag} alt={selectedCountry.name} />
+                <button
+                  type="button"
+                  className="hotel-booking-country-btn"
+                  onClick={() => setOpenCountry((prev) => !prev)}
+                >
+                  <div className="hotel-booking-country-left">
+                    <img src={selectedCountry.flag} alt={selectedCountry.name} />
 
-                  <div>
-                    <small>Country</small>
-                    <strong>{selectedCountry.name}</strong>
+                    <div>
+                      <small>Country</small>
+                      <strong>{selectedCountry.name}</strong>
+                    </div>
                   </div>
-                </div>
 
-                <FaChevronDown />
-              </button>
+                  <FaChevronDown />
+                </button>
 
-              {openCountry && (
-                <div className="hotel-booking-country-menu">
-                  {countries.map((country) => (
-                    <button
-                      type="button"
-                      key={country.dialCode}
-                      className={
-                        selectedCountry.dialCode === country.dialCode
-                          ? "hotel-booking-country-option selected"
-                          : "hotel-booking-country-option"
-                      }
-                      onClick={() => chooseCountry(country)}
-                    >
-                      <img src={country.flag} alt={country.name} />
-                      <span>{country.name}</span>
-                      <strong>{country.dialCode}</strong>
-                    </button>
-                  ))}
-                </div>
-              )}
+                {openCountry && (
+                  <div className="hotel-booking-country-menu">
+                    {countries.map((country) => (
+                      <button
+                        type="button"
+                        key={country.dialCode}
+                        className={
+                          selectedCountry.dialCode === country.dialCode
+                            ? "hotel-booking-country-option selected"
+                            : "hotel-booking-country-option"
+                        }
+                        onClick={() => chooseCountry(country)}
+                      >
+                        <img src={country.flag} alt={country.name} />
+                        <span>{country.name}</span>
+                        <strong>{country.dialCode}</strong>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="hotel-booking-phone-input">
+                <span>{selectedCountry.dialCode}</span>
+
+                <input
+                  type="tel"
+                  placeholder="Phone Number / WhatsApp"
+                  value={bookingData.phone}
+                  onChange={(e) => updateBooking("phone", e.target.value)}
+                />
+              </div>
             </div>
 
-            <div className="hotel-booking-phone-input">
-              <span>{selectedCountry.dialCode}</span>
+            <input
+              type="number"
+              placeholder="Number of Travelers"
+              min="1"
+              value={bookingData.travelers}
+              onChange={(e) => updateBooking("travelers", e.target.value)}
+            />
+
+            <div className="booking-date-field">
+              <label>Check-in Date</label>
 
               <input
-                type="tel"
-                placeholder="Phone Number / WhatsApp"
-                value={bookingData.phone}
-                onChange={(e) => updateBooking("phone", e.target.value)}
+                type="date"
+                value={bookingData.checkIn}
+                onChange={(e) => updateBooking("checkIn", e.target.value)}
               />
             </div>
-          </div>
 
-          <input
-            type="number"
-            placeholder="Number of Travelers"
-            min="1"
-            value={bookingData.travelers}
-            onChange={(e) => updateBooking("travelers", e.target.value)}
-          />
+            <div className="booking-date-field">
+              <label>Check-out Date</label>
 
-          <div className="booking-date-field">
-            <label>Check-in Date</label>
+              <input
+                type="date"
+                value={bookingData.checkOut}
+                onChange={(e) => updateBooking("checkOut", e.target.value)}
+              />
+            </div>
 
-            <input
-              type="date"
-              value={bookingData.checkIn}
-              onChange={(e) => updateBooking("checkIn", e.target.value)}
+            <select
+              value={bookingData.roomType}
+              onChange={(e) => updateBooking("roomType", e.target.value)}
+            >
+              <option>Single Room</option>
+              <option>Double Room</option>
+              <option>Triple Room</option>
+              <option>Family Room</option>
+              <option>Suite</option>
+            </select>
+
+            <textarea
+              placeholder="Special requests or notes"
+              value={bookingData.notes}
+              onChange={(e) => updateBooking("notes", e.target.value)}
             />
+
+            <button
+              type="button"
+              className="submit-booking"
+              onClick={onSubmit}
+              disabled={loading}
+            >
+              {loading ? "Sending..." : "Send Booking Request"}
+            </button>
           </div>
-
-          <div className="booking-date-field">
-            <label>Check-out Date</label>
-
-            <input
-              type="date"
-              value={bookingData.checkOut}
-              onChange={(e) => updateBooking("checkOut", e.target.value)}
-            />
-          </div>
-
-          <select
-            value={bookingData.roomType}
-            onChange={(e) => updateBooking("roomType", e.target.value)}
-          >
-            <option>Single Room</option>
-            <option>Double Room</option>
-            <option>Triple Room</option>
-            <option>Family Room</option>
-            <option>Suite</option>
-          </select>
-
-          <textarea
-            placeholder="Special requests or notes"
-            value={bookingData.notes}
-            onChange={(e) => updateBooking("notes", e.target.value)}
-          />
-
-          <button
-            type="button"
-            className="submit-booking"
-            onClick={onSubmit}
-            disabled={loading}
-          >
-            {loading ? "Sending..." : "Send Booking Request"}
-          </button>
         </div>
       </div>
     </div>

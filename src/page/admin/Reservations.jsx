@@ -22,6 +22,66 @@ const EMPTY_FORM = {
   totalPrice: "",
 };
 
+const getCurrentAdminName = () => {
+  try {
+    const user =
+      JSON.parse(localStorage.getItem("user") || "null") ||
+      JSON.parse(sessionStorage.getItem("user") || "null");
+
+    return (
+      user?.name ||
+      `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+      user?.email ||
+      "Admin"
+    );
+  } catch {
+    return "Admin";
+  }
+};
+
+const getCreatedBy = (booking = {}) => {
+  const role =
+    booking.createdByRole ||
+    booking.created_by_role ||
+    booking.creatorRole ||
+    booking.creator_role ||
+    booking.source ||
+    booking.reservationSource ||
+    booking.reservation_source ||
+    booking.createdBy?.role ||
+    booking.created_by?.role ||
+    "";
+
+  const name =
+    booking.createdByName ||
+    booking.created_by_name ||
+    booking.adminName ||
+    booking.admin_name ||
+    booking.creatorName ||
+    booking.creator_name ||
+    booking.createdBy?.name ||
+    booking.created_by?.name ||
+    booking.admin?.name ||
+    "";
+
+  const cleanRole = String(role).toLowerCase();
+
+  if (
+    cleanRole.includes("admin") ||
+    booking.isAdminCreated ||
+    booking.is_admin_created ||
+    booking.created_by_admin
+  ) {
+    return name ? `Admin - ${name}` : "Admin";
+  }
+
+  if (String(booking.createdBy || booking.created_by || "").toLowerCase() === "admin") {
+    return name ? `Admin - ${name}` : "Admin";
+  }
+
+  return "User";
+};
+
 export default function Reservations({ showSuccess }) {
   const [reservationTab, setReservationTab] = useState("packages");
   const [reservationSearch, setReservationSearch] = useState("");
@@ -57,6 +117,8 @@ export default function Reservations({ showSuccess }) {
         customerInfo.fullName ||
         customerInfo.full_name ||
         customerInfo.name ||
+        booking.fullName ||
+        booking.full_name ||
         booking.client ||
         "Client",
       email: customerInfo.email || booking.email || "-",
@@ -66,12 +128,20 @@ export default function Reservations({ showSuccess }) {
         searchParams.backendName ||
         searchParams.route ||
         booking.packageName ||
+        booking.package_name ||
         "Package",
-      date: searchParams.travelDate || booking.date || "-",
+      date:
+        searchParams.travelDate ||
+        searchParams.travel_date ||
+        booking.travelDate ||
+        booking.travel_date ||
+        booking.date ||
+        "-",
       travelers: customerInfo.travelers || booking.travelers || "-",
-      roomType: searchParams.roomType || booking.roomType || "-",
+      roomType: searchParams.roomType || booking.roomType || booking.room_type || "-",
       status: booking.status || "Pending",
       notes: customerInfo.notes || booking.notes || "",
+      createdBy: getCreatedBy(booking),
     };
   };
 
@@ -87,18 +157,40 @@ export default function Reservations({ showSuccess }) {
         customerInfo.fullName ||
         customerInfo.full_name ||
         customerInfo.name ||
+        booking.fullName ||
+        booking.full_name ||
         booking.client ||
         "Client",
       email: customerInfo.email || booking.email || "-",
       phone: customerInfo.phone || booking.phone || "-",
-      hotelName: selectedHotel.name || booking.hotelName || "Hotel",
+      hotelName:
+        selectedHotel.name ||
+        booking.hotelName ||
+        booking.hotel_name ||
+        "Hotel",
       city: selectedHotel.city || booking.city || "-",
-      roomType: selectedHotel.roomType || booking.roomType || "-",
-      checkIn: selectedHotel.checkIn || booking.checkIn || "-",
-      checkOut: selectedHotel.checkOut || booking.checkOut || "-",
+      roomType:
+        selectedHotel.roomType ||
+        selectedHotel.room_type ||
+        booking.roomType ||
+        booking.room_type ||
+        "-",
+      checkIn:
+        selectedHotel.checkIn ||
+        selectedHotel.check_in ||
+        booking.checkIn ||
+        booking.check_in ||
+        "-",
+      checkOut:
+        selectedHotel.checkOut ||
+        selectedHotel.check_out ||
+        booking.checkOut ||
+        booking.check_out ||
+        "-",
       travelers: customerInfo.travelers || booking.travelers || "-",
       status: booking.status || "Pending",
       notes: customerInfo.notes || booking.notes || "",
+      createdBy: getCreatedBy(booking),
     };
   };
 
@@ -114,6 +206,7 @@ export default function Reservations({ showSuccess }) {
       const packageBookings = getArray(packageRes.data).map((booking, index) =>
         normalizePackageReservation(booking, index)
       );
+
       const hotelBookings = getArray(hotelRes.data).map((booking, index) =>
         normalizeHotelReservation(booking, index)
       );
@@ -170,7 +263,9 @@ export default function Reservations({ showSuccess }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const openCreateForm = (type = reservationTab === "hotels" ? "hotel" : "package") => {
+  const openCreateForm = (
+    type = reservationTab === "hotels" ? "hotel" : "package"
+  ) => {
     setForm({ ...EMPTY_FORM, type });
     setShowForm(true);
   };
@@ -198,7 +293,9 @@ export default function Reservations({ showSuccess }) {
   };
 
   const chooseHotel = (hotelId) => {
-    const selectedHotel = hotels.find((item) => String(item.id) === String(hotelId));
+    const selectedHotel = hotels.find(
+      (item) => String(item.id) === String(hotelId)
+    );
 
     if (!selectedHotel) return;
 
@@ -231,13 +328,24 @@ export default function Reservations({ showSuccess }) {
       return;
     }
 
+    const adminName = getCurrentAdminName();
+
+    const payload = {
+      ...form,
+      createdBy: "admin",
+      createdByRole: "admin",
+      createdByName: adminName,
+      reservationSource: "admin",
+      isAdminCreated: true,
+    };
+
     try {
       setSaving(true);
 
       if (isHotel) {
-        await API.post("/admin/hotels/reservations", form);
+        await API.post("/admin/hotels/reservations", payload);
       } else {
-        await API.post("/admin/reservations", form);
+        await API.post("/admin/reservations", payload);
       }
 
       notify("Reservation created successfully.");
@@ -314,7 +422,7 @@ export default function Reservations({ showSuccess }) {
         <div className="client-tools">
           <input
             type="text"
-            placeholder="Search reservations by client, email, phone, hotel, package or date..."
+            placeholder="Search reservations by client, email, phone, hotel, package, created by or date..."
             value={reservationSearch}
             onChange={(e) => setReservationSearch(e.target.value)}
           />
@@ -337,6 +445,7 @@ export default function Reservations({ showSuccess }) {
                   {reservationTab === "hotels" && <th>Check Out</th>}
                   <th>Travelers</th>
                   <th>Room</th>
+                  <th>Created By</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -347,19 +456,36 @@ export default function Reservations({ showSuccess }) {
                     <td>{booking.client}</td>
                     <td>{booking.email}</td>
                     <td>{booking.phone}</td>
+
                     <td>
                       {booking.type === "package"
                         ? booking.packageName
                         : booking.hotelName}
                     </td>
+
                     <td>
                       {booking.type === "package"
                         ? booking.date
                         : booking.checkIn}
                     </td>
+
                     {reservationTab === "hotels" && <td>{booking.checkOut}</td>}
+
                     <td>{booking.travelers}</td>
                     <td>{booking.roomType || "-"}</td>
+
+                    <td>
+                      <span
+                        className={
+                          booking.createdBy?.toLowerCase().includes("admin")
+                            ? "created-by-badge admin"
+                            : "created-by-badge user"
+                        }
+                      >
+                        {booking.createdBy}
+                      </span>
+                    </td>
+
                     <td>
                       <select
                         className={`status-select ${

@@ -3942,3 +3942,24 @@ th {
 .hotel-popup-fixed {
   margin-top: 0 !important;
 }
+.created-by-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.created-by-badge.admin {
+  background: #f3e4d5;
+  color: #935426;
+}
+
+.created-by-badge.user {
+  background: #eef3ee;
+  color: #2f6f3e;
+}

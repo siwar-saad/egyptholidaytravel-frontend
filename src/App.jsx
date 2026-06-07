@@ -21,9 +21,12 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import HomeChatbot from "./components/HomeChatbot";
 
+import ScrollToTop from "./components/ScrollToTop";
+
 function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Routes>
         {/* AUTH */}
         <Route path="/login" element={<Login />} />
