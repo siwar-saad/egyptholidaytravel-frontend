@@ -466,9 +466,6 @@ export default function Packages() {
                   </div>
 
                   <div className="package-card-body">
-                    <span className="package-back-name">
-                      Back Name: {item.backendName}
-                    </span>
 
                     <h3>{item.name}</h3>
 

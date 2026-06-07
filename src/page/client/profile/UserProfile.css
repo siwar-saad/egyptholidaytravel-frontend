@@ -2239,3 +2239,32 @@
     grid-template-columns: 1fr;
   }
 }
+.messages-page-section {
+  width: 100%;
+  padding: 40px 20px;
+  overflow: visible;
+}
+
+.messenger-card {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.messenger-chat {
+  display: flex;
+  flex-direction: column;
+  height: 620px;
+  max-height: 75vh;
+  overflow: hidden;
+}
+
+.messenger-thread {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+.messenger-composer {
+  flex-shrink: 0;
+}
