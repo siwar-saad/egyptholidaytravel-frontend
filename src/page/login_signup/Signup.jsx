@@ -72,6 +72,9 @@ export default function Signup() {
 
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+  const [verificationStep, setVerificationStep] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -168,6 +171,16 @@ export default function Signup() {
         country: selectedCountry.name,
       });
 
+      if (
+        response.data?.verificationRequired ||
+        response.data?.requiresVerification
+      ) {
+        setPendingEmail(response.data.email || email.trim());
+        setVerificationCode("");
+        setVerificationStep(true);
+        return;
+      }
+
       if (response.data?.user) {
         sessionStorage.setItem("user", JSON.stringify(response.data.user));
 
@@ -190,6 +203,49 @@ export default function Signup() {
         err.response?.data?.message ||
           err.response?.data?.error ||
           "Signup failed ❌"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifySignupCode = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!verificationCode.trim()) {
+      setError("Please enter the verification code.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await API.post("/auth/verify-signup-code", {
+        email: pendingEmail || email.trim(),
+        code: verificationCode.trim(),
+      });
+
+      if (response.data?.user) {
+        sessionStorage.setItem("user", JSON.stringify(response.data.user));
+
+        if (response.data?.token) {
+          sessionStorage.setItem("token", response.data.token);
+        }
+      }
+
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        navigate("/profile", { replace: true });
+      }, 1000);
+    } catch (err) {
+      console.log("Verification error:", err.response?.data || err.message);
+
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Invalid verification code"
       );
     } finally {
       setLoading(false);
@@ -239,15 +295,46 @@ export default function Signup() {
           </div>
 
           <div className="auth-right signup-right">
-            <form className="auth-form signup-form" onSubmit={handleSignup}>
+            <form
+              className="auth-form signup-form"
+              onSubmit={verificationStep ? handleVerifySignupCode : handleSignup}
+            >
               <div className="signup-title-box">
-                <h2>Sign Up</h2>
+                <h2>{verificationStep ? "Verify Email" : "Sign Up"}</h2>
 
                 <p>
-                  Create your account and manage your bookings easily with us.
+                  {verificationStep
+                    ? `Enter the code sent to ${pendingEmail || email}.`
+                    : "Create your account and manage your bookings easily with us."}
                 </p>
               </div>
 
+              {verificationStep ? (
+                <>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Verification Code"
+                    required
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                  />
+
+                  {error && <span className="auth-error">{error}</span>}
+
+                  <button type="submit" disabled={loading}>
+                    {loading ? "Verifying..." : "Verify & Continue"}
+                  </button>
+
+                  <p className="auth-switch">
+                    Wrong email?{" "}
+                    <span onClick={() => setVerificationStep(false)}>
+                      Edit details
+                    </span>
+                  </p>
+                </>
+              ) : (
+                <>
               <div className="signup-row">
                 <input
                   type="text"
@@ -402,6 +489,8 @@ export default function Signup() {
                 Already have an account?{" "}
                 <span onClick={() => navigate("/login")}>Log in</span>
               </p>
+                </>
+              )}
             </form>
           </div>
         </div>

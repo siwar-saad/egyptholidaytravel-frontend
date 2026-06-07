@@ -7,7 +7,7 @@ import Signup from "./page/login_signup/Signup";
 import ForgotPassword from "./page/login_signup/ForgotPassword";
 import ResetPassword from "./page/login_signup/ResetPassword";
 
-import Packages from "./page/Packages";
+import Packages from "./page/packages/Packages";
 import Hotels from "./page/hotel/Hotels";
 import FlightComingSoon from "./page/flight/flightcomingsoon";
 

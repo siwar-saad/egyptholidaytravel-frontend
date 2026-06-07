@@ -228,9 +228,8 @@ export default function Messages({ showSuccess, onUnreadChange }) {
 
         const latest = sortedConversationMessages[sortedConversationMessages.length - 1];
 
-        const hasReply = sortedConversationMessages.some(
-          (msg) => (msg.sender || "client") === "admin" || msg.reply
-        );
+        const latestSender = latest?.sender || "client";
+        const hasReply = latestSender === "admin" || Boolean(latest?.reply);
 
         return {
           ...conversation,
