@@ -20,6 +20,7 @@ import {
   FaTrain,
   FaUtensils,
 } from "react-icons/fa";
+
 const EMPTY_PACKAGE_BOOKING = {
   fullName: "",
   email: "",
@@ -53,6 +54,7 @@ const PACKAGE_COUNTRIES = [
 
 const splitStoredPhone = (phone = "") => {
   const cleanPhone = phone.trim();
+
   const country =
     PACKAGE_COUNTRIES.find((item) => cleanPhone.startsWith(item.dialCode)) ||
     PACKAGE_COUNTRIES[0];
@@ -80,6 +82,12 @@ const isPastDate = (dateValue) => {
 
   return selectedDate < today;
 };
+
+const cleanPackageTitle = (value) =>
+  String(value || "")
+    .replace(/[()]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
 export default function Packages() {
   const navigate = useNavigate();
@@ -136,8 +144,8 @@ export default function Packages() {
   };
 
   const normalizePackage = (item) => ({
-    id: item.id,
-    name: item.name || item.title || "Package",
+    id: item.id || item._id,
+    name: cleanPackageTitle(item.name || item.title || "Package"),
     backendName:
       item.backendName || item.backend_name || item.title || item.name || "",
     route: item.route || "",
@@ -157,6 +165,7 @@ export default function Packages() {
     const fetchPackages = async () => {
       try {
         setPackagesLoading(true);
+
         const res = await API.get("/packages");
         const loadedPackages = Array.isArray(res.data) ? res.data : [];
 
@@ -178,7 +187,9 @@ export default function Packages() {
     if (!openPackageId) return;
     if (packagesLoading) return;
 
-    const packageToOpen = packagesData.find((item) => item.id === openPackageId);
+    const packageToOpen = packagesData.find(
+      (item) => String(item.id) === String(openPackageId)
+    );
 
     if (packageToOpen) {
       setSelectedPackage(packageToOpen);
@@ -453,7 +464,9 @@ export default function Packages() {
             {packagesLoading ? (
               <p className="empty-packages-message">Loading packages...</p>
             ) : packagesData.length === 0 ? (
-              <p className="empty-packages-message">No published packages yet.</p>
+              <p className="empty-packages-message">
+                No published packages yet.
+              </p>
             ) : (
               packagesData.map((item) => (
                 <article className="package-card-pro" key={item.id}>
@@ -466,7 +479,6 @@ export default function Packages() {
                   </div>
 
                   <div className="package-card-body">
-
                     <h3>{item.name}</h3>
 
                     <div className="package-info-row">
@@ -725,7 +737,6 @@ function PackageModal({ item, onClose, onBook }) {
               </p>
             </div>
           )}
-
 
           {Array.isArray(item.included) && item.included.length > 0 && (
             <div className="package-included-card">

@@ -48,7 +48,20 @@ const EMPTY_USER_FORM = {
   role: "user",
 };
 
-export default function Users({ showSuccess }) {
+const EMPTY_DELETE_CONFIRM = {
+  show: false,
+  user: null,
+  loading: false,
+};
+
+const EMPTY_NOTICE = {
+  show: false,
+  type: "success",
+  title: "",
+  message: "",
+};
+
+export default function Users() {
   const [users, setUsers] = useState([]);
   const [activeUserTab, setActiveUserTab] = useState("clients");
   const [userSearch, setUserSearch] = useState("");
@@ -61,12 +74,20 @@ export default function Users({ showSuccess }) {
   const [openCountry, setOpenCountry] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const notify = (message) => {
-    if (typeof showSuccess === "function") {
-      showSuccess(message);
-    } else {
-      alert(message);
-    }
+  const [deleteConfirm, setDeleteConfirm] = useState(EMPTY_DELETE_CONFIRM);
+  const [notice, setNotice] = useState(EMPTY_NOTICE);
+
+  const notify = (message, type = "success") => {
+    setNotice({
+      show: true,
+      type,
+      title: type === "success" ? "Success" : "Notice",
+      message,
+    });
+  };
+
+  const closeNotice = () => {
+    setNotice(EMPTY_NOTICE);
   };
 
   const getUserId = (user) => {
@@ -138,6 +159,7 @@ export default function Users({ showSuccess }) {
     } catch (err) {
       console.log("Users error:", err.response?.data || err.message);
       setUsers([]);
+      notify("Unable to load users.", "error");
     }
   };
 
@@ -224,7 +246,7 @@ export default function Users({ showSuccess }) {
     const role = userForm.role === "admin" ? "admin" : "user";
 
     if (!firstName || !lastName || !email || !phone) {
-      notify("Please fill first name, last name, email and phone.");
+      notify("Please fill first name, last name, email and phone.", "error");
       return;
     }
 
@@ -249,7 +271,7 @@ export default function Users({ showSuccess }) {
         const userId = getUserId(editingUser);
 
         if (!userId) {
-          notify("User id not found.");
+          notify("User id not found.", "error");
           setLoading(false);
           return;
         }
@@ -296,34 +318,56 @@ export default function Users({ showSuccess }) {
       notify(
         err.response?.data?.error ||
           err.response?.data?.message ||
-          "Unable to save user."
+          "Unable to save user.",
+        "error"
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteUser = async (user) => {
+  const openDeleteConfirm = (user) => {
+    const userId = getUserId(user);
+
+    if (!userId) {
+      notify("User id not found.", "error");
+      return;
+    }
+
+    setDeleteConfirm({
+      show: true,
+      user,
+      loading: false,
+    });
+  };
+
+  const closeDeleteConfirm = () => {
+    if (deleteConfirm.loading) return;
+    setDeleteConfirm(EMPTY_DELETE_CONFIRM);
+  };
+
+  const confirmDeleteUser = async () => {
+    const user = deleteConfirm.user;
     const userId = getUserId(user);
     const role = getUserRole(user);
 
     if (!userId) {
-      notify("User id not found.");
+      notify("User id not found.", "error");
+      setDeleteConfirm(EMPTY_DELETE_CONFIRM);
       return;
     }
 
-    const confirmDelete = window.confirm(
-      role === "admin"
-        ? "Are you sure you want to delete this admin?"
-        : "Are you sure you want to delete this client?"
-    );
-
-    if (!confirmDelete) return;
-
     try {
+      setDeleteConfirm((prev) => ({
+        ...prev,
+        loading: true,
+      }));
+
       await API.delete(`/admin/clients/${userId}`);
 
       setUsers((prev) => prev.filter((item) => getUserId(item) !== userId));
+
+      setDeleteConfirm(EMPTY_DELETE_CONFIRM);
 
       notify(
         role === "admin"
@@ -333,10 +377,13 @@ export default function Users({ showSuccess }) {
     } catch (err) {
       console.log("Delete user error:", err.response?.data || err.message);
 
+      setDeleteConfirm(EMPTY_DELETE_CONFIRM);
+
       notify(
         err.response?.data?.error ||
           err.response?.data?.message ||
-          "Unable to delete user."
+          "Unable to delete user.",
+        "error"
       );
     }
   };
@@ -439,7 +486,7 @@ export default function Users({ showSuccess }) {
                     <button
                       type="button"
                       className="delete-client-btn"
-                      onClick={() => deleteUser(user)}
+                      onClick={() => openDeleteConfirm(user)}
                     >
                       Delete
                     </button>
@@ -602,6 +649,104 @@ export default function Users({ showSuccess }) {
           </div>
         </div>
       )}
+
+      {deleteConfirm.show && (
+        <DeleteConfirmPopup
+          user={deleteConfirm.user}
+          role={getUserRole(deleteConfirm.user)}
+          name={getUserName(deleteConfirm.user)}
+          loading={deleteConfirm.loading}
+          onCancel={closeDeleteConfirm}
+          onConfirm={confirmDeleteUser}
+        />
+      )}
+
+      {notice.show && (
+        <UserNoticePopup notice={notice} onClose={closeNotice} />
+      )}
     </>
+  );
+}
+
+function DeleteConfirmPopup({ user, role, name, loading, onCancel, onConfirm }) {
+  const isAdmin = role === "admin";
+
+  return (
+    <div className="admin-delete-confirm-overlay">
+      <div className="admin-delete-confirm-popup">
+        <button
+          type="button"
+          className="admin-delete-confirm-close"
+          onClick={onCancel}
+          disabled={loading}
+        >
+          ×
+        </button>
+
+        <div className={isAdmin ? "delete-icon admin" : "delete-icon client"}>
+          !
+        </div>
+
+        <h2>{isAdmin ? "Delete Admin" : "Delete Client"}</h2>
+
+        <p>
+          Are you sure you want to delete{" "}
+          <strong>{name || user?.email || "this user"}</strong>?
+        </p>
+
+        <span>
+          This action will remove the account from the admin panel. You cannot
+          undo this action.
+        </span>
+
+        <div className="admin-delete-confirm-actions">
+          <button
+            type="button"
+            className="delete-confirm-cancel"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            className="delete-confirm-danger"
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? "Deleting..." : "Yes, Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserNoticePopup({ notice, onClose }) {
+  const isSuccess = notice.type === "success";
+
+  return (
+    <div className="user-notice-overlay">
+      <div className={`user-notice-popup ${notice.type}`}>
+        <button
+          type="button"
+          className="user-notice-close"
+          onClick={onClose}
+        >
+          ×
+        </button>
+
+        <div className="user-notice-icon">{isSuccess ? "✓" : "!"}</div>
+
+        <h2>{notice.title}</h2>
+
+        <p>{notice.message}</p>
+
+        <button type="button" className="user-notice-btn" onClick={onClose}>
+          OK
+        </button>
+      </div>
+    </div>
   );
 }

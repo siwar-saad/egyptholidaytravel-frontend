@@ -20,6 +20,7 @@ const createEmptyHotel = () => ({
   groupTitle: "",
   groupSubtitle: "",
   displayOrder: 0,
+  visibility: "Private",
   periods: [{ ...emptyPeriod }],
 });
 
@@ -36,7 +37,7 @@ const getImageUrl = (src) => {
 const cleanUniqueImages = (images = []) =>
   [...new Set(images.map((item) => String(item || "").trim()).filter(Boolean))];
 
-export default function Hotels({ showSuccess }) {
+export default function Hotels() {
   const defaultCover =
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
 
@@ -49,18 +50,39 @@ export default function Hotels({ showSuccess }) {
   const [manualImageUrl, setManualImageUrl] = useState("");
   const [hotelForm, setHotelForm] = useState(createEmptyHotel());
 
-  const notify = (message) => {
-    if (typeof showSuccess === "function") {
-      showSuccess(message);
-    }
+  const [hotelNotice, setHotelNotice] = useState({
+    show: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const notify = (message, type = "success") => {
+    setHotelNotice({
+      show: true,
+      type,
+      title: type === "success" ? "Success" : "Notice",
+      message,
+    });
   };
+
+  const closeNotice = () => {
+    setHotelNotice({
+      show: false,
+      type: "success",
+      title: "",
+      message: "",
+    });
+  };
+
+  const getHotelId = (hotel) => hotel?._id || hotel?.id;
 
   const loadHotels = async () => {
     try {
       const res = await API.get("/hotels");
-      setHotels(res.data || []);
+      setHotels(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to load hotels.");
+      notify(err.response?.data?.error || "Unable to load hotels.", "error");
     }
   };
 
@@ -70,8 +92,8 @@ export default function Hotels({ showSuccess }) {
 
   const filteredHotels = hotels.filter((hotel) =>
     `${hotel.name || ""} ${hotel.city || ""} ${hotel.meal || ""} ${
-      hotel.group_title || ""
-    }`
+      hotel.group_title || hotel.groupTitle || ""
+    } ${hotel.visibility || ""}`
       .toLowerCase()
       .includes(hotelSearch.toLowerCase())
   );
@@ -81,6 +103,7 @@ export default function Hotels({ showSuccess }) {
     setEditingHotel(null);
     setHotelForm(createEmptyHotel());
     setManualImageUrl("");
+    setSaving(false);
   };
 
   const openAddHotel = () => {
@@ -103,11 +126,13 @@ export default function Hotels({ showSuccess }) {
       image: hotel.image || cleanedGallery[0] || "",
       gallery: cleanedGallery,
       description: hotel.description || "",
-      groupTitle: hotel.group_title || "",
-      groupSubtitle: hotel.group_subtitle || "",
-      displayOrder: hotel.display_order || 0,
+      groupTitle: hotel.group_title || hotel.groupTitle || "",
+      groupSubtitle: hotel.group_subtitle || hotel.groupSubtitle || "",
+      displayOrder: hotel.display_order || hotel.displayOrder || 0,
+      visibility: hotel.visibility || "Private",
       periods: periods.length ? periods : [{ ...emptyPeriod }],
     });
+
     setManualImageUrl("");
     setShowHotelForm(true);
   };
@@ -185,7 +210,10 @@ export default function Hotels({ showSuccess }) {
 
       notify("Hotel photos uploaded successfully.");
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to upload hotel photos.");
+      notify(
+        err.response?.data?.error || "Unable to upload hotel photos.",
+        "error"
+      );
     } finally {
       setUploadingImages(false);
     }
@@ -195,7 +223,7 @@ export default function Hotels({ showSuccess }) {
     const cleanUrl = manualImageUrl.trim();
 
     if (!cleanUrl) {
-      notify("Please write an image URL first.");
+      notify("Please write an image URL first.", "error");
       return;
     }
 
@@ -253,6 +281,7 @@ export default function Hotels({ showSuccess }) {
       groupTitle: hotelForm.groupTitle.trim(),
       groupSubtitle: hotelForm.groupSubtitle.trim(),
       displayOrder: Number(hotelForm.displayOrder || 0),
+      visibility: hotelForm.visibility || "Private",
       periods,
     };
   };
@@ -261,7 +290,7 @@ export default function Hotels({ showSuccess }) {
     const payload = buildPayload();
 
     if (!payload.name || !payload.city || !payload.meal) {
-      notify("Please fill hotel name, city and meal plan.");
+      notify("Please fill hotel name, city and meal plan.", "error");
       return;
     }
 
@@ -269,11 +298,12 @@ export default function Hotels({ showSuccess }) {
       setSaving(true);
 
       if (editingHotel) {
-        const res = await API.put(`/admin/${editingHotel.id}`, payload);
+        const hotelId = getHotelId(editingHotel);
+        const res = await API.put(`/admin/${hotelId}`, payload);
 
         setHotels((current) =>
           current.map((hotel) =>
-            hotel.id === editingHotel.id ? res.data : hotel
+            getHotelId(hotel) === hotelId ? res.data : hotel
           )
         );
 
@@ -285,20 +315,70 @@ export default function Hotels({ showSuccess }) {
       }
 
       closeHotelForm();
+      loadHotels();
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to save hotel.");
+      notify(err.response?.data?.error || "Unable to save hotel.", "error");
     } finally {
       setSaving(false);
     }
   };
 
+  const updateHotelVisibility = async (hotel, visibility) => {
+    const hotelId = getHotelId(hotel);
+
+    if (!hotelId) {
+      notify("Hotel id not found.", "error");
+      return;
+    }
+
+    try {
+      const payload = {
+        name: hotel.name || "",
+        city: hotel.city || "",
+        meal: hotel.meal || "",
+        image: hotel.image || "",
+        gallery: Array.isArray(hotel.gallery) ? hotel.gallery : [],
+        description: hotel.description || "",
+        groupTitle: hotel.group_title || hotel.groupTitle || "",
+        groupSubtitle: hotel.group_subtitle || hotel.groupSubtitle || "",
+        displayOrder: Number(hotel.display_order || hotel.displayOrder || 0),
+        visibility,
+        periods: Array.isArray(hotel.periods) ? hotel.periods : [],
+      };
+
+      await API.put(`/admin/${hotelId}`, payload);
+
+      setHotels((current) =>
+        current.map((item) =>
+          getHotelId(item) === hotelId ? { ...item, visibility } : item
+        )
+      );
+
+      notify("Hotel visibility updated.");
+    } catch (err) {
+      notify(
+        err.response?.data?.error || "Unable to update hotel visibility.",
+        "error"
+      );
+    }
+  };
+
   const deleteHotel = async (hotelId) => {
+    if (!hotelId) {
+      notify("Hotel id not found.", "error");
+      return;
+    }
+
     try {
       await API.delete(`/admin/${hotelId}`);
-      setHotels((current) => current.filter((hotel) => hotel.id !== hotelId));
+
+      setHotels((current) =>
+        current.filter((hotel) => getHotelId(hotel) !== hotelId)
+      );
+
       notify("Hotel deleted successfully.");
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to delete hotel.");
+      notify(err.response?.data?.error || "Unable to delete hotel.", "error");
     }
   };
 
@@ -319,7 +399,7 @@ export default function Hotels({ showSuccess }) {
         <div className="client-tools">
           <input
             type="text"
-            placeholder="Search hotels by name, city or meal plan..."
+            placeholder="Search hotels by name, city, meal plan or visibility..."
             value={hotelSearch}
             onChange={(e) => setHotelSearch(e.target.value)}
           />
@@ -332,12 +412,13 @@ export default function Hotels({ showSuccess }) {
             {filteredHotels.map((hotel) => {
               const periods = Array.isArray(hotel.periods) ? hotel.periods : [];
               const firstPeriod = periods[0] || {};
+              const hotelId = getHotelId(hotel);
 
               return (
-                <div className="package-admin-card" key={hotel.id}>
+                <div className="package-admin-card" key={hotelId}>
                   <img
                     src={getImageUrl(hotel.image) || defaultCover}
-                    alt={hotel.name}
+                    alt={hotel.name || "Hotel"}
                     className="package-admin-image"
                     onError={(e) => {
                       e.currentTarget.src = defaultCover;
@@ -345,20 +426,21 @@ export default function Hotels({ showSuccess }) {
                   />
 
                   <div className="package-admin-content">
-                    <h3>{hotel.name}</h3>
+                    <h3>{hotel.name || "Untitled Hotel"}</h3>
 
                     <p>
-                      <strong>City:</strong> {hotel.city} <br />
-                      <strong>Meal Plan:</strong> {hotel.meal} <br />
+                      <strong>City:</strong> {hotel.city || "-"} <br />
+                      <strong>Meal Plan:</strong> {hotel.meal || "-"} <br />
                       <strong>Group:</strong>{" "}
-                      {hotel.group_title || "Our Hotels"} <br />
+                      {hotel.group_title || hotel.groupTitle || "Our Hotels"}{" "}
+                      <br />
                       <strong>Periods:</strong> {periods.length}
                     </p>
 
                     <div className="package-admin-meta">
-                      <span>Single: {firstPeriod.single || "-"} </span>
-                      <span>Double: {firstPeriod.double || "-"} </span>
-                      <span>Triple: {firstPeriod.triple || "-"} </span>
+                      <span>Single: {firstPeriod.single || "-"}</span>
+                      <span>Double: {firstPeriod.double || "-"}</span>
+                      <span>{hotel.visibility || "Private"}</span>
                     </div>
                   </div>
 
@@ -367,13 +449,27 @@ export default function Hotels({ showSuccess }) {
                       Edit
                     </button>
 
-                    <button
-                      type="button"
-                      className="delete-package-btn"
-                      onClick={() => deleteHotel(hotel.id)}
+                    <select
+                      className={`package-select ${
+                        hotel?.visibility === "Published"
+                          ? "uploaded"
+                          : "missing"
+                      }`}
+                      value={hotel?.visibility || "Private"}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (value === "Delete") {
+                          deleteHotel(hotelId);
+                        } else {
+                          updateHotelVisibility(hotel, value);
+                        }
+                      }}
                     >
-                      Delete
-                    </button>
+                      <option value="Published">Published</option>
+                      <option value="Private">Private</option>
+                      <option value="Delete">Delete</option>
+                    </select>
                   </div>
                 </div>
               );
@@ -428,6 +524,16 @@ export default function Hotels({ showSuccess }) {
                 }
               />
 
+              <select
+                value={hotelForm.visibility}
+                onChange={(e) =>
+                  setHotelForm({ ...hotelForm, visibility: e.target.value })
+                }
+              >
+                <option value="Published">Published</option>
+                <option value="Private">Private</option>
+              </select>
+
               <input
                 type="text"
                 placeholder="Hotel Name"
@@ -466,7 +572,9 @@ export default function Hotels({ showSuccess }) {
                   />
 
                   <span>
-                    {uploadingImages ? "Uploading photos..." : "Choose hotel photos"}
+                    {uploadingImages
+                      ? "Uploading photos..."
+                      : "Choose hotel photos"}
                   </span>
 
                   <small>PNG, JPG, JPEG or WEBP</small>
@@ -489,7 +597,10 @@ export default function Hotels({ showSuccess }) {
               {hotelForm.gallery.length > 0 && (
                 <div className="hotel-images-preview-grid">
                   {hotelForm.gallery.map((photo, index) => (
-                    <div className="hotel-image-preview-card" key={`${photo}-${index}`}>
+                    <div
+                      className="hotel-image-preview-card"
+                      key={`${photo}-${index}`}
+                    >
                       <img
                         src={getImageUrl(photo)}
                         alt={`Hotel preview ${index + 1}`}
@@ -545,14 +656,18 @@ export default function Hotels({ showSuccess }) {
                       type="text"
                       placeholder="From"
                       value={period.from}
-                      onChange={(e) => updatePeriod(index, "from", e.target.value)}
+                      onChange={(e) =>
+                        updatePeriod(index, "from", e.target.value)
+                      }
                     />
 
                     <input
                       type="text"
                       placeholder="To"
                       value={period.to}
-                      onChange={(e) => updatePeriod(index, "to", e.target.value)}
+                      onChange={(e) =>
+                        updatePeriod(index, "to", e.target.value)
+                      }
                     />
 
                     <input
@@ -603,6 +718,36 @@ export default function Hotels({ showSuccess }) {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {hotelNotice.show && (
+        <div className="hotel-admin-notice-overlay">
+          <div className={`hotel-admin-notice ${hotelNotice.type}`}>
+            <button
+              type="button"
+              className="hotel-admin-notice-close"
+              onClick={closeNotice}
+            >
+              ×
+            </button>
+
+            <div className="hotel-admin-notice-icon">
+              {hotelNotice.type === "success" ? "✓" : "!"}
+            </div>
+
+            <h3>{hotelNotice.title}</h3>
+
+            <p>{hotelNotice.message}</p>
+
+            <button
+              type="button"
+              className="hotel-admin-notice-btn"
+              onClick={closeNotice}
+            >
+              OK
+            </button>
           </div>
         </div>
       )}

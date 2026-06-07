@@ -42,10 +42,15 @@ export default function Packages({ showSuccess }) {
   const getPackageId = (item) => item?._id || item?.id;
 
   const getPackagesArray = (data) => {
+    console.log("RAW PACKAGES RESPONSE:", data);
+
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.packages)) return data.packages;
     if (Array.isArray(data?.data)) return data.data;
     if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data?.rows)) return data.rows;
+    if (Array.isArray(data?.result)) return data.result;
+    if (Array.isArray(data?.results)) return data.results;
 
     return [];
   };
@@ -60,12 +65,23 @@ export default function Packages({ showSuccess }) {
 
   const getImageUrl = (image) => {
     if (!image) return DEFAULT_COVER;
-    if (image.startsWith("http") || image.startsWith("data:")) return image;
+
+    if (
+      image.startsWith("http") ||
+      image.startsWith("data:") ||
+      image.startsWith("blob:")
+    ) {
+      return image;
+    }
 
     const apiBase = API.defaults.baseURL || "/api";
     const origin = apiBase.replace(/\/api\/?$/, "");
 
-    return `${origin}${image}`;
+    if (image.startsWith("/")) {
+      return `${origin}${image}`;
+    }
+
+    return image;
   };
 
   const stringifyJson = (value) => {
@@ -80,30 +96,63 @@ export default function Packages({ showSuccess }) {
   };
 
   const parseJson = (value, fieldName) => {
-    if (!value?.trim()) return [];
+    const cleanValue = String(value || "").trim();
+
+    if (!cleanValue) return [];
 
     try {
-      const parsed = JSON.parse(value);
+      const parsed = JSON.parse(cleanValue);
 
       if (!Array.isArray(parsed)) {
-        throw new Error(`${fieldName} must be an array`);
+        throw new Error();
       }
 
       return parsed;
-    } catch (error) {
-      throw new Error(`${fieldName} must be valid JSON array`);
+    } catch {
+      throw new Error(`${fieldName} must be a valid JSON array`);
     }
   };
+
+  useEffect(() => {
+    if (!showPackageForm) return;
+
+    const oldBodyOverflow = document.body.style.overflow;
+    const oldHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = oldBodyOverflow;
+      document.documentElement.style.overflow = oldHtmlOverflow;
+    };
+  }, [showPackageForm]);
 
   const fetchPackages = async () => {
     try {
       setLoading(true);
 
-      const res = await API.get("/admin/packages");
+      let res;
 
-      setPackages(getPackagesArray(res.data));
+      try {
+        res = await API.get("/admin/packages");
+      } catch (adminError) {
+        console.log(
+          "Admin packages route failed. Trying public /packages:",
+          adminError.response?.data || adminError.message
+        );
+
+        res = await API.get("/packages");
+      }
+
+      const loadedPackages = getPackagesArray(res.data);
+
+      console.log("LOADED PACKAGES:", loadedPackages);
+
+      setPackages(loadedPackages);
     } catch (err) {
       console.log("Packages error:", err.response?.data || err.message);
+      notify(err.response?.data?.error || "Unable to load packages.");
       setPackages([]);
     } finally {
       setLoading(false);
@@ -130,22 +179,25 @@ export default function Packages({ showSuccess }) {
 
   const openEditPackage = (item) => {
     setEditingPackage(item);
+
     setNewPackage({
       name: item?.name || item?.title || "",
       backendName: item?.backendName || item?.backend_name || "",
       route: item?.route || "",
       duration: item?.duration || "",
       transfer: item?.transfer || "",
-      transferReduction: item?.transferReduction || item?.transfer_reduction || "",
+      transferReduction:
+        item?.transferReduction || item?.transfer_reduction || "",
       startPrice: item?.startPrice || item?.start_price || item?.price || "",
       programme: item?.programme || "",
       price: item?.price || item?.startPrice || "",
       visibility: item?.visibility || "Private",
-      image: item?.image || "",
+      image: item?.image || item?.image_url || item?.cover || "",
       options: stringifyJson(item?.options),
       itinerary: stringifyJson(item?.itinerary),
       displayOrder: item?.displayOrder || item?.display_order || 0,
     });
+
     setShowPackageForm(true);
   };
 
@@ -178,8 +230,10 @@ export default function Packages({ showSuccess }) {
 
         setNewPackage((prevPackage) => ({
           ...prevPackage,
-          image: res.data.image,
+          image: res.data?.image || res.data?.url || "",
         }));
+
+        notify("Package image uploaded successfully.");
       } catch (err) {
         notify(err.response?.data?.error || "Unable to upload package image.");
       }
@@ -239,7 +293,10 @@ export default function Packages({ showSuccess }) {
       setSaving(true);
 
       const res = editingPackage
-        ? await API.put(`/admin/packages/${getPackageId(editingPackage)}`, packageData)
+        ? await API.put(
+            `/admin/packages/${getPackageId(editingPackage)}`,
+            packageData
+          )
         : await API.post("/admin/packages", packageData);
 
       const savedPackage = getPackageFromResponse(res.data, {
@@ -258,7 +315,12 @@ export default function Packages({ showSuccess }) {
       );
 
       closePackageForm();
-      notify(editingPackage ? "Package updated successfully." : "Package added successfully.");
+
+      notify(
+        editingPackage
+          ? "Package updated successfully."
+          : "Package added successfully."
+      );
 
       fetchPackages();
     } catch (err) {
@@ -367,13 +429,9 @@ export default function Packages({ showSuccess }) {
               return (
                 <div className="package-admin-card" key={packageId || index}>
                   <img
-                    src={
-                      getImageUrl(
-                        item?.image ||
-                          item?.image_url ||
-                          item?.cover
-                      )
-                    }
+                    src={getImageUrl(
+                      item?.image || item?.image_url || item?.cover
+                    )}
                     alt={item?.name || item?.title || "Package"}
                     className="package-admin-image"
                     onError={(e) => {
@@ -391,7 +449,13 @@ export default function Packages({ showSuccess }) {
                     </p>
 
                     <div className="package-admin-meta">
-                      <span>{item?.startPrice || item?.start_price || item?.price || "No price"}</span>
+                      <span>
+                        {item?.startPrice ||
+                          item?.start_price ||
+                          item?.price ||
+                          "No price"}
+                      </span>
+
                       <span>{item?.visibility || "Private"}</span>
                     </div>
                   </div>
@@ -432,11 +496,11 @@ export default function Packages({ showSuccess }) {
 
       {showPackageForm && (
         <div className="package-popup-overlay">
-          <div className="package-popup">
-            <div className="package-popup-head">
+          <div className="package-popup package-popup-pro">
+            <div className="package-popup-head package-popup-head-sticky">
               <div>
                 <h2>{editingPackage ? "Edit Package" : "Add New Package"}</h2>
-                <p>Create a complete travel package.</p>
+                <p>Create and manage a professional travel package.</p>
               </div>
 
               <button
@@ -448,123 +512,184 @@ export default function Packages({ showSuccess }) {
               </button>
             </div>
 
-            <div className="package-popup-form">
-              <input
-                type="text"
-                placeholder="Package Name"
-                value={newPackage.name}
-                onChange={(e) => updatePackageField("name", e.target.value)}
-              />
+            <div className="package-popup-form package-popup-form-scroll">
+              <div className="package-form-section">
+                <h3>Basic Information</h3>
 
-              <input
-                type="text"
-                placeholder="Backend Name"
-                value={newPackage.backendName}
-                onChange={(e) => updatePackageField("backendName", e.target.value)}
-              />
+                <input
+                  type="text"
+                  placeholder="Package Name"
+                  value={newPackage.name}
+                  onChange={(e) => updatePackageField("name", e.target.value)}
+                />
 
-              <input
-                type="text"
-                placeholder="Route, e.g. Cairo - Hurghada"
-                value={newPackage.route}
-                onChange={(e) => updatePackageField("route", e.target.value)}
-              />
+                <input
+                  type="text"
+                  placeholder="Backend Name"
+                  value={newPackage.backendName}
+                  onChange={(e) =>
+                    updatePackageField("backendName", e.target.value)
+                  }
+                />
 
-              <input
-                type="text"
-                placeholder="Duration, e.g. 6 Nights"
-                value={newPackage.duration}
-                onChange={(e) => updatePackageField("duration", e.target.value)}
-              />
+                <input
+                  type="text"
+                  placeholder="Route, e.g. Cairo - Hurghada"
+                  value={newPackage.route}
+                  onChange={(e) => updatePackageField("route", e.target.value)}
+                />
 
-              <input
-                type="text"
-                placeholder="Transfer"
-                value={newPackage.transfer}
-                onChange={(e) => updatePackageField("transfer", e.target.value)}
-              />
+                <input
+                  type="text"
+                  placeholder="Duration, e.g. 6 Nights"
+                  value={newPackage.duration}
+                  onChange={(e) =>
+                    updatePackageField("duration", e.target.value)
+                  }
+                />
+              </div>
 
-              <input
-                type="text"
-                placeholder="Transfer Reduction"
-                value={newPackage.transferReduction}
-                onChange={(e) =>
-                  updatePackageField("transferReduction", e.target.value)
-                }
-              />
+              <div className="package-form-section">
+                <h3>Price & Transfer</h3>
 
-              <input
-                type="text"
-                placeholder="Starting Price"
-                value={newPackage.startPrice}
-                onChange={(e) => updatePackageField("startPrice", e.target.value)}
-              />
+                <input
+                  type="text"
+                  placeholder="Transfer"
+                  value={newPackage.transfer}
+                  onChange={(e) =>
+                    updatePackageField("transfer", e.target.value)
+                  }
+                />
 
-              <textarea
-                placeholder="Full Programme"
-                value={newPackage.programme}
-                onChange={(e) =>
-                  updatePackageField("programme", e.target.value)
-                }
-              />
+                <input
+                  type="text"
+                  placeholder="Transfer Reduction"
+                  value={newPackage.transferReduction}
+                  onChange={(e) =>
+                    updatePackageField("transferReduction", e.target.value)
+                  }
+                />
 
-              <textarea
-                placeholder='Options JSON array, e.g. [{"title":"Option 01","rows":[{"city":"Cairo","nights":"2 Nights","hotel":"Hotel","meal":"Breakfast","sgl":"100$","dbl":"80$","tpl":"70$"}]}]'
-                value={newPackage.options}
-                onChange={(e) => updatePackageField("options", e.target.value)}
-              />
+                <input
+                  type="text"
+                  placeholder="Starting Price"
+                  value={newPackage.startPrice}
+                  onChange={(e) =>
+                    updatePackageField("startPrice", e.target.value)
+                  }
+                />
 
-              <textarea
-                placeholder='Itinerary JSON array, e.g. [{"day":"Day 1","title":"Arrival","details":["Meet and assist"]}]'
-                value={newPackage.itinerary}
-                onChange={(e) => updatePackageField("itinerary", e.target.value)}
-              />
+                <input
+                  type="text"
+                  placeholder="Price"
+                  value={newPackage.price}
+                  onChange={(e) => updatePackageField("price", e.target.value)}
+                />
 
-              <input
-                type="number"
-                placeholder="Display Order"
-                value={newPackage.displayOrder}
-                onChange={(e) => updatePackageField("displayOrder", e.target.value)}
-              />
+                <input
+                  type="number"
+                  placeholder="Display Order"
+                  value={newPackage.displayOrder}
+                  onChange={(e) =>
+                    updatePackageField("displayOrder", e.target.value)
+                  }
+                />
+              </div>
 
-              <input
-                type="text"
-                placeholder="Price"
-                value={newPackage.price}
-                onChange={(e) => updatePackageField("price", e.target.value)}
-              />
+              <div className="package-form-section">
+                <h3>Programme</h3>
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePackageImage}
-              />
+                <textarea
+                  className="big-textarea"
+                  placeholder="Write the full programme here..."
+                  value={newPackage.programme}
+                  onChange={(e) =>
+                    updatePackageField("programme", e.target.value)
+                  }
+                />
+              </div>
 
-              {newPackage.image && (
-                <div className="hotel-preview-grid">
-                  <div className="hotel-preview-item">
-                    <img src={getImageUrl(newPackage.image)} alt="Package preview" />
+              <div className="package-form-section">
+                <h3>Package Options</h3>
 
-                    <button type="button" onClick={removePackageImage}>
-                      ×
-                    </button>
+                <p className="package-helper-text">
+                  Add package options in JSON format. Leave this field empty if
+                  you do not need options.
+                </p>
+
+                <textarea
+                  className="json-textarea"
+                  placeholder="Add package options here..."
+                  value={newPackage.options}
+                  onChange={(e) => updatePackageField("options", e.target.value)}
+                />
+              </div>
+
+              <div className="package-form-section">
+                <h3>Itinerary</h3>
+
+                <p className="package-helper-text">
+                  Add itinerary days in JSON format. Leave this field empty if
+                  you do not need itinerary.
+                </p>
+
+                <textarea
+                  className="json-textarea"
+                  placeholder="Add itinerary details here..."
+                  value={newPackage.itinerary}
+                  onChange={(e) =>
+                    updatePackageField("itinerary", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="package-form-section">
+                <h3>Package Image</h3>
+
+                <label className="package-image-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePackageImage}
+                  />
+
+                  <span>Choose package image</span>
+                  <small>PNG, JPG, JPEG or WEBP</small>
+                </label>
+
+                {newPackage.image && (
+                  <div className="hotel-preview-grid">
+                    <div className="hotel-preview-item">
+                      <img
+                        src={getImageUrl(newPackage.image)}
+                        alt="Package preview"
+                      />
+
+                      <button type="button" onClick={removePackageImage}>
+                        ×
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <select
-                value={newPackage.visibility}
-                onChange={(e) =>
-                  updatePackageField("visibility", e.target.value)
-                }
-              >
-                <option value="Published">Published</option>
-                <option value="Private">Private</option>
-              </select>
+                <select
+                  value={newPackage.visibility}
+                  onChange={(e) =>
+                    updatePackageField("visibility", e.target.value)
+                  }
+                >
+                  <option value="Published">Published</option>
+                  <option value="Private">Private</option>
+                </select>
+              </div>
 
-              <div className="package-popup-actions">
+              <div className="package-popup-actions package-popup-actions-sticky">
                 <button type="button" onClick={savePackage} disabled={saving}>
-                  {saving ? "Saving..." : editingPackage ? "Save Changes" : "Save Package"}
+                  {saving
+                    ? "Saving..."
+                    : editingPackage
+                    ? "Save Changes"
+                    : "Save Package"}
                 </button>
 
                 <button
