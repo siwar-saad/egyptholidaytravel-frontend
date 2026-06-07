@@ -55,8 +55,9 @@ export default function Admin() {
     localStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("token");
+    window.dispatchEvent(new Event("authChanged"));
 
-    window.location.href = "/login";
+    window.location.replace("/login");
   };
 
   useEffect(() => {

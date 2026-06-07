@@ -12,6 +12,7 @@ import {
   FaPlaneDeparture,
   FaCalendarPlus,
 } from "react-icons/fa";
+import API from "../../api";
 import "./Admin.css";
 
 export default function AdminLayout({ children }) {
@@ -47,13 +48,20 @@ export default function AdminLayout({ children }) {
     return location.pathname.startsWith(path);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await API.post("/auth/logout");
+    } catch (err) {
+      console.log("Admin logout error:", err.response?.data || err.message);
+    }
+
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     sessionStorage.removeItem("user");
     sessionStorage.removeItem("token");
+    window.dispatchEvent(new Event("authChanged"));
 
-    navigate("/login");
+    window.location.replace("/login");
   };
 
   return (

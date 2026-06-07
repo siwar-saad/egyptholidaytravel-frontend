@@ -251,11 +251,15 @@ export default function UserProfile() {
   useEffect(() => {
     const loadClientData = async () => {
       const storedUser = normalizeUser(getStoredUser() || {});
+      let profileData = storedUser;
+      let apiBookings = [];
+      let apiPayments = [];
+      let clientMessages = [];
 
       try {
         const profileRes = await API.get("/client/profile");
 
-        const profileData = {
+        profileData = normalizeUser({
           ...profileRes.data,
           firstName: profileRes.data?.firstName || "",
           lastName: profileRes.data?.lastName || "",
@@ -266,75 +270,50 @@ export default function UserProfile() {
           country: profileRes.data?.country || "",
           avatar: profileRes.data?.avatar || "",
           role: profileRes.data?.role || "user",
-        };
+        });
 
         setUser(profileData);
         setEditForm(profileData);
+        saveStoredUser(profileData);
       } catch (err) {
         console.log("CLIENT PROFILE ERROR:", err.response?.data || err.message);
+
+        setUser(profileData);
+        setEditForm(profileData);
       }
 
       try {
         const bookingsRes = await API.get("/client/mybookings");
-        setBookings(bookingsRes.data || []);
+        apiBookings = bookingsRes.data || [];
       } catch (err) {
         console.log("CLIENT BOOKINGS ERROR:", err.response?.data || err.message);
       }
 
       try {
         const paymentsRes = await API.get("/client/payments");
-        const profileData = normalizeUser(profileRes.data || storedUser);
-        const clientMessages = messagesRes.data || [];
-
-        const adminBookings = getAdminCreatedBookingsForClient(
-          profileData.email
-        );
-
-        const finalBookings = mergeBookings(
-          bookingsRes.data || [],
-          adminBookings
-        );
-
-        setUser(profileData);
-        setEditForm(profileData);
-        saveStoredUser(profileData);
-
-        setBookings(finalBookings);
-        setPayments(paymentsRes.data || []);
+        apiPayments = paymentsRes.data || [];
       } catch (err) {
         console.log("CLIENT PAYMENTS ERROR:", err.response?.data || err.message);
       }
 
       try {
         const messagesRes = await API.get("/client/messages");
-        const clientMessages = messagesRes.data || [];
-
-        setMessages(clientMessages);
-
-        setMessageNotifications(
-          clientMessages.filter(
-            (msg) => (msg.sender || "client") === "admin" && !msg.isRead
-          ).length
-        );
+        clientMessages = messagesRes.data || [];
       } catch (err) {
         console.log("CLIENT MESSAGES ERROR:", err.response?.data || err.message);
-        console.log("CLIENT DATA ERROR:", err.response?.data || err.message);
-
-        const fallbackUser = normalizeUser(storedUser);
-
-        const adminBookings = getAdminCreatedBookingsForClient(
-          fallbackUser.email
-        );
-
-        setUser(fallbackUser);
-        setEditForm(fallbackUser);
-        saveStoredUser(fallbackUser);
-
-        setBookings(adminBookings);
-        setPayments([]);
-        setMessages([]);
-        setMessageNotifications(0);
       }
+
+      const adminBookings = getAdminCreatedBookingsForClient(profileData.email);
+      const finalBookings = mergeBookings(apiBookings, adminBookings);
+
+      setBookings(finalBookings);
+      setPayments(apiPayments);
+      setMessages(clientMessages);
+      setMessageNotifications(
+        clientMessages.filter(
+          (msg) => (msg.sender || "client") === "admin" && !msg.isRead
+        ).length
+      );
     };
 
     loadClientData();
