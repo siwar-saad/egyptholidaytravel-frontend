@@ -37,7 +37,116 @@ const getImageUrl = (src) => {
 const cleanUniqueImages = (images = []) =>
   [...new Set(images.map((item) => String(item || "").trim()).filter(Boolean))];
 
-export default function Hotels() {
+const monthMap = {
+  jan: "01",
+  january: "01",
+  feb: "02",
+  february: "02",
+  mar: "03",
+  march: "03",
+  apr: "04",
+  april: "04",
+  may: "05",
+  jun: "06",
+  june: "06",
+  jul: "07",
+  july: "07",
+  aug: "08",
+  august: "08",
+  sep: "09",
+  sept: "09",
+  september: "09",
+  oct: "10",
+  october: "10",
+  nov: "11",
+  november: "11",
+  dec: "12",
+  december: "12",
+};
+
+const monthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+const normalizeDateForInput = (value) => {
+  if (!value) return "";
+
+  const cleanValue = String(value).trim();
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
+    return cleanValue;
+  }
+
+  const parts = cleanValue.split("-");
+
+  if (parts.length >= 3) {
+    const day = String(parts[0]).padStart(2, "0");
+    const monthText = String(parts[1]).toLowerCase();
+    let year = String(parts[2]).trim();
+
+    if (year.length === 2) {
+      year = `20${year}`;
+    }
+
+    const month = monthMap[monthText];
+
+    if (month && year.length === 4) {
+      return `${year}-${month}-${day}`;
+    }
+  }
+
+  const date = new Date(cleanValue);
+
+  if (!Number.isNaN(date.getTime())) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+  return "";
+};
+
+const formatDateForStorage = (value) => {
+  if (!value) return "";
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const [year, month, day] = value.split("-");
+  const monthName = monthNames[Number(month) - 1];
+
+  return `${day}-${monthName}-${year}`;
+};
+
+const normalizePeriodsForForm = (periods = []) => {
+  if (!Array.isArray(periods) || periods.length === 0) {
+    return [{ ...emptyPeriod }];
+  }
+
+  return periods.map((period) => ({
+    from: normalizeDateForInput(period.from),
+    to: normalizeDateForInput(period.to),
+    single: period.single || "",
+    double: period.double || "",
+    triple: period.triple || "",
+  }));
+};
+
+export default function Hotels({ showSuccess }) {
   const defaultCover =
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
 
@@ -50,29 +159,12 @@ export default function Hotels() {
   const [manualImageUrl, setManualImageUrl] = useState("");
   const [hotelForm, setHotelForm] = useState(createEmptyHotel());
 
-  const [hotelNotice, setHotelNotice] = useState({
-    show: false,
-    type: "success",
-    title: "",
-    message: "",
-  });
-
-  const notify = (message, type = "success") => {
-    setHotelNotice({
-      show: true,
-      type,
-      title: type === "success" ? "Success" : "Notice",
-      message,
-    });
-  };
-
-  const closeNotice = () => {
-    setHotelNotice({
-      show: false,
-      type: "success",
-      title: "",
-      message: "",
-    });
+  const notify = (message) => {
+    if (typeof showSuccess === "function") {
+      showSuccess(message);
+    } else {
+      console.log(message);
+    }
   };
 
   const getHotelId = (hotel) => hotel?._id || hotel?.id;
@@ -82,7 +174,7 @@ export default function Hotels() {
       const res = await API.get("/hotels");
       setHotels(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to load hotels.", "error");
+      notify(err.response?.data?.error || "Unable to load hotels.");
     }
   };
 
@@ -119,6 +211,7 @@ export default function Hotels() {
     const periods = Array.isArray(hotel.periods) ? hotel.periods : [];
 
     setEditingHotel(hotel);
+
     setHotelForm({
       name: hotel.name || "",
       city: hotel.city || "",
@@ -130,7 +223,7 @@ export default function Hotels() {
       groupSubtitle: hotel.group_subtitle || hotel.groupSubtitle || "",
       displayOrder: hotel.display_order || hotel.displayOrder || 0,
       visibility: hotel.visibility || "Private",
-      periods: periods.length ? periods : [{ ...emptyPeriod }],
+      periods: normalizePeriodsForForm(periods),
     });
 
     setManualImageUrl("");
@@ -166,6 +259,7 @@ export default function Hotels() {
   const readFileAsDataUrl = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
+
       reader.onload = () => resolve(reader.result);
       reader.onerror = reject;
       reader.readAsDataURL(file);
@@ -210,10 +304,7 @@ export default function Hotels() {
 
       notify("Hotel photos uploaded successfully.");
     } catch (err) {
-      notify(
-        err.response?.data?.error || "Unable to upload hotel photos.",
-        "error"
-      );
+      notify(err.response?.data?.error || "Unable to upload hotel photos.");
     } finally {
       setUploadingImages(false);
     }
@@ -223,7 +314,7 @@ export default function Hotels() {
     const cleanUrl = manualImageUrl.trim();
 
     if (!cleanUrl) {
-      notify("Please write an image URL first.", "error");
+      notify("Please write an image URL first.");
       return;
     }
 
@@ -267,9 +358,17 @@ export default function Hotels() {
     const coverImage = hotelForm.image.trim() || gallery[0] || "";
     const finalGallery = cleanUniqueImages([coverImage, ...gallery]);
 
-    const periods = hotelForm.periods.filter((period) =>
-      Object.values(period).some((value) => String(value || "").trim())
-    );
+    const periods = hotelForm.periods
+      .filter((period) =>
+        Object.values(period).some((value) => String(value || "").trim())
+      )
+      .map((period) => ({
+        from: formatDateForStorage(period.from),
+        to: formatDateForStorage(period.to),
+        single: period.single,
+        double: period.double,
+        triple: period.triple,
+      }));
 
     return {
       name: hotelForm.name.trim(),
@@ -290,7 +389,7 @@ export default function Hotels() {
     const payload = buildPayload();
 
     if (!payload.name || !payload.city || !payload.meal) {
-      notify("Please fill hotel name, city and meal plan.", "error");
+      notify("Please fill hotel name, city and meal plan.");
       return;
     }
 
@@ -317,7 +416,7 @@ export default function Hotels() {
       closeHotelForm();
       loadHotels();
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to save hotel.", "error");
+      notify(err.response?.data?.error || "Unable to save hotel.");
     } finally {
       setSaving(false);
     }
@@ -327,7 +426,7 @@ export default function Hotels() {
     const hotelId = getHotelId(hotel);
 
     if (!hotelId) {
-      notify("Hotel id not found.", "error");
+      notify("Hotel id not found.");
       return;
     }
 
@@ -356,16 +455,13 @@ export default function Hotels() {
 
       notify("Hotel visibility updated.");
     } catch (err) {
-      notify(
-        err.response?.data?.error || "Unable to update hotel visibility.",
-        "error"
-      );
+      notify(err.response?.data?.error || "Unable to update hotel visibility.");
     }
   };
 
   const deleteHotel = async (hotelId) => {
     if (!hotelId) {
-      notify("Hotel id not found.", "error");
+      notify("Hotel id not found.");
       return;
     }
 
@@ -378,7 +474,7 @@ export default function Hotels() {
 
       notify("Hotel deleted successfully.");
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to delete hotel.", "error");
+      notify(err.response?.data?.error || "Unable to delete hotel.");
     }
   };
 
@@ -410,7 +506,10 @@ export default function Hotels() {
         ) : (
           <div className="packages-admin-grid">
             {filteredHotels.map((hotel) => {
-              const periods = Array.isArray(hotel.periods) ? hotel.periods : [];
+              const periods = Array.isArray(hotel.periods)
+                ? hotel.periods
+                : [];
+
               const firstPeriod = periods[0] || {};
               const hotelId = getHotelId(hotel);
 
@@ -651,53 +750,70 @@ export default function Hotels() {
                 </div>
 
                 {hotelForm.periods.map((period, index) => (
-                  <div className="hotel-period-row" key={index}>
-                    <input
-                      type="text"
-                      placeholder="From"
-                      value={period.from}
-                      onChange={(e) =>
-                        updatePeriod(index, "from", e.target.value)
-                      }
-                    />
+                  <div className="hotel-period-row-clean" key={index}>
+                    <div className="hotel-period-field">
+                      <label>From</label>
+                      <input
+                        type="date"
+                        value={period.from}
+                        onChange={(e) =>
+                          updatePeriod(index, "from", e.target.value)
+                        }
+                      />
+                    </div>
 
-                    <input
-                      type="text"
-                      placeholder="To"
-                      value={period.to}
-                      onChange={(e) =>
-                        updatePeriod(index, "to", e.target.value)
-                      }
-                    />
+                    <div className="hotel-period-field">
+                      <label>To</label>
+                      <input
+                        type="date"
+                        value={period.to}
+                        onChange={(e) =>
+                          updatePeriod(index, "to", e.target.value)
+                        }
+                      />
+                    </div>
 
-                    <input
-                      type="text"
-                      placeholder="Single"
-                      value={period.single}
-                      onChange={(e) =>
-                        updatePeriod(index, "single", e.target.value)
-                      }
-                    />
+                    <div className="hotel-period-field">
+                      <label>Single Room</label>
+                      <input
+                        type="text"
+                        placeholder="ex: 40 USD"
+                        value={period.single}
+                        onChange={(e) =>
+                          updatePeriod(index, "single", e.target.value)
+                        }
+                      />
+                    </div>
 
-                    <input
-                      type="text"
-                      placeholder="Double"
-                      value={period.double}
-                      onChange={(e) =>
-                        updatePeriod(index, "double", e.target.value)
-                      }
-                    />
+                    <div className="hotel-period-field">
+                      <label>Double Room</label>
+                      <input
+                        type="text"
+                        placeholder="ex: 60 USD"
+                        value={period.double}
+                        onChange={(e) =>
+                          updatePeriod(index, "double", e.target.value)
+                        }
+                      />
+                    </div>
 
-                    <input
-                      type="text"
-                      placeholder="Triple / Note"
-                      value={period.triple}
-                      onChange={(e) =>
-                        updatePeriod(index, "triple", e.target.value)
-                      }
-                    />
+                    <div className="hotel-period-field">
+                      <label>Triple / Note</label>
+                      <input
+                        type="text"
+                        placeholder="ex: 80 USD"
+                        value={period.triple}
+                        onChange={(e) =>
+                          updatePeriod(index, "triple", e.target.value)
+                        }
+                      />
+                    </div>
 
-                    <button type="button" onClick={() => removePeriod(index)}>
+                    <button
+                      type="button"
+                      className="remove-period-btn"
+                      onClick={() => removePeriod(index)}
+                    >
                       Remove
                     </button>
                   </div>
@@ -718,36 +834,6 @@ export default function Hotels() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {hotelNotice.show && (
-        <div className="hotel-admin-notice-overlay">
-          <div className={`hotel-admin-notice ${hotelNotice.type}`}>
-            <button
-              type="button"
-              className="hotel-admin-notice-close"
-              onClick={closeNotice}
-            >
-              ×
-            </button>
-
-            <div className="hotel-admin-notice-icon">
-              {hotelNotice.type === "success" ? "✓" : "!"}
-            </div>
-
-            <h3>{hotelNotice.title}</h3>
-
-            <p>{hotelNotice.message}</p>
-
-            <button
-              type="button"
-              className="hotel-admin-notice-btn"
-              onClick={closeNotice}
-            >
-              OK
-            </button>
           </div>
         </div>
       )}
