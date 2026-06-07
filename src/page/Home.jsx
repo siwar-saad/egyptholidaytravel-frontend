@@ -186,7 +186,7 @@ export default function Home() {
         const res = await API.get("/reviews");
         const databaseReviews = Array.isArray(res.data) ? res.data : [];
 
-        setReviews([
+        setReviews([  
           ...databaseReviews.map((review) => ({
             ...review,
             avatar: null,
