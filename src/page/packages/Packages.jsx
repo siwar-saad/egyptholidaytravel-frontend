@@ -21,6 +21,8 @@ import {
   FaUtensils,
 } from "react-icons/fa";
 
+const ITEMS_PER_PAGE = 14;
+
 const EMPTY_PACKAGE_BOOKING = {
   fullName: "",
   email: "",
@@ -95,6 +97,8 @@ export default function Packages() {
 
   const [packagesData, setPackagesData] = useState([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
+  const [currentPackagePage, setCurrentPackagePage] = useState(1);
+
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [bookingPackage, setBookingPackage] = useState(null);
   const [showPackageBookingForm, setShowPackageBookingForm] = useState(false);
@@ -181,6 +185,35 @@ export default function Packages() {
     fetchPackages();
   }, []);
 
+  const totalPackagePages = Math.max(
+    1,
+    Math.ceil(packagesData.length / ITEMS_PER_PAGE)
+  );
+
+  const packageStartIndex = (currentPackagePage - 1) * ITEMS_PER_PAGE;
+
+  const paginatedPackages = packagesData.slice(
+    packageStartIndex,
+    packageStartIndex + ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    if (currentPackagePage > totalPackagePages) {
+      setCurrentPackagePage(totalPackagePages);
+    }
+  }, [currentPackagePage, totalPackagePages]);
+
+  const goToPackagePage = (page) => {
+    const safePage = Math.min(Math.max(page, 1), totalPackagePages);
+
+    setCurrentPackagePage(safePage);
+
+    document.querySelector(".packages-list-section")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   useEffect(() => {
     const openPackageId = location.state?.openPackageId;
 
@@ -257,6 +290,7 @@ export default function Packages() {
       setBookingAsAdmin(true);
       setSelectedPackage(null);
       setBookingPackage(item);
+
       setPackageBookingData({
         ...EMPTY_PACKAGE_BOOKING,
         roomType: "DBL",
@@ -455,8 +489,8 @@ export default function Packages() {
             <span>Our Offers</span>
             <h2>Available Packages</h2>
             <p>
-              Each card below represents one complete package with its own
-              backend name.
+              Each page shows up to 14 packages. Use pagination below to see
+              more offers.
             </p>
           </div>
 
@@ -468,7 +502,7 @@ export default function Packages() {
                 No published packages yet.
               </p>
             ) : (
-              packagesData.map((item) => (
+              paginatedPackages.map((item) => (
                 <article className="package-card-pro" key={item.id}>
                   <div className="package-img-box">
                     <img src={item.image} alt={item.name} loading="lazy" />
@@ -519,6 +553,14 @@ export default function Packages() {
               ))
             )}
           </div>
+
+          {!packagesLoading && packagesData.length > ITEMS_PER_PAGE && (
+            <Pagination
+              currentPage={currentPackagePage}
+              totalPages={totalPackagePages}
+              onPageChange={goToPackagePage}
+            />
+          )}
         </section>
 
         <section className="packages-contact-pro" id="packages-contact">
@@ -674,12 +716,13 @@ function PackageModal({ item, onClose, onBook }) {
                     <h3>{day.title}</h3>
 
                     <ul>
-                      {day.details.map((detail, index) => (
-                        <li key={`${day.day}-${index}`}>
-                          <FaCheckCircle />
-                          <span>{detail}</span>
-                        </li>
-                      ))}
+                      {Array.isArray(day.details) &&
+                        day.details.map((detail, index) => (
+                          <li key={`${day.day}-${index}`}>
+                            <FaCheckCircle />
+                            <span>{detail}</span>
+                          </li>
+                        ))}
                     </ul>
                   </div>
                 </div>
@@ -706,22 +749,23 @@ function PackageModal({ item, onClose, onBook }) {
                       </thead>
 
                       <tbody>
-                        {option.rows.map((row, index) => (
-                          <tr key={`${option.title}-${row.city}-${index}`}>
-                            <td>{row.city}</td>
-                            <td>{row.nights}</td>
-                            <td>{row.hotel}</td>
-                            <td>
-                              <span className="meal-badge">
-                                <FaUtensils />
-                                {row.meal}
-                              </span>
-                            </td>
-                            <td>{row.sgl || "—"}</td>
-                            <td>{row.dbl || "—"}</td>
-                            <td>{row.tpl || "—"}</td>
-                          </tr>
-                        ))}
+                        {Array.isArray(option.rows) &&
+                          option.rows.map((row, index) => (
+                            <tr key={`${option.title}-${row.city}-${index}`}>
+                              <td>{row.city}</td>
+                              <td>{row.nights}</td>
+                              <td>{row.hotel}</td>
+                              <td>
+                                <span className="meal-badge">
+                                  <FaUtensils />
+                                  {row.meal}
+                                </span>
+                              </td>
+                              <td>{row.sgl || "—"}</td>
+                              <td>{row.dbl || "—"}</td>
+                              <td>{row.tpl || "—"}</td>
+                            </tr>
+                          ))}
                       </tbody>
                     </table>
                   </div>
@@ -1045,6 +1089,51 @@ function PackageProAlert({ alert, onClose, onLogin, onSignup }) {
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="pagination-wrap">
+      <button
+        type="button"
+        className="pagination-arrow"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+      >
+        Prev
+      </button>
+
+      <div className="pagination-pages">
+        {Array.from({ length: totalPages }, (_, index) => {
+          const page = index + 1;
+
+          return (
+            <button
+              type="button"
+              key={page}
+              className={`page-number-btn ${
+                currentPage === page ? "active" : ""
+              }`}
+              onClick={() => onPageChange(page)}
+            >
+              {page}
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        className="pagination-arrow"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        Next
+      </button>
     </div>
   );
 }

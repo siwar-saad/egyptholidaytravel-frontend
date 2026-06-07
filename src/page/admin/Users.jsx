@@ -99,6 +99,19 @@ export default function Users() {
     return role === "admin" ? "admin" : "user";
   };
 
+  const isEmailVerified = (user) => {
+    return Boolean(
+      user?.emailVerified ||
+        user?.email_verified ||
+        user?.isEmailVerified ||
+        user?.is_email_verified ||
+        user?.verified ||
+        user?.isVerified ||
+        user?.emailVerifiedAt ||
+        user?.email_verified_at
+    );
+  };
+
   const getUserName = (user) => {
     if (!user) return "";
 
@@ -189,10 +202,12 @@ export default function Users() {
 
   const openAddUser = (role = "user") => {
     setEditingUser(null);
+
     setUserForm({
       ...EMPTY_USER_FORM,
       role,
     });
+
     setSelectedCountry(COUNTRIES[0]);
     setOpenCountry(false);
     setShowUserForm(true);
@@ -455,6 +470,7 @@ export default function Users() {
           <div className="clients-grid">
             {filteredUsers.map((user, index) => {
               const role = getUserRole(user);
+              const emailVerified = isEmailVerified(user);
 
               return (
                 <div className="client-card" key={getUserId(user) || index}>
@@ -473,7 +489,20 @@ export default function Users() {
                       </span>
                     </div>
 
-                    <p>{user?.email || "No email"}</p>
+                    <div className="user-email-line">
+                      <p>{user?.email || "No email"}</p>
+
+                      <span
+                        className={
+                          emailVerified
+                            ? "email-status-badge verified"
+                            : "email-status-badge not-verified"
+                        }
+                      >
+                        {emailVerified ? "Email verified" : "Email not verified"}
+                      </span>
+                    </div>
+
                     <span>{user?.phone || "No phone"}</span>
                     <span>{user?.country || "No country"}</span>
                   </div>
@@ -661,9 +690,7 @@ export default function Users() {
         />
       )}
 
-      {notice.show && (
-        <UserNoticePopup notice={notice} onClose={closeNotice} />
-      )}
+      {notice.show && <UserNoticePopup notice={notice} onClose={closeNotice} />}
     </>
   );
 }
@@ -729,11 +756,7 @@ function UserNoticePopup({ notice, onClose }) {
   return (
     <div className="user-notice-overlay">
       <div className={`user-notice-popup ${notice.type}`}>
-        <button
-          type="button"
-          className="user-notice-close"
-          onClick={onClose}
-        >
+        <button type="button" className="user-notice-close" onClick={onClose}>
           ×
         </button>
 

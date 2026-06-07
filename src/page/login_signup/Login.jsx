@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEnvelope, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
 import API from "../../api";
 import "./Login.css";
@@ -11,6 +11,12 @@ import queenImage from "../../assets/image/login.png";
 import pyramidIcon from "../../assets/image/pyramid.webp";
 import passportIcon from "../../assets/image/passport.webp";
 import visaIcon from "../../assets/image/visa.webp";
+
+const EMPTY_MESSAGE = {
+  message: "",
+  type: "error",
+  isVerification: false,
+};
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,9 +29,17 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [error, setError] = useState("");
+  const [authMessage, setAuthMessage] = useState(EMPTY_MESSAGE);
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const [showVerifyPopup, setShowVerifyPopup] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationMessage, setVerificationMessage] = useState("");
+  const [verificationError, setVerificationError] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -58,7 +72,7 @@ export default function Login() {
           return;
         }
       } catch {
-        // User is not logged in, keep login page open
+        // User is not logged in
       } finally {
         if (mounted) {
           setCheckingAuth(false);
@@ -73,19 +87,197 @@ export default function Login() {
     };
   }, [navigate]);
 
+  const postWithFallback = async (requests) => {
+    let lastError = null;
+
+    for (const request of requests) {
+      try {
+        return await API.post(request.url, request.data, {
+          skipAuthRedirect: true,
+        });
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    throw lastError;
+  };
+
+  const isEmailVerificationError = (message, data = {}) => {
+    const text = String(message || "").toLowerCase();
+    const code = String(
+      data.code || data.errorCode || data.reason || data.type || ""
+    ).toLowerCase();
+
+    return (
+      code.includes("email_not_verified") ||
+      code.includes("not_verified") ||
+      (text.includes("verify") && text.includes("email")) ||
+      (text.includes("verified") && text.includes("email"))
+    );
+  };
+
   const handleChange = (e) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
+
+    setAuthMessage(EMPTY_MESSAGE);
+  };
+
+  const resendVerificationCode = async (emailValue) => {
+    const cleanEmail = String(emailValue || "").trim();
+
+    if (!cleanEmail) {
+      setVerificationError("Please write your email first.");
+      return;
+    }
+
+    try {
+      setResendLoading(true);
+      setVerificationError("");
+      setVerificationMessage("");
+
+      await postWithFallback([
+        {
+          url: "/auth/resend-verification-code",
+          data: { email: cleanEmail },
+        },
+        {
+          url: "/auth/resend-verification",
+          data: { email: cleanEmail },
+        },
+        {
+          url: "/auth/resend-email-verification",
+          data: { email: cleanEmail },
+        },
+        {
+          url: "/auth/send-verification-code",
+          data: { email: cleanEmail },
+        },
+      ]);
+
+      setVerificationMessage(
+        "A new verification code has been sent to your email."
+      );
+    } catch (err) {
+      console.log("Resend verification error:", err.response?.data || err.message);
+
+      setVerificationError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Unable to resend verification code. Please try again."
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const openVerificationPopup = async () => {
+    const emailToVerify = form.email.trim() || verificationEmail.trim();
+
+    if (!emailToVerify) {
+      setAuthMessage({
+        message: "Please write your email first.",
+        type: "error",
+        isVerification: false,
+      });
+      return;
+    }
+
+    setVerificationEmail(emailToVerify);
+    setVerificationCode("");
+    setVerificationMessage("");
+    setVerificationError("");
+    setShowVerifyPopup(true);
+
+    await resendVerificationCode(emailToVerify);
+  };
+
+  const closeVerificationPopup = () => {
+    setShowVerifyPopup(false);
+    setVerificationCode("");
+    setVerificationMessage("");
+    setVerificationError("");
+  };
+
+  const verifyEmailCode = async () => {
+    const cleanEmail = verificationEmail.trim();
+    const cleanCode = verificationCode.trim();
+
+    if (!cleanEmail) {
+      setVerificationError("Email is required.");
+      return;
+    }
+
+    if (!cleanCode) {
+      setVerificationError("Please enter the verification code.");
+      return;
+    }
+
+    try {
+      setVerifyLoading(true);
+      setVerificationError("");
+      setVerificationMessage("");
+
+      await postWithFallback([
+        {
+          url: "/auth/verify-email",
+          data: { email: cleanEmail, code: cleanCode },
+        },
+        {
+          url: "/auth/verify-email-code",
+          data: { email: cleanEmail, code: cleanCode },
+        },
+        {
+          url: "/auth/verify-code",
+          data: {
+            email: cleanEmail,
+            code: cleanCode,
+            type: "email_verification",
+          },
+        },
+        {
+          url: "/auth/signup/verify",
+          data: { email: cleanEmail, code: cleanCode },
+        },
+      ]);
+
+      setShowVerifyPopup(false);
+      setVerificationCode("");
+      setVerificationMessage("");
+      setVerificationError("");
+
+      setAuthMessage({
+        message: "Email verified successfully. You can login now.",
+        type: "success",
+        isVerification: false,
+      });
+    } catch (err) {
+      console.log("Verify email error:", err.response?.data || err.message);
+
+      setVerificationError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Invalid verification code. Please try again."
+      );
+    } finally {
+      setVerifyLoading(false);
+    }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+
+    setAuthMessage(EMPTY_MESSAGE);
 
     if (!form.email.trim() || !form.password) {
-      setError("Please enter email and password.");
+      setAuthMessage({
+        message: "Please enter email and password.",
+        type: "error",
+        isVerification: false,
+      });
       return;
     }
 
@@ -99,7 +291,11 @@ export default function Login() {
       });
 
       if (!res.data?.user) {
-        setError("Login failed. User not found.");
+        setAuthMessage({
+          message: "Login failed. User not found.",
+          type: "error",
+          isVerification: false,
+        });
         return;
       }
 
@@ -118,11 +314,31 @@ export default function Login() {
     } catch (err) {
       console.log("Login error:", err.response?.data || err.message);
 
-      setError(
+      const message =
         err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Email or password is incorrect."
+        err.response?.data?.error ||
+        "Email or password is incorrect.";
+
+      const verificationError = isEmailVerificationError(
+        message,
+        err.response?.data
       );
+
+      if (verificationError) {
+        setVerificationEmail(form.email.trim());
+
+        setAuthMessage({
+          message: "Please verify your email before login.",
+          type: "warning",
+          isVerification: true,
+        });
+      } else {
+        setAuthMessage({
+          message,
+          type: "error",
+          isVerification: false,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -174,7 +390,27 @@ export default function Login() {
             <form className="auth-form" onSubmit={handleLogin}>
               <h2>Log In</h2>
 
-              {error && <div className="auth-error">{error}</div>}
+              {authMessage.message && (
+                <button
+                  type="button"
+                  className={`auth-message-line ${authMessage.type} ${
+                    authMessage.isVerification ? "clickable" : ""
+                  }`}
+                  onClick={
+                    authMessage.isVerification
+                      ? openVerificationPopup
+                      : undefined
+                  }
+                >
+                  <div className="auth-message-line-content">
+                    <span>{authMessage.message}</span>
+
+                    {authMessage.isVerification && (
+                      <small>Verify now</small>
+                    )}
+                  </div>
+                </button>
+              )}
 
               <input
                 type="email"
@@ -236,6 +472,91 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {showVerifyPopup && (
+        <EmailVerificationPopup
+          email={verificationEmail}
+          code={verificationCode}
+          setCode={setVerificationCode}
+          message={verificationMessage}
+          error={verificationError}
+          resendLoading={resendLoading}
+          verifyLoading={verifyLoading}
+          onClose={closeVerificationPopup}
+          onResend={() => resendVerificationCode(verificationEmail)}
+          onVerify={verifyEmailCode}
+        />
+      )}
     </>
+  );
+}
+
+function EmailVerificationPopup({
+  email,
+  code,
+  setCode,
+  message,
+  error,
+  resendLoading,
+  verifyLoading,
+  onClose,
+  onResend,
+  onVerify,
+}) {
+  return (
+    <div className="email-verify-overlay">
+      <div className="email-verify-popup">
+        <button type="button" className="email-verify-close" onClick={onClose}>
+          <FaTimes />
+        </button>
+
+        <div className="email-verify-icon">
+          <FaEnvelope />
+        </div>
+
+        <h2>Verify Your Email</h2>
+
+        <p>
+          We sent a new verification code to:
+          <strong> {email}</strong>
+        </p>
+
+        {message && <div className="email-verify-success">{message}</div>}
+        {error && <div className="email-verify-error">{error}</div>}
+
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder="Enter verification code"
+          value={code}
+          maxLength={8}
+          onChange={(e) => setCode(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              onVerify();
+            }
+          }}
+        />
+
+        <button
+          type="button"
+          className="email-verify-main-btn"
+          onClick={onVerify}
+          disabled={verifyLoading}
+        >
+          {verifyLoading ? "Verifying..." : "Verify Email"}
+        </button>
+
+        <button
+          type="button"
+          className="email-verify-resend-btn"
+          onClick={onResend}
+          disabled={resendLoading}
+        >
+          {resendLoading ? "Sending new code..." : "Resend new code"}
+        </button>
+      </div>
+    </div>
   );
 }
