@@ -24,12 +24,6 @@ const getUserId = (msg = {}) =>
   msg.user?.id ||
   null;
 
-const getMessageKey = (msg = {}, index = 0) =>
-  getMessageId(msg) ||
-  `${safeText(getConversationKey(msg))}-${safeText(
-    msg.createdAt || msg.created_at || msg.dateTime || msg.date || index
-  )}-${index}`;
-
 const getConversationKey = (msg = {}) => {
   const userId = getUserId(msg);
 
@@ -39,6 +33,12 @@ const getConversationKey = (msg = {}) => {
     msg.email || msg.phone || msg.name || `visitor-${getMessageId(msg) || ""}`
   ).toLowerCase();
 };
+
+const getMessageKey = (msg = {}, index = 0) =>
+  getMessageId(msg) ||
+  `${safeText(getConversationKey(msg))}-${safeText(
+    msg.createdAt || msg.created_at || msg.dateTime || msg.date || index
+  )}-${index}`;
 
 const getMessageDate = (msg = {}) => {
   const rawDate =
@@ -118,8 +118,6 @@ export default function Messages({ showSuccess, onUnreadChange }) {
   const [replyDrafts, setReplyDrafts] = useState({});
   const [selectedConversationKey, setSelectedConversationKey] = useState(null);
   const [search, setSearch] = useState("");
-  const [showReplyPopup, setShowReplyPopup] = useState(false);
-  const [sentReplyText, setSentReplyText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSendingReply, setIsSendingReply] = useState(false);
 
@@ -205,13 +203,18 @@ export default function Messages({ showSuccess, onUnreadChange }) {
       current.messages.push(msg);
       current.clientId = current.clientId || getUserId(msg);
       current.name =
-        current.name || msg.name || msg.client?.name || msg.user?.name || "Visitor";
+        current.name ||
+        msg.name ||
+        msg.client?.name ||
+        msg.user?.name ||
+        "Visitor";
       current.email =
         current.email || msg.email || msg.client?.email || msg.user?.email || "";
       current.phone =
         current.phone || msg.phone || msg.client?.phone || msg.user?.phone || "";
       current.isRegisteredUser =
-        current.isRegisteredUser || Boolean(msg.isRegisteredUser || getUserId(msg));
+        current.isRegisteredUser ||
+        Boolean(msg.isRegisteredUser || getUserId(msg));
 
       map.set(key, current);
     });
@@ -226,7 +229,8 @@ export default function Messages({ showSuccess, onUnreadChange }) {
           (msg) => (msg.sender || "client") !== "admin" && !msg.isRead
         ).length;
 
-        const latest = sortedConversationMessages[sortedConversationMessages.length - 1];
+        const latest =
+          sortedConversationMessages[sortedConversationMessages.length - 1];
 
         const hasReply = sortedConversationMessages.some(
           (msg) => (msg.sender || "client") === "admin" || msg.reply
@@ -252,7 +256,9 @@ export default function Messages({ showSuccess, onUnreadChange }) {
     if (!cleanSearch) return conversations;
 
     return conversations.filter((conversation) =>
-      `${conversation.name} ${conversation.email} ${conversation.phone} ${conversation.messages
+      `${conversation.name} ${conversation.email} ${
+        conversation.phone
+      } ${conversation.messages
         .map((msg) => `${msg.message || ""} ${msg.reply || ""}`)
         .join(" ")}`
         .toLowerCase()
@@ -385,9 +391,6 @@ export default function Messages({ showSuccess, onUnreadChange }) {
         ...prevDrafts,
         [replyTargetId]: "",
       }));
-
-      setSentReplyText(cleanReply);
-      setShowReplyPopup(true);
 
       notify(res.data?.message || "Reply saved successfully.");
     } catch (err) {
@@ -612,24 +615,6 @@ export default function Messages({ showSuccess, onUnreadChange }) {
           </div>
         </div>
       </section>
-
-      {showReplyPopup && (
-        <div className="message-success-overlay">
-          <div className="message-success-popup">
-            <div className="message-success-icon">OK</div>
-
-            <h2>Reply Saved</h2>
-
-            <p>Your reply has been saved for this conversation.</p>
-
-            <div className="sent-message-box">{sentReplyText}</div>
-
-            <button type="button" onClick={() => setShowReplyPopup(false)}>
-              Done
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }

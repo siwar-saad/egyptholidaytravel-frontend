@@ -14,6 +14,7 @@ const isSameDay = (first, second) =>
 const formatChatDate = (date) => {
   const today = new Date();
   const yesterday = new Date();
+
   yesterday.setDate(today.getDate() - 1);
 
   if (isSameDay(date, today)) return "Today";
@@ -39,13 +40,13 @@ export default function Messages({
   onSendMessage,
   onRefreshMessages,
 }) {
-  const threadEndRef = useRef(null);
+  const messengerThreadRef = useRef(null);
 
   const sortedMessages = useMemo(
     () =>
-      [...messages].sort((a, b) => {
-        return getMessageDate(a).getTime() - getMessageDate(b).getTime();
-      }),
+      [...messages].sort(
+        (a, b) => getMessageDate(a).getTime() - getMessageDate(b).getTime()
+      ),
     [messages]
   );
 
@@ -59,12 +60,24 @@ export default function Messages({
     return () => clearInterval(refreshTimer);
   }, [onRefreshMessages]);
 
+  /* 
+    IMPORTANT:
+    هذا يعمل scroll داخل div متاع الشات فقط
+    وما يهبّطش الصفحة للـ footer
+  */
   useEffect(() => {
-    threadEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const thread = messengerThreadRef.current;
+
+    if (!thread) return;
+
+    requestAnimationFrame(() => {
+      thread.scrollTop = thread.scrollHeight;
+    });
   }, [sortedMessages.length]);
 
   const handleSend = () => {
     if (!messageText?.trim()) return;
+
     onSendMessage();
   };
 
@@ -96,7 +109,7 @@ export default function Messages({
         </div>
 
         <div className="messenger-chat">
-          <div className="messenger-thread">
+          <div className="messenger-thread" ref={messengerThreadRef}>
             {sortedMessages.length === 0 ? (
               <div className="empty-chat">
                 <div className="empty-icon">💬</div>
@@ -145,6 +158,7 @@ export default function Messages({
 
                         <div className="chat-bubble">
                           <p>{msg.reply}</p>
+
                           <span>
                             {msg.repliedAt
                               ? new Date(msg.repliedAt).toLocaleTimeString(
@@ -163,8 +177,6 @@ export default function Messages({
                 );
               })
             )}
-
-            <div ref={threadEndRef} />
           </div>
 
           <div className="messenger-composer">

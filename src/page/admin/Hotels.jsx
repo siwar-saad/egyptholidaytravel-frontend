@@ -10,22 +10,21 @@ const emptyPeriod = {
   triple: "",
 };
 
-const emptyHotel = {
+const createEmptyHotel = () => ({
   name: "",
   city: "",
   meal: "",
   image: "",
-  galleryText: "",
+  gallery: [],
   description: "",
   groupTitle: "",
   groupSubtitle: "",
   displayOrder: 0,
   periods: [{ ...emptyPeriod }],
-};
+});
 
 const apiOrigin =
-  (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") ||
-  "";
+  (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
 
 const getImageUrl = (src) => {
   if (!src) return "";
@@ -33,6 +32,9 @@ const getImageUrl = (src) => {
   if (src.startsWith("/images/")) return `${apiOrigin}${src}`;
   return src;
 };
+
+const cleanUniqueImages = (images = []) =>
+  [...new Set(images.map((item) => String(item || "").trim()).filter(Boolean))];
 
 export default function Hotels({ showSuccess }) {
   const defaultCover =
@@ -44,7 +46,8 @@ export default function Hotels({ showSuccess }) {
   const [editingHotel, setEditingHotel] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [hotelForm, setHotelForm] = useState(emptyHotel);
+  const [manualImageUrl, setManualImageUrl] = useState("");
+  const [hotelForm, setHotelForm] = useState(createEmptyHotel());
 
   const notify = (message) => {
     if (typeof showSuccess === "function") {
@@ -73,14 +76,23 @@ export default function Hotels({ showSuccess }) {
       .includes(hotelSearch.toLowerCase())
   );
 
+  const closeHotelForm = () => {
+    setShowHotelForm(false);
+    setEditingHotel(null);
+    setHotelForm(createEmptyHotel());
+    setManualImageUrl("");
+  };
+
   const openAddHotel = () => {
     setEditingHotel(null);
-    setHotelForm(emptyHotel);
+    setHotelForm(createEmptyHotel());
+    setManualImageUrl("");
     setShowHotelForm(true);
   };
 
   const openEditHotel = (hotel) => {
     const gallery = Array.isArray(hotel.gallery) ? hotel.gallery : [];
+    const cleanedGallery = cleanUniqueImages([hotel.image, ...gallery]);
     const periods = Array.isArray(hotel.periods) ? hotel.periods : [];
 
     setEditingHotel(hotel);
@@ -88,14 +100,15 @@ export default function Hotels({ showSuccess }) {
       name: hotel.name || "",
       city: hotel.city || "",
       meal: hotel.meal || "",
-      image: hotel.image || "",
-      galleryText: gallery.join("\n"),
+      image: hotel.image || cleanedGallery[0] || "",
+      gallery: cleanedGallery,
       description: hotel.description || "",
       groupTitle: hotel.group_title || "",
       groupSubtitle: hotel.group_subtitle || "",
       displayOrder: hotel.display_order || 0,
       periods: periods.length ? periods : [{ ...emptyPeriod }],
     });
+    setManualImageUrl("");
     setShowHotelForm(true);
   };
 
@@ -118,7 +131,10 @@ export default function Hotels({ showSuccess }) {
   const removePeriod = (index) => {
     setHotelForm((current) => ({
       ...current,
-      periods: current.periods.filter((_, periodIndex) => periodIndex !== index),
+      periods:
+        current.periods.length > 1
+          ? current.periods.filter((_, periodIndex) => periodIndex !== index)
+          : [{ ...emptyPeriod }],
     }));
   };
 
@@ -143,6 +159,7 @@ export default function Hotels({ showSuccess }) {
 
       for (const file of files) {
         const dataUrl = await readFileAsDataUrl(file);
+
         const res = await API.post("/admin/upload-image", {
           fileName: file.name,
           dataUrl,
@@ -154,17 +171,15 @@ export default function Hotels({ showSuccess }) {
       }
 
       setHotelForm((current) => {
-        const currentGallery = current.galleryText
-          .split("\n")
-          .map((item) => item.trim())
-          .filter(Boolean);
-
-        const nextGallery = [...currentGallery, ...uploadedUrls];
+        const nextGallery = cleanUniqueImages([
+          ...current.gallery,
+          ...uploadedUrls,
+        ]);
 
         return {
           ...current,
-          image: uploadedUrls[0] || current.image || "",
-          galleryText: nextGallery.join("\n"),
+          image: current.image || uploadedUrls[0] || "",
+          gallery: nextGallery,
         };
       });
 
@@ -176,11 +191,53 @@ export default function Hotels({ showSuccess }) {
     }
   };
 
+  const addManualImage = () => {
+    const cleanUrl = manualImageUrl.trim();
+
+    if (!cleanUrl) {
+      notify("Please write an image URL first.");
+      return;
+    }
+
+    setHotelForm((current) => {
+      const nextGallery = cleanUniqueImages([...current.gallery, cleanUrl]);
+
+      return {
+        ...current,
+        image: current.image || cleanUrl,
+        gallery: nextGallery,
+      };
+    });
+
+    setManualImageUrl("");
+  };
+
+  const removeHotelImage = (imageUrl) => {
+    setHotelForm((current) => {
+      const nextGallery = current.gallery.filter((item) => item !== imageUrl);
+      const nextCover =
+        current.image === imageUrl ? nextGallery[0] || "" : current.image;
+
+      return {
+        ...current,
+        image: nextCover,
+        gallery: nextGallery,
+      };
+    });
+  };
+
+  const setCoverImage = (imageUrl) => {
+    setHotelForm((current) => ({
+      ...current,
+      image: imageUrl,
+      gallery: cleanUniqueImages([imageUrl, ...current.gallery]),
+    }));
+  };
+
   const buildPayload = () => {
-    const gallery = hotelForm.galleryText
-      .split("\n")
-      .map((item) => item.trim())
-      .filter(Boolean);
+    const gallery = cleanUniqueImages(hotelForm.gallery);
+    const coverImage = hotelForm.image.trim() || gallery[0] || "";
+    const finalGallery = cleanUniqueImages([coverImage, ...gallery]);
 
     const periods = hotelForm.periods.filter((period) =>
       Object.values(period).some((value) => String(value || "").trim())
@@ -190,8 +247,8 @@ export default function Hotels({ showSuccess }) {
       name: hotelForm.name.trim(),
       city: hotelForm.city.trim(),
       meal: hotelForm.meal.trim(),
-      image: hotelForm.image.trim() || gallery[0] || "",
-      gallery,
+      image: coverImage,
+      gallery: finalGallery,
       description: hotelForm.description.trim(),
       groupTitle: hotelForm.groupTitle.trim(),
       groupSubtitle: hotelForm.groupSubtitle.trim(),
@@ -213,9 +270,13 @@ export default function Hotels({ showSuccess }) {
 
       if (editingHotel) {
         const res = await API.put(`/admin/${editingHotel.id}`, payload);
+
         setHotels((current) =>
-          current.map((hotel) => (hotel.id === editingHotel.id ? res.data : hotel))
+          current.map((hotel) =>
+            hotel.id === editingHotel.id ? res.data : hotel
+          )
         );
+
         notify("Hotel updated successfully.");
       } else {
         const res = await API.post("/admin/add", payload);
@@ -223,9 +284,7 @@ export default function Hotels({ showSuccess }) {
         notify("Hotel added successfully.");
       }
 
-      setShowHotelForm(false);
-      setEditingHotel(null);
-      setHotelForm(emptyHotel);
+      closeHotelForm();
     } catch (err) {
       notify(err.response?.data?.error || "Unable to save hotel.");
     } finally {
@@ -291,7 +350,8 @@ export default function Hotels({ showSuccess }) {
                     <p>
                       <strong>City:</strong> {hotel.city} <br />
                       <strong>Meal Plan:</strong> {hotel.meal} <br />
-                      <strong>Group:</strong> {hotel.group_title || "Our Hotels"} <br />
+                      <strong>Group:</strong>{" "}
+                      {hotel.group_title || "Our Hotels"} <br />
                       <strong>Periods:</strong> {periods.length}
                     </p>
 
@@ -324,22 +384,23 @@ export default function Hotels({ showSuccess }) {
 
       {showHotelForm && (
         <div className="package-popup-overlay">
-          <div className="package-popup">
-            <div className="package-popup-head">
+          <div className="package-popup hotel-popup-fixed">
+            <div className="package-popup-head hotel-popup-head-sticky">
               <div>
                 <h2>{editingHotel ? "Edit Hotel" : "Add New Hotel"}</h2>
                 <p>Add hotel details, photos, prices and travel periods.</p>
               </div>
 
               <button
+                type="button"
                 className="close-package-popup"
-                onClick={() => setShowHotelForm(false)}
+                onClick={closeHotelForm}
               >
                 ×
               </button>
             </div>
 
-            <div className="package-popup-form">
+            <div className="package-popup-form hotel-popup-scroll">
               <input
                 type="text"
                 placeholder="Group Title, e.g. Hotels in Cairo"
@@ -394,32 +455,72 @@ export default function Hotels({ showSuccess }) {
                 }
               />
 
-              <input
-                type="text"
-                placeholder="Cover Image URL or /src/assets path"
-                value={hotelForm.image}
-                onChange={(e) =>
-                  setHotelForm({ ...hotelForm, image: e.target.value })
-                }
-              />
+              <div className="hotel-upload-zone">
+                <label className="hotel-upload-label">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    multiple
+                    onChange={uploadHotelImages}
+                    disabled={uploadingImages}
+                  />
 
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                multiple
-                onChange={uploadHotelImages}
-                disabled={uploadingImages}
-              />
+                  <span>
+                    {uploadingImages ? "Uploading photos..." : "Choose hotel photos"}
+                  </span>
 
-              {uploadingImages && <p className="empty-msg">Uploading photos...</p>}
+                  <small>PNG, JPG, JPEG or WEBP</small>
+                </label>
 
-              <textarea
-                placeholder="Gallery images, one URL/path per line"
-                value={hotelForm.galleryText}
-                onChange={(e) =>
-                  setHotelForm({ ...hotelForm, galleryText: e.target.value })
-                }
-              />
+                <div className="hotel-url-row">
+                  <input
+                    type="text"
+                    placeholder="Or paste image URL / path"
+                    value={manualImageUrl}
+                    onChange={(e) => setManualImageUrl(e.target.value)}
+                  />
+
+                  <button type="button" onClick={addManualImage}>
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {hotelForm.gallery.length > 0 && (
+                <div className="hotel-images-preview-grid">
+                  {hotelForm.gallery.map((photo, index) => (
+                    <div className="hotel-image-preview-card" key={`${photo}-${index}`}>
+                      <img
+                        src={getImageUrl(photo)}
+                        alt={`Hotel preview ${index + 1}`}
+                        onError={(e) => {
+                          e.currentTarget.src = defaultCover;
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        className="remove-hotel-image-btn"
+                        onClick={() => removeHotelImage(photo)}
+                      >
+                        ×
+                      </button>
+
+                      {hotelForm.image === photo ? (
+                        <span className="hotel-cover-badge">Cover</span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="set-cover-btn"
+                          onClick={() => setCoverImage(photo)}
+                        >
+                          Set cover
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <textarea
                 placeholder="Description"
@@ -432,6 +533,7 @@ export default function Hotels({ showSuccess }) {
               <div className="hotel-period-editor">
                 <div className="hotel-period-editor-head">
                   <h3>Rates & Travel Periods</h3>
+
                   <button type="button" onClick={addPeriod}>
                     Add Period
                   </button>
@@ -457,21 +559,27 @@ export default function Hotels({ showSuccess }) {
                       type="text"
                       placeholder="Single"
                       value={period.single}
-                      onChange={(e) => updatePeriod(index, "single", e.target.value)}
+                      onChange={(e) =>
+                        updatePeriod(index, "single", e.target.value)
+                      }
                     />
 
                     <input
                       type="text"
                       placeholder="Double"
                       value={period.double}
-                      onChange={(e) => updatePeriod(index, "double", e.target.value)}
+                      onChange={(e) =>
+                        updatePeriod(index, "double", e.target.value)
+                      }
                     />
 
                     <input
                       type="text"
                       placeholder="Triple / Note"
                       value={period.triple}
-                      onChange={(e) => updatePeriod(index, "triple", e.target.value)}
+                      onChange={(e) =>
+                        updatePeriod(index, "triple", e.target.value)
+                      }
                     />
 
                     <button type="button" onClick={() => removePeriod(index)}>
@@ -482,13 +590,14 @@ export default function Hotels({ showSuccess }) {
               </div>
 
               <div className="package-popup-actions">
-                <button onClick={saveHotel} disabled={saving}>
+                <button type="button" onClick={saveHotel} disabled={saving}>
                   {saving ? "Saving..." : "Save Hotel"}
                 </button>
 
                 <button
+                  type="button"
                   className="cancel-package-btn"
-                  onClick={() => setShowHotelForm(false)}
+                  onClick={closeHotelForm}
                 >
                   Cancel
                 </button>
