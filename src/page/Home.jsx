@@ -6,7 +6,6 @@ import { FaSuitcaseRolling } from "react-icons/fa";
 import API from "../api";
 import Footer from "../components/footer";
 
-
 import HomeInfoSection from "./homeInfo/HomeInfoSection";
 import InfoPopup from "./homeInfo/InfoPopup";
 
@@ -27,6 +26,11 @@ import cairoLuxorPackage from "../assets/image/cairo-luxor2.png";
 import customer1 from "../assets/image/sara.png";
 import customer2 from "../assets/image/ahmed.png";
 import customer3 from "../assets/image/lara.png";
+
+const SITE_NAME = "Egypt Holiday Travel";
+const SITE_URL = "https://egyptholidaytravel.com/";
+const SITE_DESCRIPTION =
+  "Egypt Holiday Travel offers personalized travel packages, hotels, tours, and holiday experiences across Egypt.";
 
 const DEFAULT_REVIEWS = [
   {
@@ -102,6 +106,84 @@ export default function Home() {
       packageId: "cairo-luxor-6",
     },
   ];
+
+  useEffect(() => {
+    document.title = SITE_NAME;
+
+    const setMeta = (name, content) => {
+      let tag = document.querySelector(`meta[name="${name}"]`);
+
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute("name", name);
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("content", content);
+    };
+
+    const setPropertyMeta = (property, content) => {
+      let tag = document.querySelector(`meta[property="${property}"]`);
+
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute("property", property);
+        document.head.appendChild(tag);
+      }
+
+      tag.setAttribute("content", content);
+    };
+
+    const setLink = (rel, href) => {
+      let link = document.querySelector(`link[rel="${rel}"]`);
+
+      if (!link) {
+        link = document.createElement("link");
+        link.setAttribute("rel", rel);
+        document.head.appendChild(link);
+      }
+
+      link.setAttribute("href", href);
+    };
+
+    setMeta("description", SITE_DESCRIPTION);
+    setMeta(
+      "keywords",
+      "Egypt Holiday Travel, Egypt tours, Egypt packages, Egypt hotels, travel agency Egypt, Cairo trips, Sharm El Sheikh, Hurghada"
+    );
+    setMeta("author", SITE_NAME);
+
+    setPropertyMeta("og:type", "website");
+    setPropertyMeta("og:site_name", SITE_NAME);
+    setPropertyMeta("og:title", SITE_NAME);
+    setPropertyMeta("og:description", SITE_DESCRIPTION);
+    setPropertyMeta("og:url", SITE_URL);
+    setPropertyMeta("og:image", `${SITE_URL}logo-512.png`);
+
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", SITE_NAME);
+    setMeta("twitter:description", SITE_DESCRIPTION);
+    setMeta("twitter:image", `${SITE_URL}logo-512.png`);
+
+    setLink("canonical", SITE_URL);
+
+    let schema = document.getElementById("eht-website-schema");
+
+    if (!schema) {
+      schema = document.createElement("script");
+      schema.id = "eht-website-schema";
+      schema.type = "application/ld+json";
+      document.head.appendChild(schema);
+    }
+
+    schema.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: SITE_NAME,
+      alternateName: ["Egypt Holiday Travel", "EHT"],
+      url: SITE_URL,
+    });
+  }, []);
 
   const closeReviewPopup = () => {
     setReviewPopup({
@@ -186,7 +268,7 @@ export default function Home() {
         const res = await API.get("/reviews");
         const databaseReviews = Array.isArray(res.data) ? res.data : [];
 
-        setReviews([  
+        setReviews([
           ...databaseReviews.map((review) => ({
             ...review,
             avatar: null,
@@ -227,8 +309,11 @@ export default function Home() {
       <section className="hero-section" id="hero">
         <Navbar />
 
-        <img src={bgImg} alt="Egypt" loading="lazy" className="hero-image" />
+        <img src={bgImg} alt="Egypt Holiday Travel" loading="lazy" className="hero-image" />
         <div className="hero-overlay"></div>
+
+        {/* SEO title for Google - hidden, does not change design */}
+        <h1 className="seo-site-title">Egypt Holiday Travel</h1>
       </section>
 
       <HomeInfoSection onOpen={setSelectedInfo} />
@@ -257,7 +342,7 @@ export default function Home() {
       </section>
 
       <section className="featured-packages-section">
-        <h2>Top  Packages</h2>
+        <h2>Top Packages</h2>
 
         <div className="featured-packages-grid">
           {packages.map((item, index) => (
@@ -268,7 +353,7 @@ export default function Home() {
             >
               <img src={item.img} loading="lazy" alt={item.name} />
 
-              <h3>Cart {index + 1}</h3>
+              <h3>Package {index + 1}</h3>
               <h4>{item.name} Trip</h4>
               <p>{item.desc}</p>
 
@@ -368,7 +453,7 @@ export default function Home() {
         </div>
 
         <div className="why-right">
-          <img src={dahabImg} loading="lazy" alt="Travel" />
+          <img src={dahabImg} loading="lazy" alt="Travel in Egypt" />
         </div>
       </section>
 
@@ -563,20 +648,19 @@ export default function Home() {
         </div>
       )}
 
-      
       <Footer />
 
       {showButton && (
-  <button
-    className="book-now-btn"
-    type="button"
-    onClick={handleBookNow}
-    aria-label="Book now"
-    title="Book Now"
-  >
-    <FaSuitcaseRolling />
-  </button>
-)}
+        <button
+          className="book-now-btn"
+          type="button"
+          onClick={handleBookNow}
+          aria-label="Book now"
+          title="Book Now"
+        >
+          <FaSuitcaseRolling />
+        </button>
+      )}
 
       <InfoPopup item={selectedInfo} onClose={() => setSelectedInfo(null)} />
     </div>
