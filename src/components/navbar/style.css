@@ -30,7 +30,6 @@
 
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
 
   border-bottom: 1px solid rgba(255, 255, 255, 0.22);
   box-shadow: var(--nav-shadow);

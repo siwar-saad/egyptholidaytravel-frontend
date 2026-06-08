@@ -37,3 +37,7 @@ node_modules/
 .DS_Store
 
 *.pdf
+
+.env
+*.env
+.env.*
