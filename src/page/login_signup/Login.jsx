@@ -144,18 +144,6 @@ export default function Login() {
           url: "/auth/resend-verification-code",
           data: { email: cleanEmail },
         },
-        {
-          url: "/auth/resend-verification",
-          data: { email: cleanEmail },
-        },
-        {
-          url: "/auth/resend-email-verification",
-          data: { email: cleanEmail },
-        },
-        {
-          url: "/auth/send-verification-code",
-          data: { email: cleanEmail },
-        },
       ]);
 
       setVerificationMessage(
@@ -223,23 +211,7 @@ export default function Login() {
 
       await postWithFallback([
         {
-          url: "/auth/verify-email",
-          data: { email: cleanEmail, code: cleanCode },
-        },
-        {
-          url: "/auth/verify-email-code",
-          data: { email: cleanEmail, code: cleanCode },
-        },
-        {
-          url: "/auth/verify-code",
-          data: {
-            email: cleanEmail,
-            code: cleanCode,
-            type: "email_verification",
-          },
-        },
-        {
-          url: "/auth/signup/verify",
+          url: "/auth/verify-signup-code",
           data: { email: cleanEmail, code: cleanCode },
         },
       ]);
