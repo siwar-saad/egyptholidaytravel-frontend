@@ -144,18 +144,6 @@ export default function Login() {
           url: "/auth/resend-verification-code",
           data: { email: cleanEmail },
         },
-        {
-          url: "/auth/resend-verification",
-          data: { email: cleanEmail },
-        },
-        {
-          url: "/auth/resend-email-verification",
-          data: { email: cleanEmail },
-        },
-        {
-          url: "/auth/send-verification-code",
-          data: { email: cleanEmail },
-        },
       ]);
 
       setVerificationMessage(
@@ -164,10 +152,18 @@ export default function Login() {
     } catch (err) {
       console.log("Resend verification error:", err.response?.data || err.message);
 
+      const serverError =
+        err.response?.data?.message || err.response?.data?.error;
+      const serverCode = err.response?.data?.code;
+
       setVerificationError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Unable to resend verification code. Please try again."
+        serverError
+          ? serverCode
+            ? `${serverError} (${serverCode})`
+            : serverError
+          : err.response
+          ? "The backend returned an error without details."
+          : "The backend is not reachable. Please check that the server is running on port 3000."
       );
     } finally {
       setResendLoading(false);
@@ -223,23 +219,7 @@ export default function Login() {
 
       await postWithFallback([
         {
-          url: "/auth/verify-email",
-          data: { email: cleanEmail, code: cleanCode },
-        },
-        {
-          url: "/auth/verify-email-code",
-          data: { email: cleanEmail, code: cleanCode },
-        },
-        {
-          url: "/auth/verify-code",
-          data: {
-            email: cleanEmail,
-            code: cleanCode,
-            type: "email_verification",
-          },
-        },
-        {
-          url: "/auth/signup/verify",
+          url: "/auth/verify-signup-code",
           data: { email: cleanEmail, code: cleanCode },
         },
       ]);
