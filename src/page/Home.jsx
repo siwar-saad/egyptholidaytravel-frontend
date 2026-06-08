@@ -257,7 +257,7 @@ export default function Home() {
       </section>
 
       <section className="featured-packages-section">
-        <h2>Featured Packages</h2>
+        <h2>Top  Packages</h2>
 
         <div className="featured-packages-grid">
           {packages.map((item, index) => (
