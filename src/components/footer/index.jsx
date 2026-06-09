@@ -63,6 +63,7 @@ export default function Footer() {
           <a href="/packages">Packages</a>
           <a href="/hotels">Hotels</a>
           <a href="/flights">Flights</a>
+          <a href="/destinations">Destination</a>
         </div>
 
         <div className="footer-col">

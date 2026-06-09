@@ -18,6 +18,7 @@ const COUNTRIES = [
   { flag: "https://flagcdn.com/tn.svg", name: "Tunisia", dialCode: "+216" },
   { flag: "https://flagcdn.com/ma.svg", name: "Morocco", dialCode: "+212" },
   { flag: "https://flagcdn.com/ba.svg", name: "Bosnia", dialCode: "+387" },
+  { flag: "https://flagcdn.com/eg.svg", name: "Egypt", dialCode: "+20" },
 ];
 
 export default function Signup() {
@@ -308,10 +309,7 @@ export default function Signup() {
           </div>
 
           <div className="auth-right signup-right">
-            <form
-              className="auth-form signup-form"
-              onSubmit={handleSignup}
-            >
+            <form className="auth-form signup-form" onSubmit={handleSignup}>
               <div className="signup-title-box">
                 <h2>Sign Up</h2>
 
@@ -319,6 +317,7 @@ export default function Signup() {
                   Create your account and manage your bookings easily with us.
                 </p>
               </div>
+
               <div className="signup-row">
                 <input
                   type="text"

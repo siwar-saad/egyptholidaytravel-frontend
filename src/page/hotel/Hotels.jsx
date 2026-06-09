@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaChevronDown } from "react-icons/fa";
 
 import API from "../../api";
@@ -10,6 +10,7 @@ import "./Hotels.css";
 import heroImg from "../../assets/image/bghotel.png";
 
 const ITEMS_PER_PAGE = 14;
+const TODAY = new Date().toISOString().split("T")[0];
 
 const apiOrigin =
   (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
@@ -19,6 +20,15 @@ const getImageUrl = (src) => {
   if (/^(https?:|data:|blob:)/i.test(src)) return src;
   if (src.startsWith("/images/")) return `${apiOrigin}${src}`;
   return src;
+};
+
+const normalizeText = (value = "") => {
+  return String(value)
+    .toLowerCase()
+    .replace(/hotel/g, "")
+    .replace(/resort/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 };
 
 const EMPTY_BOOKING_DATA = {
@@ -90,6 +100,7 @@ const splitStoredPhone = (phone = "") => {
 
 export default function Hotels() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [hotels, setHotels] = useState([]);
   const [currentHotelPage, setCurrentHotelPage] = useState(1);
@@ -107,6 +118,7 @@ export default function Hotels() {
   );
 
   const [openBookingCountry, setOpenBookingCountry] = useState(false);
+  const [homeHotelHandled, setHomeHotelHandled] = useState(false);
 
   const [hotelAlert, setHotelAlert] = useState({
     show: false,
@@ -158,6 +170,63 @@ export default function Hotels() {
 
     loadHotels();
   }, []);
+
+  useEffect(() => {
+    if (homeHotelHandled) return;
+    if (!hotels || hotels.length === 0) return;
+
+    const openHotelId = location.state?.openHotelId;
+    const openHotelName = location.state?.openHotelName;
+    const openHotelCity = location.state?.openHotelCity;
+
+    if (!openHotelId && !openHotelName && !openHotelCity) return;
+
+    const wantedName = normalizeText(openHotelName);
+    const wantedCity = normalizeText(openHotelCity);
+
+    const selectedIndex = hotels.findIndex((hotel) => {
+      const hotelId = String(hotel.id || hotel._id || hotel.hotelId || "");
+      const hotelText = normalizeText(
+        `${hotel.name || ""} ${hotel.title || ""} ${hotel.city || ""} ${
+          hotel.group_title || ""
+        } ${hotel.group_subtitle || ""}`
+      );
+
+      if (openHotelId && hotelId === String(openHotelId)) return true;
+
+      if (wantedName && hotelText.includes(wantedName)) return true;
+      if (wantedCity && hotelText.includes(wantedCity)) return true;
+
+      const usefulWords = wantedName
+        .split(" ")
+        .filter((word) => word.length > 2);
+
+      if (usefulWords.length > 0) {
+        return usefulWords.every((word) => hotelText.includes(word));
+      }
+
+      return false;
+    });
+
+    if (selectedIndex !== -1) {
+      const selected = hotels[selectedIndex];
+
+      setCurrentHotelPage(Math.floor(selectedIndex / ITEMS_PER_PAGE) + 1);
+      setSelectedHotel(selected);
+      setMainImage(selected.image);
+      setShowBookingForm(false);
+      setOpenBookingCountry(false);
+
+      setTimeout(() => {
+        document.querySelector(".hotel-section")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 150);
+    }
+
+    setHomeHotelHandled(true);
+  }, [hotels, location.state, homeHotelHandled]);
 
   const totalHotelPages = Math.max(
     1,
@@ -308,6 +377,16 @@ export default function Hotels() {
       return;
     }
 
+    if (bookingData.checkIn < TODAY) {
+      showHotelAlert("Check-in date cannot be in the past.");
+      return;
+    }
+
+    if (bookingData.checkOut <= bookingData.checkIn) {
+      showHotelAlert("Check-out date must be after check-in date.");
+      return;
+    }
+
     const fullPhone = `${selectedBookingCountry.dialCode} ${bookingData.phone.trim()}`;
 
     try {
@@ -447,6 +526,7 @@ export default function Hotels() {
             onClose={closeBooking}
             onSubmit={handleBookingSubmit}
             loading={bookingLoading}
+            bookingAsAdmin={bookingAsAdmin}
           />
         )}
 
@@ -620,12 +700,25 @@ function BookingForm({
   onClose,
   onSubmit,
   loading,
+  bookingAsAdmin,
 }) {
+  const lockClientInfo = !bookingAsAdmin;
+
   const updateBooking = (field, value) => {
-    setBookingData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setBookingData((prev) => {
+      if (field === "checkIn") {
+        return {
+          ...prev,
+          checkIn: value,
+          checkOut: prev.checkOut && prev.checkOut <= value ? "" : prev.checkOut,
+        };
+      }
+
+      return {
+        ...prev,
+        [field]: value,
+      };
+    });
   };
 
   const chooseCountry = (country) => {
@@ -658,6 +751,7 @@ function BookingForm({
             type="text"
             placeholder="Full Name"
             value={bookingData.fullName}
+            readOnly={lockClientInfo}
             onChange={(e) => updateBooking("fullName", e.target.value)}
           />
 
@@ -665,6 +759,7 @@ function BookingForm({
             type="email"
             placeholder="Email Address"
             value={bookingData.email}
+            readOnly={lockClientInfo}
             onChange={(e) => updateBooking("email", e.target.value)}
           />
 
@@ -677,6 +772,7 @@ function BookingForm({
               <button
                 type="button"
                 className="hotel-booking-country-btn"
+                disabled={lockClientInfo}
                 onClick={() => setOpenCountry((prev) => !prev)}
               >
                 <div className="hotel-booking-country-left">
@@ -720,6 +816,7 @@ function BookingForm({
                 type="tel"
                 placeholder="Phone Number / WhatsApp"
                 value={bookingData.phone}
+                readOnly={lockClientInfo}
                 onChange={(e) => updateBooking("phone", e.target.value)}
               />
             </div>
@@ -738,6 +835,7 @@ function BookingForm({
 
             <input
               type="date"
+              min={TODAY}
               value={bookingData.checkIn}
               onChange={(e) => updateBooking("checkIn", e.target.value)}
             />
@@ -748,6 +846,7 @@ function BookingForm({
 
             <input
               type="date"
+              min={bookingData.checkIn || TODAY}
               value={bookingData.checkOut}
               onChange={(e) => updateBooking("checkOut", e.target.value)}
             />

@@ -32,6 +32,93 @@ const SITE_URL = "https://egyptholidaytravel.com/";
 const SITE_DESCRIPTION =
   "Egypt Holiday Travel offers personalized travel packages, hotels, tours, and holiday experiences across Egypt.";
 
+const apiOrigin =
+  (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
+
+const getImageUrl = (src) => {
+  if (!src) return "";
+  if (/^(https?:|data:|blob:)/i.test(src)) return src;
+  if (src.startsWith("/images/")) return `${apiOrigin}${src}`;
+  return src;
+};
+
+const normalizeText = (value = "") => {
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+};
+
+const getHotelUniqueId = (hotel, index = 0) => {
+  return String(
+    hotel.id ||
+      hotel._id ||
+      hotel.hotelId ||
+      `${hotel.name || "hotel"}-${hotel.city || "city"}-${index}`
+  );
+};
+
+const selectTopHotelsByDestination = (hotelsData = []) => {
+  const destinationsWanted = [
+    {
+      label: "Sharm El Sheikh",
+      keywords: ["sharm", "sharm el sheikh"],
+    },
+    {
+      label: "Cairo",
+      keywords: ["cairo"],
+    },
+    {
+      label: "Hurghada",
+      keywords: ["hurghada"],
+    },
+    {
+      label: "Dahab",
+      keywords: ["dahab"],
+    },
+  ];
+
+  const selectedHotels = [];
+  const usedIds = new Set();
+
+  destinationsWanted.forEach((destination) => {
+    const foundHotel = hotelsData.find((hotel, index) => {
+      const hotelId = getHotelUniqueId(hotel, index);
+
+      if (usedIds.has(hotelId)) return false;
+
+      const hotelText = normalizeText(
+        `${hotel.name || ""} ${hotel.title || ""} ${hotel.city || ""} ${
+          hotel.group_title || ""
+        } ${hotel.group_subtitle || ""}`
+      );
+
+      return destination.keywords.some((keyword) =>
+        hotelText.includes(normalizeText(keyword))
+      );
+    });
+
+    if (foundHotel) {
+      const foundIndex = hotelsData.indexOf(foundHotel);
+      usedIds.add(getHotelUniqueId(foundHotel, foundIndex));
+      selectedHotels.push(foundHotel);
+    }
+  });
+
+  if (selectedHotels.length < 4) {
+    hotelsData.forEach((hotel, index) => {
+      const hotelId = getHotelUniqueId(hotel, index);
+
+      if (!usedIds.has(hotelId) && selectedHotels.length < 4) {
+        usedIds.add(hotelId);
+        selectedHotels.push(hotel);
+      }
+    });
+  }
+
+  return selectedHotels.slice(0, 4);
+};
+
 const DEFAULT_REVIEWS = [
   {
     id: 1,
@@ -65,6 +152,7 @@ export default function Home() {
   const [openWhy, setOpenWhy] = useState(null);
 
   const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+  const [topHotels, setTopHotels] = useState([]);
 
   const [reviewForm, setReviewForm] = useState({
     name: "",
@@ -185,6 +273,64 @@ export default function Home() {
     });
   }, []);
 
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        const res = await API.get("/reviews");
+        const databaseReviews = Array.isArray(res.data) ? res.data : [];
+
+        setReviews([
+          ...databaseReviews.map((review) => ({
+            ...review,
+            avatar: null,
+          })),
+          ...DEFAULT_REVIEWS,
+        ]);
+      } catch (error) {
+        console.log("Reviews load error:", error.response?.data || error.message);
+        setReviews(DEFAULT_REVIEWS);
+      }
+    };
+
+    loadReviews();
+  }, []);
+
+  useEffect(() => {
+    const loadTopHotels = async () => {
+      try {
+        const res = await API.get("/hotels");
+        const hotelsData = Array.isArray(res.data) ? res.data : [];
+
+        setTopHotels(selectTopHotelsByDestination(hotelsData));
+      } catch (error) {
+        console.log(
+          "Top hotels load error:",
+          error.response?.data || error.message
+        );
+
+        setTopHotels([]);
+      }
+    };
+
+    loadTopHotels();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const infoSection = document.getElementById("info");
+
+      if (infoSection) {
+        const rect = infoSection.getBoundingClientRect();
+        setShowButton(rect.top <= window.innerHeight / 1.25);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const closeReviewPopup = () => {
     setReviewPopup({
       open: false,
@@ -197,6 +343,16 @@ export default function Home() {
   const openPackageFromHome = (packageId) => {
     navigate("/packages", {
       state: { openPackageId: packageId },
+    });
+  };
+
+  const openHotelFromHome = (hotel) => {
+    navigate("/hotels", {
+      state: {
+        openHotelId: hotel.id || hotel._id || hotel.hotelId,
+        openHotelName: hotel.name || hotel.title,
+        openHotelCity: hotel.city || "",
+      },
     });
   };
 
@@ -262,44 +418,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    const loadReviews = async () => {
-      try {
-        const res = await API.get("/reviews");
-        const databaseReviews = Array.isArray(res.data) ? res.data : [];
-
-        setReviews([
-          ...databaseReviews.map((review) => ({
-            ...review,
-            avatar: null,
-          })),
-          ...DEFAULT_REVIEWS,
-        ]);
-      } catch (error) {
-        console.log("Reviews load error:", error.response?.data || error.message);
-        setReviews(DEFAULT_REVIEWS);
-      }
-    };
-
-    loadReviews();
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const infoSection = document.getElementById("info");
-
-      if (infoSection) {
-        const rect = infoSection.getBoundingClientRect();
-        setShowButton(rect.top <= window.innerHeight / 1.25);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const handleBookNow = () => {
     navigate("/packages");
   };
@@ -309,10 +427,15 @@ export default function Home() {
       <section className="hero-section" id="hero">
         <Navbar />
 
-        <img src={bgImg} alt="Egypt Holiday Travel" loading="lazy" className="hero-image" />
+        <img
+          src={bgImg}
+          alt="Egypt Holiday Travel"
+          loading="lazy"
+          className="hero-image"
+        />
+
         <div className="hero-overlay"></div>
 
-        {/* SEO title for Google - hidden, does not change design */}
         <h1 className="seo-site-title">Egypt Holiday Travel</h1>
       </section>
 
@@ -369,6 +492,50 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="destinations-section top-hotels-section" id="top-hotels">
+        <h2 className="section-title">Top Hotels</h2>
+
+        {topHotels.length > 0 ? (
+          <div className="destinations-grid top-hotels-grid">
+            {topHotels.map((hotel, index) => (
+              <div
+                key={hotel.id || hotel._id || `${hotel.name}-${index}`}
+                className="destination-card-new top-hotel-card"
+                onClick={() => openHotelFromHome(hotel)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") openHotelFromHome(hotel);
+                }}
+              >
+                <img
+                  src={getImageUrl(hotel.image)}
+                  alt={hotel.name || "Hotel"}
+                  loading="lazy"
+                />
+
+                <div className="card-overlay"></div>
+
+                <div className="card-text">
+                  <h3>{hotel.name || "Hotel"}</h3>
+                  <p>{hotel.city || "Explore Hotel"}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="destinations-note">
+            No hotels available yet. Please add hotels from the admin panel.
+          </p>
+        )}
+
+        {topHotels.length > 0 && (
+          <p className="destinations-note">
+            Choose one of our selected hotels and view more details on the hotels page.
+          </p>
+        )}
       </section>
 
       <section className="features-strip">

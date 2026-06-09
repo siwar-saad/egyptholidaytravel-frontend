@@ -23,6 +23,8 @@ import HomeChatbot from "./components/HomeChatbot";
 
 import ScrollToTop from "./components/ScrollToTop";
 
+import DestinationsComingSoon from "./page/destination/DestinationsComingSoon";
+
 function App() {
   return (
     <BrowserRouter>
@@ -38,7 +40,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/packages" element={<Packages />} />
         <Route path="/hotels" element={<Hotels />} />
-
+        <Route path="/destinations" element={<DestinationsComingSoon />} />
         {/* FLIGHT COMING SOON */}
         <Route path="/flight" element={<FlightComingSoon />} />
         <Route path="/flights" element={<FlightComingSoon />} />

@@ -1,187 +1,182 @@
 import "./style.css";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 
 import API from "../../api";
 import agency from "../../assets/image/agency.png";
 
-const safeParse = (value, fallback = null) => {
-  try {
-    return JSON.parse(value) || fallback;
-  } catch {
-    return fallback;
-  }
-};
+const apiOrigin =
+  (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
 
-const getStoredUser = () => {
-  return safeParse(
-    localStorage.getItem("user") || sessionStorage.getItem("user"),
-    null
-  );
+const getImageUrl = (src) => {
+  if (!src) return "";
+  if (/^(https?:|data:|blob:)/i.test(src)) return src;
+  if (src.startsWith("/images/")) return `${apiOrigin}${src}`;
+  return src;
 };
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [user, setUser] = useState(getStoredUser());
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const storedUser = getStoredUser();
-
-        if (storedUser) {
-          setUser(storedUser);
-        }
-
-        const res = await API.get("/auth/me", { skipAuthRedirect: true });
-        const apiUser = res.data?.user || null;
-
-        if (apiUser) {
-          const finalUser = {
-            ...(storedUser || {}),
-            ...apiUser,
-            avatar: apiUser.avatar || storedUser?.avatar || "",
-            profileImage:
-              apiUser.profileImage || storedUser?.profileImage || "",
-          };
-
-          setUser(finalUser);
-        } else {
-          setUser(storedUser);
-        }
+        const res = await API.get("/auth/me");
+        setUser(res.data?.user || null);
       } catch {
-        setUser(getStoredUser());
+        try {
+          const storedUser =
+            localStorage.getItem("user") || sessionStorage.getItem("user");
+
+          setUser(storedUser ? JSON.parse(storedUser) : null);
+        } catch {
+          setUser(null);
+        }
       }
     };
 
     loadUser();
 
-    const refreshUser = () => {
-      setUser(getStoredUser());
-    };
+    window.addEventListener("storage", loadUser);
 
-    const handleProfileUpdate = (event) => {
-      if (event.detail) {
-        setUser(event.detail);
-      } else {
-        refreshUser();
-      }
-    };
-
-    window.addEventListener("storage", refreshUser);
-    window.addEventListener("profileUpdated", handleProfileUpdate);
-    window.addEventListener("profilePhotoUpdated", handleProfileUpdate);
-    window.addEventListener("authChanged", refreshUser);
-
-    return () => {
-      window.removeEventListener("storage", refreshUser);
-      window.removeEventListener("profileUpdated", handleProfileUpdate);
-      window.removeEventListener("profilePhotoUpdated", handleProfileUpdate);
-      window.removeEventListener("authChanged", refreshUser);
-    };
+    return () => window.removeEventListener("storage", loadUser);
   }, []);
 
-  const isActive = (path) => {
-    if (path === "/") {
-      return location.pathname === "/";
+  const getUserName = () => {
+  if (!user) return "";
+
+  const role = (user.role || "").toLowerCase();
+
+  if (role === "admin") {
+    return "Admin EgyptHoliday";
+  }
+
+  return (
+    user.name ||
+    `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+    user.email ||
+    "Profile"
+  );
+};
+
+  const getUserAvatar = () => {
+    return getImageUrl(user?.avatar || user?.image || user?.profileImage || "");
+  };
+
+  const goToProfile = () => {
+    if (!user) {
+      navigate("/login");
+      return;
     }
 
-    return location.pathname.startsWith(path);
+    const role = (user.role || "").toLowerCase();
+
+    if (role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/profile");
+    }
   };
 
   const isProfileActive =
-    location.pathname.startsWith("/profile") ||
-    location.pathname.startsWith("/admin");
-
-  const userName =
-    user?.name ||
-    `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
-    user?.email ||
-    "Profile";
-
-  const userPhoto =
-    user?.avatar ||
-    user?.profileImage ||
-    user?.photo ||
-    user?.image ||
-    "";
+    location.pathname.startsWith("/admin") || location.pathname === "/profile";
 
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <Link to="/">
-          <img src={agency} alt="Logo" className="navbar-logo" />
-        </Link>
+        <img
+          src={agency}
+          alt="Egypt Holiday Travel"
+          className="navbar-logo"
+          onClick={() => navigate("/")}
+        />
       </div>
 
       <nav className="navbar-links">
-        <button
-          type="button"
-          className={`nav-link-btn ${isActive("/") ? "active" : ""}`}
-          onClick={() => navigate("/")}
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            isActive ? "nav-link-btn active" : "nav-link-btn"
+          }
         >
           Home
-        </button>
+        </NavLink>
 
-        <button
-          type="button"
-          className={`nav-link-btn ${isActive("/flight") ? "active" : ""}`}
-          onClick={() => navigate("/flight")}
+        <NavLink
+          to="/flight"
+          className={({ isActive }) =>
+            isActive ? "nav-link-btn active" : "nav-link-btn"
+          }
         >
           Flights
-        </button>
+        </NavLink>
 
-        <button
-          type="button"
-          className={`nav-link-btn ${isActive("/packages") ? "active" : ""}`}
-          onClick={() => navigate("/packages")}
+        <NavLink
+          to="/packages"
+          className={({ isActive }) =>
+            isActive ? "nav-link-btn active" : "nav-link-btn"
+          }
         >
           Packages
-        </button>
+        </NavLink>
 
-        <button
-          type="button"
-          className={`nav-link-btn ${isActive("/hotels") ? "active" : ""}`}
-          onClick={() => navigate("/hotels")}
+        <NavLink
+          to="/hotels"
+          className={({ isActive }) =>
+            isActive ? "nav-link-btn active" : "nav-link-btn"
+          }
         >
           Hotels
-        </button>
+        </NavLink>
 
-        {user ? (
-          <button
-            type="button"
-            className={`profile-btn ${isProfileActive ? "active" : ""}`}
-            onClick={() =>
-              navigate(user.role === "admin" ? "/admin" : "/profile")
-            }
-          >
-            {userPhoto ? (
-              <img
-                src={userPhoto}
-                alt={userName}
-                className="navbar-profile-img"
-              />
-            ) : (
-              <FaUser />
-            )}
-
-            <span>{userName}</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            className={`navbar-user ${
-              location.pathname.startsWith("/login") ? "active" : ""
-            }`}
-            onClick={() => navigate("/login")}
-          >
-            <FaUser />
-          </button>
-        )}
+        <NavLink
+          to="/destinations"
+          className={({ isActive }) =>
+            isActive ? "nav-link-btn active" : "nav-link-btn"
+          }
+        >
+          Destination
+        </NavLink>
       </nav>
+
+      {user ? (
+        <button
+          type="button"
+          className={isProfileActive ? "profile-btn active" : "profile-btn"}
+          onClick={goToProfile}
+          title={getUserName()}
+        >
+          {getUserAvatar() ? (
+            <img
+              src={getUserAvatar()}
+              alt={getUserName()}
+              className="navbar-profile-img"
+            />
+          ) : (
+            <FaUser />
+          )}
+
+          <span>{getUserName()}</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={
+            location.pathname === "/login" || location.pathname === "/signup"
+              ? "navbar-user active"
+              : "navbar-user"
+          }
+          onClick={() => navigate("/login")}
+          aria-label="Login"
+        >
+          <FaUser />
+        </button>
+      )}
     </header>
   );
 }

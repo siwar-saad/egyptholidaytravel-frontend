@@ -1,0 +1,258 @@
+.destinations-coming-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: "Inika", serif;
+}
+
+.destinations-coming-section {
+  width: 100%;
+  min-height: 100vh;
+  padding: 140px 20px 70px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(circle at top left, rgba(147, 84, 38, 0.08), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(147, 84, 38, 0.09), transparent 35%),
+    linear-gradient(180deg, #ffffff 0%, #fbf7f2 100%);
+}
+
+.destinations-coming-card {
+  width: min(780px, 100%);
+  background: #ffffff;
+  border-radius: 34px;
+  padding: 48px 42px;
+  text-align: center;
+
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  box-shadow: 0 28px 75px rgba(147, 84, 38, 0.13);
+
+  position: relative;
+  overflow: hidden;
+}
+
+.destinations-coming-card::before {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: rgba(147, 84, 38, 0.07);
+  top: -70px;
+  right: -70px;
+}
+
+.destinations-coming-card::after {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(147, 84, 38, 0.06);
+  bottom: -55px;
+  left: -55px;
+}
+
+.destinations-coming-label {
+  position: relative;
+  z-index: 2;
+
+  display: inline-block;
+  margin-bottom: 14px;
+
+  color: #935426;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.destinations-coming-card h1 {
+  position: relative;
+  z-index: 2;
+
+  font-family: "Playfair Display", serif;
+  font-size: clamp(42px, 6vw, 70px);
+  line-height: 1;
+  color: #24160f;
+  margin-bottom: 12px;
+}
+
+.destinations-coming-card h2 {
+  position: relative;
+  z-index: 2;
+
+  font-size: clamp(28px, 4vw, 40px);
+  color: #935426;
+  margin-bottom: 18px;
+  font-weight: 900;
+}
+
+.destinations-coming-text {
+  position: relative;
+  z-index: 2;
+
+  max-width: 620px;
+  margin: 0 auto 28px;
+  color: #5f4d40;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.destinations-contact-box {
+  position: relative;
+  z-index: 2;
+
+  max-width: 650px;
+  margin: 28px auto;
+  padding: 24px;
+
+  background: #fbf7f2;
+  border: 1px solid rgba(147, 84, 38, 0.12);
+  border-radius: 24px;
+}
+
+.destinations-contact-box h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  color: #24160f;
+  margin-bottom: 10px;
+}
+
+.destinations-contact-box p {
+  color: #6e5b4d;
+  font-size: 15px;
+  line-height: 1.75;
+  margin-bottom: 18px;
+}
+
+.destinations-contact-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.destinations-contact-list a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 40px;
+  padding: 10px 16px;
+
+  border-radius: 999px;
+  background: #ffffff;
+  color: #935426;
+
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+
+  border: 1px solid rgba(147, 84, 38, 0.16);
+  transition: 0.25s ease;
+}
+
+.destinations-contact-list a:hover {
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(147, 84, 38, 0.2);
+}
+
+.destinations-coming-btn {
+  position: relative;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 6px;
+  padding: 14px 34px;
+
+  border-radius: 999px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 900;
+  text-decoration: none;
+
+  box-shadow: 0 16px 34px rgba(147, 84, 38, 0.28);
+  transition: 0.25s ease;
+}
+
+.destinations-coming-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 44px rgba(147, 84, 38, 0.38);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .destinations-coming-section {
+    padding: 120px 14px 55px;
+  }
+
+  .destinations-coming-card {
+    border-radius: 28px;
+    padding: 38px 20px;
+  }
+
+  .destinations-coming-text {
+    font-size: 15px;
+  }
+
+  .destinations-contact-box {
+    padding: 20px 14px;
+    border-radius: 22px;
+  }
+
+  .destinations-contact-box h3 {
+    font-size: 24px;
+  }
+
+  .destinations-contact-box p {
+    font-size: 14px;
+  }
+
+  .destinations-contact-list {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .destinations-contact-list a {
+    width: 100%;
+  }
+
+  .destinations-coming-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .destinations-coming-section {
+    padding: 105px 10px 45px;
+  }
+
+  .destinations-coming-card {
+    padding: 34px 16px;
+    border-radius: 24px;
+  }
+
+  .destinations-coming-label {
+    font-size: 11.5px;
+  }
+
+  .destinations-coming-card h1 {
+    font-size: 40px;
+  }
+
+  .destinations-coming-card h2 {
+    font-size: 27px;
+  }
+}
