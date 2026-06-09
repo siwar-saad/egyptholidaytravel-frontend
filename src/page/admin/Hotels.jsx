@@ -146,7 +146,7 @@ const normalizePeriodsForForm = (periods = []) => {
   }));
 };
 
-export default function Hotels({ showSuccess }) {
+export default function Hotels() {
   const defaultCover =
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
 
@@ -159,12 +159,29 @@ export default function Hotels({ showSuccess }) {
   const [manualImageUrl, setManualImageUrl] = useState("");
   const [hotelForm, setHotelForm] = useState(createEmptyHotel());
 
-  const notify = (message) => {
-    if (typeof showSuccess === "function") {
-      showSuccess(message);
-    } else {
-      console.log(message);
-    }
+  const [hotelPopup, setHotelPopup] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const notify = (message, type = "success", title = "") => {
+    setHotelPopup({
+      open: true,
+      type,
+      title: title || (type === "error" ? "Action Failed" : "Success"),
+      message,
+    });
+  };
+
+  const closeHotelMessagePopup = () => {
+    setHotelPopup({
+      open: false,
+      type: "success",
+      title: "",
+      message: "",
+    });
   };
 
   const getHotelId = (hotel) => hotel?._id || hotel?.id;
@@ -174,7 +191,11 @@ export default function Hotels({ showSuccess }) {
       const res = await API.get("/hotels");
       setHotels(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to load hotels.");
+      notify(
+        err.response?.data?.error || "Unable to load hotels.",
+        "error",
+        "Loading Failed"
+      );
     }
   };
 
@@ -302,9 +323,17 @@ export default function Hotels({ showSuccess }) {
         };
       });
 
-      notify("Hotel photos uploaded successfully.");
+      notify(
+        "Hotel photos uploaded successfully.",
+        "success",
+        "Photos Uploaded"
+      );
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to upload hotel photos.");
+      notify(
+        err.response?.data?.error || "Unable to upload hotel photos.",
+        "error",
+        "Upload Failed"
+      );
     } finally {
       setUploadingImages(false);
     }
@@ -314,7 +343,7 @@ export default function Hotels({ showSuccess }) {
     const cleanUrl = manualImageUrl.trim();
 
     if (!cleanUrl) {
-      notify("Please write an image URL first.");
+      notify("Please write an image URL first.", "error", "Missing Image URL");
       return;
     }
 
@@ -389,15 +418,33 @@ export default function Hotels({ showSuccess }) {
     const payload = buildPayload();
 
     if (!payload.name || !payload.city || !payload.meal) {
-      notify("Please fill hotel name, city and meal plan.");
+      notify(
+        "Please fill hotel name, city and meal plan.",
+        "error",
+        "Missing Information"
+      );
       return;
     }
 
-    try {
-      setSaving(true);
+    const isEditing = Boolean(editingHotel);
+    const hotelId = getHotelId(editingHotel);
 
-      if (editingHotel) {
-        const hotelId = getHotelId(editingHotel);
+    if (isEditing && !hotelId) {
+      closeHotelForm();
+      notify(
+        "Hotel ID not found. Please refresh the page and try again.",
+        "error",
+        "Update Failed"
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    closeHotelForm();
+
+    try {
+      if (isEditing) {
         const res = await API.put(`/admin/${hotelId}`, payload);
 
         setHotels((current) =>
@@ -406,17 +453,29 @@ export default function Hotels({ showSuccess }) {
           )
         );
 
-        notify("Hotel updated successfully.");
+        notify(
+          "Hotel updated successfully.",
+          "success",
+          "Hotel Updated"
+        );
       } else {
         const res = await API.post("/admin/add", payload);
         setHotels((current) => [res.data, ...current]);
-        notify("Hotel added successfully.");
+
+        notify(
+          "Hotel added successfully.",
+          "success",
+          "Hotel Added"
+        );
       }
 
-      closeHotelForm();
       loadHotels();
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to save hotel.");
+      notify(
+        err.response?.data?.error || "Unable to save hotel.",
+        "error",
+        isEditing ? "Update Failed" : "Save Failed"
+      );
     } finally {
       setSaving(false);
     }
@@ -426,7 +485,7 @@ export default function Hotels({ showSuccess }) {
     const hotelId = getHotelId(hotel);
 
     if (!hotelId) {
-      notify("Hotel id not found.");
+      notify("Hotel id not found.", "error", "Missing Hotel ID");
       return;
     }
 
@@ -453,15 +512,23 @@ export default function Hotels({ showSuccess }) {
         )
       );
 
-      notify("Hotel visibility updated.");
+      notify(
+        "Hotel visibility updated.",
+        "success",
+        "Visibility Updated"
+      );
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to update hotel visibility.");
+      notify(
+        err.response?.data?.error || "Unable to update hotel visibility.",
+        "error",
+        "Update Failed"
+      );
     }
   };
 
   const deleteHotel = async (hotelId) => {
     if (!hotelId) {
-      notify("Hotel id not found.");
+      notify("Hotel id not found.", "error", "Missing Hotel ID");
       return;
     }
 
@@ -472,9 +539,17 @@ export default function Hotels({ showSuccess }) {
         current.filter((hotel) => getHotelId(hotel) !== hotelId)
       );
 
-      notify("Hotel deleted successfully.");
+      notify(
+        "Hotel deleted successfully.",
+        "success",
+        "Hotel Deleted"
+      );
     } catch (err) {
-      notify(err.response?.data?.error || "Unable to delete hotel.");
+      notify(
+        err.response?.data?.error || "Unable to delete hotel.",
+        "error",
+        "Delete Failed"
+      );
     }
   };
 
@@ -834,6 +909,41 @@ export default function Hotels({ showSuccess }) {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {hotelPopup.open && (
+        <div
+          className="hotel-message-popup-overlay"
+          onClick={closeHotelMessagePopup}
+        >
+          <div
+            className={`hotel-message-popup ${hotelPopup.type}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="hotel-message-popup-close"
+              onClick={closeHotelMessagePopup}
+            >
+              ×
+            </button>
+
+            <div className={`hotel-message-popup-icon ${hotelPopup.type}`}>
+              {hotelPopup.type === "error" ? "!" : "✓"}
+            </div>
+
+            <h3>{hotelPopup.title}</h3>
+            <p>{hotelPopup.message}</p>
+
+            <button
+              type="button"
+              className="hotel-message-popup-btn"
+              onClick={closeHotelMessagePopup}
+            >
+              OK
+            </button>
           </div>
         </div>
       )}

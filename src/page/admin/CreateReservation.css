@@ -424,3 +424,144 @@
     padding-top: 24px;
   }
 }
+/* ================= RESERVATION MESSAGE POPUP ================= */
+
+.reservation-message-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(20, 12, 8, 0.45);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: reservationMsgFade 0.25s ease;
+}
+
+.reservation-message-popup {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 34px 28px 28px;
+  text-align: center;
+  border: 1px solid rgba(147, 84, 38, 0.14);
+  box-shadow: 0 28px 75px rgba(0, 0, 0, 0.22);
+  animation: reservationMsgShow 0.28s ease;
+}
+
+.reservation-message-popup.success {
+  background:
+    radial-gradient(circle at top right, rgba(147, 84, 38, 0.09), transparent 35%),
+    #ffffff;
+}
+
+.reservation-message-popup.error {
+  background:
+    radial-gradient(circle at top right, rgba(210, 55, 55, 0.1), transparent 35%),
+    #ffffff;
+}
+
+.reservation-message-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #f5eee7;
+  color: #935426;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.reservation-message-popup-close:hover {
+  background: #935426;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.reservation-message-popup-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 34px;
+  font-weight: 900;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+.reservation-message-popup-icon.success {
+  background: linear-gradient(135deg, #935426, #6f3a15);
+}
+
+.reservation-message-popup-icon.error {
+  background: linear-gradient(135deg, #d9534f, #a82320);
+}
+
+.reservation-message-popup h3 {
+  margin: 0 0 10px;
+  color: #24160f;
+  font-family: "Playfair Display", serif;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.reservation-message-popup p {
+  margin: 0 0 24px;
+  color: #5f5248;
+  font-size: 15px;
+  line-height: 1.7;
+  font-weight: 600;
+}
+
+.reservation-message-popup-btn {
+  min-width: 140px;
+  border: none;
+  border-radius: 999px;
+  padding: 13px 28px;
+  background: linear-gradient(135deg, #935426, #6f3a15);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.25);
+  transition: 0.3s ease;
+}
+
+.reservation-message-popup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(147, 84, 38, 0.35);
+}
+
+@keyframes reservationMsgFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes reservationMsgShow {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

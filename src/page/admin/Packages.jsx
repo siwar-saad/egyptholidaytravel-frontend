@@ -17,12 +17,10 @@ const EMPTY_PACKAGE = {
   price: "",
   visibility: "Private",
   image: "",
-  options: "",
-  itinerary: "",
   displayOrder: 0,
 };
 
-export default function Packages({ showSuccess }) {
+export default function Packages() {
   const [packages, setPackages] = useState([]);
   const [packageSearch, setPackageSearch] = useState("");
   const [showPackageForm, setShowPackageForm] = useState(false);
@@ -31,19 +29,44 @@ export default function Packages({ showSuccess }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const notify = (message) => {
-    if (typeof showSuccess === "function") {
-      showSuccess(message);
-    } else {
-      console.log(message);
-    }
+  const [packagePopup, setPackagePopup] = useState({
+    open: false,
+    type: "success",
+    title: "",
+    message: "",
+  });
+
+  const notify = (message, type = "success", title = "") => {
+    setPackagePopup({
+      open: true,
+      type,
+      title: title || (type === "error" ? "Action Failed" : "Success"),
+      message,
+    });
   };
 
-  const getPackageId = (item) => item?._id || item?.id;
+  const closeMessagePopup = () => {
+    setPackagePopup({
+      open: false,
+      type: "success",
+      title: "",
+      message: "",
+    });
+  };
+
+  const getPackageId = (item) => {
+    return (
+      item?._id ||
+      item?.id ||
+      item?.packageId ||
+      item?.package_id ||
+      item?.packageID ||
+      item?.uuid ||
+      null
+    );
+  };
 
   const getPackagesArray = (data) => {
-    console.log("RAW PACKAGES RESPONSE:", data);
-
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.packages)) return data.packages;
     if (Array.isArray(data?.data)) return data.data;
@@ -66,51 +89,56 @@ export default function Packages({ showSuccess }) {
   const getImageUrl = (image) => {
     if (!image) return DEFAULT_COVER;
 
+    let cleanImage = image;
+
+    if (Array.isArray(cleanImage)) {
+      cleanImage = cleanImage[0];
+    }
+
+    if (typeof cleanImage === "object") {
+      cleanImage =
+        cleanImage.url ||
+        cleanImage.src ||
+        cleanImage.image ||
+        cleanImage.path ||
+        "";
+    }
+
+    cleanImage = String(cleanImage || "").trim();
+
+    if (!cleanImage) return DEFAULT_COVER;
+
     if (
-      image.startsWith("http") ||
-      image.startsWith("data:") ||
-      image.startsWith("blob:")
+      cleanImage.startsWith("http") ||
+      cleanImage.startsWith("data:") ||
+      cleanImage.startsWith("blob:")
     ) {
-      return image;
+      return cleanImage;
     }
 
     const apiBase = API.defaults.baseURL || "/api";
     const origin = apiBase.replace(/\/api\/?$/, "");
 
-    if (image.startsWith("/")) {
-      return `${origin}${image}`;
+    if (cleanImage.startsWith("/")) {
+      return `${origin}${cleanImage}`;
     }
 
-    return image;
+    return cleanImage;
   };
 
-  const stringifyJson = (value) => {
-    if (!value) return "";
-    if (typeof value === "string") return value;
+  const safeArray = (value) => {
+    if (Array.isArray(value)) return value;
 
-    try {
-      return JSON.stringify(value, null, 2);
-    } catch {
-      return "";
-    }
-  };
-
-  const parseJson = (value, fieldName) => {
-    const cleanValue = String(value || "").trim();
-
-    if (!cleanValue) return [];
-
-    try {
-      const parsed = JSON.parse(cleanValue);
-
-      if (!Array.isArray(parsed)) {
-        throw new Error();
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
       }
-
-      return parsed;
-    } catch {
-      throw new Error(`${fieldName} must be a valid JSON array`);
     }
+
+    return [];
   };
 
   useEffect(() => {
@@ -146,13 +174,16 @@ export default function Packages({ showSuccess }) {
       }
 
       const loadedPackages = getPackagesArray(res.data);
-
-      console.log("LOADED PACKAGES:", loadedPackages);
-
       setPackages(loadedPackages);
     } catch (err) {
       console.log("Packages error:", err.response?.data || err.message);
-      notify(err.response?.data?.error || "Unable to load packages.");
+
+      notify(
+        err.response?.data?.error || "Unable to load packages.",
+        "error",
+        "Loading Failed"
+      );
+
       setPackages([]);
     } finally {
       setLoading(false);
@@ -190,11 +221,9 @@ export default function Packages({ showSuccess }) {
         item?.transferReduction || item?.transfer_reduction || "",
       startPrice: item?.startPrice || item?.start_price || item?.price || "",
       programme: item?.programme || "",
-      price: item?.price || item?.startPrice || "",
+      price: item?.price || item?.startPrice || item?.start_price || "",
       visibility: item?.visibility || "Private",
       image: item?.image || item?.image_url || item?.cover || "",
-      options: stringifyJson(item?.options),
-      itinerary: stringifyJson(item?.itinerary),
       displayOrder: item?.displayOrder || item?.display_order || 0,
     });
 
@@ -233,9 +262,17 @@ export default function Packages({ showSuccess }) {
           image: res.data?.image || res.data?.url || "",
         }));
 
-        notify("Package image uploaded successfully.");
+        notify(
+          "Package image uploaded successfully.",
+          "success",
+          "Image Uploaded"
+        );
       } catch (err) {
-        notify(err.response?.data?.error || "Unable to upload package image.");
+        notify(
+          err.response?.data?.error || "Unable to upload package image.",
+          "error",
+          "Upload Failed"
+        );
       }
     };
 
@@ -256,18 +293,23 @@ export default function Packages({ showSuccess }) {
     const name = newPackage.name.trim();
 
     if (!name) {
-      notify("Please enter package name.");
+      notify("Please enter package name.", "error", "Missing Information");
       return;
     }
 
-    let options = [];
-    let itinerary = [];
+    const isEditing = Boolean(editingPackage);
+    const editingPackageId = getPackageId(editingPackage);
 
-    try {
-      options = parseJson(newPackage.options, "Options");
-      itinerary = parseJson(newPackage.itinerary, "Itinerary");
-    } catch (error) {
-      notify(error.message);
+    if (isEditing && !editingPackageId) {
+      setShowPackageForm(false);
+      setNewPackage(EMPTY_PACKAGE);
+      setEditingPackage(null);
+
+      notify(
+        "Package ID not found. Please refresh the page and try again.",
+        "error",
+        "Update Failed"
+      );
       return;
     }
 
@@ -284,42 +326,42 @@ export default function Packages({ showSuccess }) {
       price: newPackage.price.trim() || newPackage.startPrice.trim(),
       visibility: newPackage.visibility || "Private",
       image: newPackage.image,
-      options,
-      itinerary,
       displayOrder: Number(newPackage.displayOrder || 0),
+
+      options: safeArray(editingPackage?.options),
+      itinerary: safeArray(editingPackage?.itinerary),
     };
 
-    try {
-      setSaving(true);
+    setSaving(true);
 
-      const res = editingPackage
-        ? await API.put(
-            `/admin/packages/${getPackageId(editingPackage)}`,
-            packageData
-          )
+    setShowPackageForm(false);
+    setNewPackage(EMPTY_PACKAGE);
+    setEditingPackage(null);
+
+    try {
+      const res = isEditing
+        ? await API.put(`/admin/packages/${editingPackageId}`, packageData)
         : await API.post("/admin/packages", packageData);
 
       const savedPackage = getPackageFromResponse(res.data, {
-        id: Date.now(),
+        id: editingPackageId || Date.now(),
         ...packageData,
       });
 
       setPackages((prevPackages) =>
-        editingPackage
+        isEditing
           ? prevPackages.map((item) =>
-              getPackageId(item) === getPackageId(editingPackage)
-                ? savedPackage
-                : item
+              getPackageId(item) === editingPackageId ? savedPackage : item
             )
           : [savedPackage, ...prevPackages]
       );
 
-      closePackageForm();
-
       notify(
-        editingPackage
+        isEditing
           ? "Package updated successfully."
-          : "Package added successfully."
+          : "Package added successfully.",
+        "success",
+        "Saved Successfully"
       );
 
       fetchPackages();
@@ -329,7 +371,11 @@ export default function Packages({ showSuccess }) {
       notify(
         err.response?.data?.error ||
           err.response?.data?.message ||
-          "Failed to save package."
+          (isEditing
+            ? "Unable to update package."
+            : "Unable to add package."),
+        "error",
+        isEditing ? "Update Failed" : "Save Failed"
       );
     } finally {
       setSaving(false);
@@ -338,7 +384,7 @@ export default function Packages({ showSuccess }) {
 
   const updatePackageVisibility = async (id, visibility) => {
     if (!id) {
-      notify("Package id not found.");
+      notify("Package id not found.", "error", "Missing Package ID");
       return;
     }
 
@@ -353,21 +399,23 @@ export default function Packages({ showSuccess }) {
         )
       );
 
-      notify("Package visibility updated.");
+      notify("Package visibility updated.", "success", "Updated");
     } catch (err) {
       console.log("Visibility error:", err.response?.data || err.message);
 
       notify(
         err.response?.data?.error ||
           err.response?.data?.message ||
-          "Failed to update package visibility."
+          "Failed to update package visibility.",
+        "error",
+        "Update Failed"
       );
     }
   };
 
   const deletePackage = async (id) => {
     if (!id) {
-      notify("Package id not found.");
+      notify("Package id not found.", "error", "Missing Package ID");
       return;
     }
 
@@ -378,14 +426,16 @@ export default function Packages({ showSuccess }) {
         prevPackages.filter((item) => getPackageId(item) !== id)
       );
 
-      notify("Package deleted successfully.");
+      notify("Package deleted successfully.", "success", "Deleted");
     } catch (err) {
       console.log("Delete package error:", err.response?.data || err.message);
 
       notify(
         err.response?.data?.error ||
           err.response?.data?.message ||
-          "Failed to delete package."
+          "Failed to delete package.",
+        "error",
+        "Delete Failed"
       );
     }
   };
@@ -610,40 +660,6 @@ export default function Packages({ showSuccess }) {
               </div>
 
               <div className="package-form-section">
-                <h3>Package Options</h3>
-
-                <p className="package-helper-text">
-                  Add package options in JSON format. Leave this field empty if
-                  you do not need options.
-                </p>
-
-                <textarea
-                  className="json-textarea"
-                  placeholder="Add package options here..."
-                  value={newPackage.options}
-                  onChange={(e) => updatePackageField("options", e.target.value)}
-                />
-              </div>
-
-              <div className="package-form-section">
-                <h3>Itinerary</h3>
-
-                <p className="package-helper-text">
-                  Add itinerary days in JSON format. Leave this field empty if
-                  you do not need itinerary.
-                </p>
-
-                <textarea
-                  className="json-textarea"
-                  placeholder="Add itinerary details here..."
-                  value={newPackage.itinerary}
-                  onChange={(e) =>
-                    updatePackageField("itinerary", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="package-form-section">
                 <h3>Package Image</h3>
 
                 <label className="package-image-upload">
@@ -702,6 +718,38 @@ export default function Packages({ showSuccess }) {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {packagePopup.open && (
+        <div className="package-message-popup-overlay" onClick={closeMessagePopup}>
+          <div
+            className={`package-message-popup ${packagePopup.type}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="package-message-popup-close"
+              onClick={closeMessagePopup}
+            >
+              ×
+            </button>
+
+            <div className={`package-message-popup-icon ${packagePopup.type}`}>
+              {packagePopup.type === "error" ? "!" : "✓"}
+            </div>
+
+            <h3>{packagePopup.title}</h3>
+            <p>{packagePopup.message}</p>
+
+            <button
+              type="button"
+              className="package-message-popup-btn"
+              onClick={closeMessagePopup}
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
