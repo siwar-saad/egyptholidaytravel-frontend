@@ -40,6 +40,8 @@ const getCurrentAdminName = () => {
 };
 
 const getCreatedBy = (booking = {}) => {
+  const customerInfo = booking.customer_info || booking.customerInfo || {};
+
   const role =
     booking.createdByRole ||
     booking.created_by_role ||
@@ -48,6 +50,10 @@ const getCreatedBy = (booking = {}) => {
     booking.source ||
     booking.reservationSource ||
     booking.reservation_source ||
+    customerInfo.createdByRole ||
+    customerInfo.created_by_role ||
+    customerInfo.createdBy ||
+    customerInfo.created_by ||
     booking.createdBy?.role ||
     booking.created_by?.role ||
     "";
@@ -57,6 +63,10 @@ const getCreatedBy = (booking = {}) => {
     booking.created_by_name ||
     booking.adminName ||
     booking.admin_name ||
+    customerInfo.adminName ||
+    customerInfo.admin_name ||
+    customerInfo.createdByName ||
+    customerInfo.created_by_name ||
     booking.creatorName ||
     booking.creator_name ||
     booking.createdBy?.name ||
@@ -75,11 +85,40 @@ const getCreatedBy = (booking = {}) => {
     return name ? `Admin - ${name}` : "Admin";
   }
 
-  if (String(booking.createdBy || booking.created_by || "").toLowerCase() === "admin") {
+  if (
+    String(
+      booking.createdBy ||
+        booking.created_by ||
+        customerInfo.createdBy ||
+        customerInfo.created_by ||
+        ""
+    ).toLowerCase() === "admin"
+  ) {
     return name ? `Admin - ${name}` : "Admin";
   }
 
   return "User";
+};
+
+const formatCreatedDate = (value) => {
+  if (!value || value === "-") return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("en-GB");
+};
+
+const formatCreatedTime = (value) => {
+  if (!value || value === "-") return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 export default function Reservations({ showSuccess }) {
@@ -109,6 +148,12 @@ export default function Reservations({ showSuccess }) {
     const searchParams =
       booking.search_params || booking.searchParams || booking.package || {};
     const customerInfo = booking.customer_info || booking.customerInfo || {};
+    const createdAt =
+      booking.created_at ||
+      booking.createdAt ||
+      booking.createdDate ||
+      booking.date ||
+      "";
 
     return {
       id: booking.id || booking._id || `package-${index}`,
@@ -142,6 +187,8 @@ export default function Reservations({ showSuccess }) {
       status: booking.status || "Pending",
       notes: customerInfo.notes || booking.notes || "",
       createdBy: getCreatedBy(booking),
+      createdDate: formatCreatedDate(createdAt),
+      createdTime: formatCreatedTime(createdAt),
     };
   };
 
@@ -149,6 +196,12 @@ export default function Reservations({ showSuccess }) {
     const selectedHotel =
       booking.selected_hotel || booking.selectedHotel || booking.hotel || {};
     const customerInfo = booking.customer_info || booking.customerInfo || {};
+    const createdAt =
+      booking.created_at ||
+      booking.createdAt ||
+      booking.createdDate ||
+      booking.date ||
+      "";
 
     return {
       id: booking.id || booking._id || `hotel-${index}`,
@@ -191,6 +244,8 @@ export default function Reservations({ showSuccess }) {
       status: booking.status || "Pending",
       notes: customerInfo.notes || booking.notes || "",
       createdBy: getCreatedBy(booking),
+      createdDate: formatCreatedDate(createdAt),
+      createdTime: formatCreatedTime(createdAt),
     };
   };
 
@@ -446,6 +501,8 @@ export default function Reservations({ showSuccess }) {
                   <th>Travelers</th>
                   <th>Room</th>
                   <th>Created By</th>
+                  <th>Created Date</th>
+                  <th>Created Time</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -485,6 +542,9 @@ export default function Reservations({ showSuccess }) {
                         {booking.createdBy}
                       </span>
                     </td>
+
+                    <td>{booking.createdDate || "-"}</td>
+                    <td>{booking.createdTime || "-"}</td>
 
                     <td>
                       <select
