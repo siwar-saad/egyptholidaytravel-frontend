@@ -22,10 +22,6 @@ import cairoHurghadaPackage from "../assets/image/cairo-hurghada1.png";
 import cairoSharmPackage from "../assets/image/cairo-sharm.png";
 import cairoLuxorPackage from "../assets/image/cairo-luxor2.png";
 
-/* CUSTOMERS */
-import customer1 from "../assets/image/sara.png";
-import customer2 from "../assets/image/ahmed.png";
-import customer3 from "../assets/image/lara.png";
 
 const SITE_NAME = "Egypt Holiday Travel";
 const SITE_URL = "https://egyptholidaytravel.com/";
@@ -119,29 +115,86 @@ const selectTopHotelsByDestination = (hotelsData = []) => {
   return selectedHotels.slice(0, 4);
 };
 
+const REVIEW_META = [
+  {
+    code: "tn",
+    country: "Tunisia",
+  },
+  {
+    code: "tr",
+    country: "Turkey",
+  },
+  {
+    code: "ma",
+    country: "Morocco",
+  },
+];
+
 const DEFAULT_REVIEWS = [
   {
     id: 1,
     name: "Sarah M.",
     rating: 5,
-    text: "Everything Was Perfectly Organized. The Team Made Our Trip Easy, Safe, And Full Of Beautiful Moments. Highly Recommended!",
-    avatar: customer1,
+    text: "Everything was perfectly organized. The team made our trip easy, safe, and full of beautiful moments. Highly recommended!",
+    code: "tn",
+    country: "Tunisia",
   },
   {
     id: 2,
-    name: "Ahmed K",
+    name: "Emre Y.",
     rating: 5,
     text: "Great experience! The communication was clear, and every destination was exactly as described. Excellent service.",
-    avatar: customer2,
+    code: "tr",
+    country: "Turkey",
   },
   {
     id: 3,
     name: "Laura P.",
     rating: 5,
     text: "I discovered Egypt in a completely new way. The planning, timing, and professionalism were outstanding.",
-    avatar: customer3,
+    code: "ma",
+    country: "Morocco",
   },
 ];
+
+const getReviewData = (review, index) => {
+  const meta = REVIEW_META[index % REVIEW_META.length];
+  const code = getFlagCode(review.code || review.flag || review.country || meta.code);
+
+  return {
+    ...review,
+    code,
+    country: review.country || meta.country,
+  };
+};
+
+const getFlagCode = (value = "") => {
+  const clean = String(value).trim().toLowerCase();
+
+  if (clean.includes("🇹🇳") || clean.includes("tunisia") || clean === "tn") {
+    return "tn";
+  }
+
+  if (clean.includes("🇹🇷") || clean.includes("turkey") || clean === "tr") {
+    return "tr";
+  }
+
+  if (clean.includes("🇲🇦") || clean.includes("morocco") || clean === "ma") {
+    return "ma";
+  }
+
+  return REVIEW_META[0].code;
+};
+
+const renderStars = (rating) => {
+  const value = Math.max(1, Math.min(5, Number(rating) || 5));
+
+  return Array.from({ length: 5 }).map((_, index) => (
+    <span key={index} className={index < value ? "active" : ""}>
+      ★
+    </span>
+  ));
+};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -279,13 +332,11 @@ export default function Home() {
         const res = await API.get("/reviews");
         const databaseReviews = Array.isArray(res.data) ? res.data : [];
 
-        setReviews([
-          ...databaseReviews.map((review) => ({
-            ...review,
-            avatar: null,
-          })),
-          ...DEFAULT_REVIEWS,
-        ]);
+        const formattedDatabaseReviews = databaseReviews.map((review, index) =>
+          getReviewData(review, index)
+        );
+
+        setReviews([...formattedDatabaseReviews, ...DEFAULT_REVIEWS]);
       } catch (error) {
         console.log("Reviews load error:", error.response?.data || error.message);
         setReviews(DEFAULT_REVIEWS);
@@ -624,40 +675,60 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="testimonials-section">
-        <h2>Customers Say</h2>
+      <section className="testimonials-section improved-testimonials-section">
+        <div className="testimonials-head">
+          
 
-        <div className="testimonials-grid">
-          {reviews.slice(0, 3).map((review) => (
-            <div className="testimonial-card" key={review.id}>
-              <span className="testimonial-quote">“</span>
+          <h2>Customers Say</h2>
 
-              <div className="testimonial-top">
-                {review.avatar ? (
-                  <img
-                    src={review.avatar}
-                    alt={review.name}
-                    loading="lazy"
-                    className="customer-img"
-                  />
-                ) : (
-                  <div className="customer-letter">
-                    {review.name.charAt(0).toUpperCase()}
+          <div className="testimonials-divider">
+            <span></span>
+            <i></i>
+            <span></span>
+          </div>
+        </div>
+
+        <div className="testimonials-grid improved-testimonials-grid">
+          {reviews.slice(0, 3).map((review, index) => {
+            const item = getReviewData(review, index);
+
+            return (
+              <article
+                className="testimonial-card improved-testimonial-card"
+                key={item.id || `${item.name}-${index}`}
+                style={{ "--delay": `${index * 0.12}s` }}
+              >
+                <span className="testimonial-quote">“</span>
+
+                <div className="testimonial-top improved-testimonial-top">
+                  <div className="testimonial-user-info improved-user-info">
+                    <h4>
+                      {item.name}
+                      <span
+                        className={`review-flag review-flag-${item.code}`}
+                        title={item.country}
+                        aria-label={`${item.country} flag`}
+                      ></span>
+                    </h4>
+
+                    <p className="review-country">{item.country} traveler</p>
                   </div>
-                )}
 
-                <div className="testimonial-user-info">
-                  <h4>{review.name}</h4>
-
-                  <div className="stars">
-                    {"⭐".repeat(Number(review.rating) || 5)}
-                  </div>
+                  <span className="verified-review">Verified</span>
                 </div>
-              </div>
 
-              <p>{review.text}</p>
-            </div>
-          ))}
+                <div
+                  className="testimonial-stars"
+                  aria-label={`${item.rating || 5} star rating`}
+                >
+                  {renderStars(item.rating)}
+                </div>
+
+
+                <p className="review-text">“{item.text}”</p>
+              </article>
+            );
+          })}
         </div>
 
         <div className="customer-review-form-box">

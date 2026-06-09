@@ -2786,3 +2786,87 @@ button {
     font-size: 10.8px !important;
   }
 }
+
+
+/* =========================================================
+   FINAL FIX - REAL SVG FLAGS FOR CUSTOMER REVIEWS
+   Paste at the END of Home.css
+========================================================= */
+
+.improved-user-info h4 .review-flag,
+.testimonial-user-info h4 .review-flag,
+.review-flag {
+  position: relative !important;
+  display: inline-block !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 25px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(80, 35, 15, 0.18) !important;
+  box-shadow: 0 6px 14px rgba(45, 22, 13, 0.12) !important;
+  background-color: transparent !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+.review-flag::before,
+.review-flag::after {
+  content: none !important;
+  display: none !important;
+}
+
+.review-flag-tn {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2034%2024%22%3E%0A%3Crect%20width%3D%2234%22%20height%3D%2224%22%20fill%3D%22%23e70013%22%2F%3E%0A%3Ccircle%20cx%3D%2217%22%20cy%3D%2212%22%20r%3D%227.1%22%20fill%3D%22%23fff%22%2F%3E%0A%3Ccircle%20cx%3D%2215.8%22%20cy%3D%2212%22%20r%3D%224.4%22%20fill%3D%22%23e70013%22%2F%3E%0A%3Ccircle%20cx%3D%2217.3%22%20cy%3D%2212%22%20r%3D%224.4%22%20fill%3D%22%23fff%22%2F%3E%0A%3Cpath%20fill%3D%22%23e70013%22%20d%3D%22M21.3%207.9l.9%202.5%202.6.1-2.1%201.6.7%202.6-2.1-1.5-2.2%201.5.8-2.6-2.1-1.6%202.6-.1z%22%2F%3E%0A%3C%2Fsvg%3E") !important;
+}
+
+.review-flag-tr {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2034%2024%22%3E%0A%3Crect%20width%3D%2234%22%20height%3D%2224%22%20fill%3D%22%23e30a17%22%2F%3E%0A%3Ccircle%20cx%3D%2214%22%20cy%3D%2212%22%20r%3D%226.2%22%20fill%3D%22%23fff%22%2F%3E%0A%3Ccircle%20cx%3D%2216.2%22%20cy%3D%2212%22%20r%3D%225%22%20fill%3D%22%23e30a17%22%2F%3E%0A%3Cpath%20fill%3D%22%23fff%22%20d%3D%22M22.4%208l.95%202.75h2.9l-2.35%201.72.9%202.78-2.4-1.72-2.35%201.72.9-2.78-2.35-1.72h2.9z%22%2F%3E%0A%3C%2Fsvg%3E") !important;
+}
+
+.review-flag-ma {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2034%2024%22%3E%0A%3Crect%20width%3D%2234%22%20height%3D%2224%22%20fill%3D%22%23c1272d%22%2F%3E%0A%3Cpath%20d%3D%22M17%206.1l1.75%205.39h5.67l-4.59%203.34%201.75%205.39L17%2016.89l-4.58%203.33%201.75-5.39-4.59-3.34h5.67z%22%20fill%3D%22none%22%20stroke%3D%22%23006233%22%20stroke-width%3D%221.6%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3C%2Fsvg%3E") !important;
+}
+
+.review-trip-info {
+  display: none !important;
+}
+
+.improved-testimonial-card {
+  min-height: 305px !important;
+}
+
+@media (max-width: 768px) {
+  .improved-testimonials-grid {
+    display: grid !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: 82% !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    gap: 14px !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+    padding: 4px 4px 14px !important;
+  }
+
+  .improved-testimonials-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .improved-testimonial-card {
+    scroll-snap-align: start !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .review-flag {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 24px !important;
+  }
+}

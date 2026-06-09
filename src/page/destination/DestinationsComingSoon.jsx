@@ -33,12 +33,15 @@ export default function DestinationsComingSoon() {
               </p>
 
               <div className="destinations-contact-list">
-                <a href="tel:01099999234">01099999234</a>
-                <a href="tel:01050971444">01050971444</a>
-                <a href="tel:01050383173">01050383173</a>
-                <a href="tel:0111787867">0111787867</a>
-                <a href="mailto:info@egyptholidaytravel.com">
-                  info@egyptholidaytravel.com
+                <a href="tel:+201099999234">+201099999234</a>
+                <a href="tel:+201050971444">+201050971444</a>
+                <a href="tel:+201050383173">+201050383173</a>
+                <a href="tel:+201001579926">+201001579926</a>
+                <a href="tel:+201050971555">+201050971555</a>
+                <a href="tel:+201018357333">+201018357333</a>
+
+                <a href="amr@egyptholiday-travel.com">
+                  amr@egyptholiday-travel.com
                 </a>
               </div>
             </div>
