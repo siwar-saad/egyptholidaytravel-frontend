@@ -16,6 +16,12 @@ import {
   FaStar,
   FaGlobeAfrica,
   FaCheckCircle,
+  FaCalendarAlt,
+  FaUsers,
+  FaBed,
+  FaUtensils,
+  FaCar,
+  FaPlane,
 } from "react-icons/fa";
 
 import API from "../api";
@@ -47,6 +53,37 @@ export default function HomeChatbot() {
     "Ain Sokhna",
   ];
 
+  const INITIAL_LEAD = {
+    type: "",
+    destination: "",
+    checkIn: "",
+    checkOut: "",
+    datesFlexible: "",
+    travelers: null,
+    adults: null,
+    children: 0,
+    budget: null,
+    budgetType: "",
+    tripStyle: "",
+    hotelCategory: "",
+    roomType: "",
+    mealPlan: "",
+    activities: [],
+    transport: "",
+    flightHelp: "",
+    specialRequests: "",
+    contactPreference: "",
+  };
+
+  const INITIAL_MESSAGE = {
+    sender: "bot",
+    text:
+      "Welcome to Egypt Holiday Travel 👋\n\n" +
+      "I am your smart travel advisor. I can help you choose the best package or hotel according to your destination, budget, travel dates, travelers, room preferences, meal plan, and activities.\n\n" +
+      "What are you looking for?",
+    actions: ["I want a package", "I want a hotel", "Contact", "Help me choose"],
+  };
+
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [packagesData, setPackagesData] = useState([]);
@@ -55,21 +92,8 @@ export default function HomeChatbot() {
   const [tripType, setTripType] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [feedbackDone, setFeedbackDone] = useState(false);
-
-  const [lead, setLead] = useState({
-    type: "",
-    destination: "",
-    budget: null,
-  });
-
-  const [messages, setMessages] = useState([
-    {
-      sender: "bot",
-      text:
-        "Welcome to Egypt Holiday Travel 👋\n\nI am your smart travel advisor. I can help you choose the best package or hotel according to your budget, destination, and travel needs.\n\nWhat are you looking for?",
-      actions: ["I want a package", "I want a hotel", "Contact", "Help me choose"],
-    },
-  ]);
+  const [lead, setLead] = useState(INITIAL_LEAD);
+  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
 
   const openLink = (url, target = "_self") => {
     if (!url) return;
@@ -110,10 +134,7 @@ export default function HomeChatbot() {
 
       try {
         const res = await API.get("/auth/me", { skipAuthRedirect: true });
-
-        if (res.data?.user) {
-          setUser(res.data.user);
-        }
+        if (res.data?.user) setUser(res.data.user);
       } catch {
         setUser(null);
       }
@@ -158,6 +179,13 @@ export default function HomeChatbot() {
     `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
     user?.email ||
     "dear client";
+
+  const resetChat = () => {
+    setLead(INITIAL_LEAD);
+    setTripType("");
+    setFeedbackDone(false);
+    setMessages([INITIAL_MESSAGE]);
+  };
 
   const getPackageName = (item) =>
     item?.name ||
@@ -204,19 +232,34 @@ export default function HomeChatbot() {
     hotel?.stars || hotel?.rating || hotel?.category || "";
 
   const getPeriodFrom = (period) =>
-    period?.from || period?.fromDate || period?.startDate || "-";
+    period?.from ||
+    period?.fromDate ||
+    period?.startDate ||
+    period?.checkIn ||
+    "-";
 
   const getPeriodTo = (period) =>
-    period?.to || period?.toDate || period?.endDate || "-";
+    period?.to ||
+    period?.toDate ||
+    period?.endDate ||
+    period?.checkOut ||
+    "-";
 
   const getHotelPeriods = (hotel) => {
     if (Array.isArray(hotel?.periods)) return hotel.periods;
 
-    if (hotel?.fromDate || hotel?.toDate || hotel?.from || hotel?.to) {
+    if (
+      hotel?.fromDate ||
+      hotel?.toDate ||
+      hotel?.from ||
+      hotel?.to ||
+      hotel?.startDate ||
+      hotel?.endDate
+    ) {
       return [
         {
-          from: hotel.from || hotel.fromDate,
-          to: hotel.to || hotel.toDate,
+          from: hotel.from || hotel.fromDate || hotel.startDate,
+          to: hotel.to || hotel.toDate || hotel.endDate,
           single: hotel.single || hotel.singleRoom || hotel.single_room,
           double: hotel.double || hotel.doubleRoom || hotel.double_room,
           triple: hotel.triple || hotel.tripleRoom || hotel.triple_room,
@@ -232,39 +275,162 @@ export default function HomeChatbot() {
     if (typeof price === "number") return price;
 
     const clean = String(price).replace(/,/g, "");
-    const match = clean.match(/\d+(\.\d+)?/);
+    const match = clean.match(new RegExp("\\d+(\\.\\d+)?"));
 
     return match ? Number(match[0]) : null;
   };
 
+  const parseDateValue = (value) => {
+    if (!value) return "";
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().slice(0, 10);
+    }
+
+    const clean = String(value).trim();
+
+    const isoRegex = new RegExp(
+      "^(\\d{4})[/-](\\d{1,2})[/-](\\d{1,2})$"
+    );
+    const iso = clean.match(isoRegex);
+
+    if (iso) {
+      const [, y, m, d] = iso;
+      return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(
+        2,
+        "0"
+      )}`;
+    }
+
+    const normalRegex = new RegExp(
+      "^(\\d{1,2})[/-](\\d{1,2})[/-](\\d{2,4})$"
+    );
+    const normal = clean.match(normalRegex);
+
+    if (normal) {
+      let [, d, m, y] = normal;
+
+      if (y.length === 2) y = `20${y}`;
+
+      return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(
+        2,
+        "0"
+      )}`;
+    }
+
+    return "";
+  };
+
+  const formatDateForUser = (date) => {
+    if (!date) return "";
+
+    const parsed = parseDateValue(date);
+    if (!parsed) return date;
+
+    const [year, month, day] = parsed.split("-");
+    if (!year || !month || !day) return date;
+
+    return `${day}/${month}/${year}`;
+  };
+
+  const extractDateRange = (text) => {
+    const q = String(text || "");
+
+    const dateRegex = new RegExp(
+      "(\\d{4}[/-]\\d{1,2}[/-]\\d{1,2}|\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4})",
+      "g"
+    );
+
+    const matches = q.match(dateRegex);
+
+    if (!matches || matches.length < 2) {
+      return { checkIn: "", checkOut: "" };
+    }
+
+    return {
+      checkIn: parseDateValue(matches[0]),
+      checkOut: parseDateValue(matches[1]),
+    };
+  };
+
+  const removeDatesFromText = (text) => {
+    const dateRegex = new RegExp(
+      "(\\d{4}[/-]\\d{1,2}[/-]\\d{1,2}|\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4})",
+      "g"
+    );
+
+    return String(text || "").replace(dateRegex, " ");
+  };
+
+  const isValidDateRange = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return false;
+
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return false;
+    }
+
+    return end > start;
+  };
+
+  const isDateInsidePeriod = (checkIn, checkOut, period) => {
+    if (!checkIn || !checkOut) return true;
+
+    const periodFrom = parseDateValue(getPeriodFrom(period));
+    const periodTo = parseDateValue(getPeriodTo(period));
+
+    if (!periodFrom || !periodTo) return false;
+
+    const userStart = new Date(checkIn);
+    const userEnd = new Date(checkOut);
+    const availableStart = new Date(periodFrom);
+    const availableEnd = new Date(periodTo);
+
+    if (
+      Number.isNaN(userStart.getTime()) ||
+      Number.isNaN(userEnd.getTime()) ||
+      Number.isNaN(availableStart.getTime()) ||
+      Number.isNaN(availableEnd.getTime())
+    ) {
+      return false;
+    }
+
+    return userStart >= availableStart && userEnd <= availableEnd;
+  };
+
   const extractBudget = (text) => {
-    const clean = normalize(text).replace(/,/g, "");
-    const match = clean.match(/\d+(\.\d+)?/);
+    const clean = normalize(removeDatesFromText(text)).replace(/,/g, "");
 
-    if (!match) return null;
+    const patterns = [
+      new RegExp(
+        "(budget|pudget|price|cost|under|less|flous|prix)[^0-9]{0,20}(\\d+(\\.\\d+)?)"
+      ),
+      new RegExp("\\$\\s*(\\d+(\\.\\d+)?)"),
+      new RegExp("(\\d+(\\.\\d+)?)\\s*(dollar|dollars|usd|\\$)"),
+    ];
 
-    const number = Number(match[0]);
+    for (const pattern of patterns) {
+      const match = clean.match(pattern);
 
-    const hasBudgetWord =
-      clean.includes("budget") ||
-      clean.includes("pudget") ||
-      clean.includes("price") ||
-      clean.includes("cost") ||
-      clean.includes("dollar") ||
-      clean.includes("usd") ||
-      clean.includes("$") ||
-      clean.includes("under") ||
-      clean.includes("less") ||
-      clean.includes("flous") ||
-      clean.includes("prix");
+      if (match) {
+        const value = Number(match[2] || match[1]);
+        if (!Number.isNaN(value)) return value;
+      }
+    }
 
-    if (hasBudgetWord || number >= 100) return number;
+    const fallback = clean.match(new RegExp("\\d+(\\.\\d+)?"));
+    if (!fallback) return null;
 
-    return null;
+    const number = Number(fallback[0]);
+    return number >= 100 ? number : null;
   };
 
   const extractDestination = (text) => {
     const q = normalize(text);
+
+    if (q.includes("any destination")) return "Any destination";
 
     const found = DESTINATIONS.find((destination) =>
       q.includes(normalize(destination))
@@ -303,12 +469,285 @@ export default function HomeChatbot() {
       return "package";
     }
 
-    return lead.type || tripType || "package";
+    return "";
+  };
+
+  const extractTravelers = (text) => {
+    const q = normalize(text);
+
+    const adultsMatch = q.match(new RegExp("(\\d+)\\s*(adult|adults)"));
+    const childrenMatch = q.match(
+      new RegExp("(\\d+)\\s*(child|children|kid|kids)")
+    );
+    const travelersMatch = q.match(
+      new RegExp("(\\d+)\\s*(traveler|travelers|people|persons|guests)")
+    );
+
+    const adults = adultsMatch ? Number(adultsMatch[1]) : null;
+    const children = childrenMatch ? Number(childrenMatch[1]) : 0;
+    const travelers = travelersMatch ? Number(travelersMatch[1]) : null;
+
+    if (adults !== null) {
+      return {
+        adults,
+        children,
+        travelers: adults + children,
+      };
+    }
+
+    if (travelers !== null) {
+      return {
+        adults: travelers,
+        children: 0,
+        travelers,
+      };
+    }
+
+    return {};
+  };
+
+  const extractBudgetType = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("per person")) return "Per person";
+    if (q.includes("total budget") || q.includes("total")) return "Total budget";
+    if (q.includes("not sure")) return "Not sure";
+
+    return "";
+  };
+
+  const extractTripStyle = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("family")) return "Family trip";
+    if (q.includes("couple")) return "Couple trip";
+    if (q.includes("honeymoon")) return "Honeymoon";
+    if (q.includes("friends")) return "Friends trip";
+    if (q.includes("business")) return "Business trip";
+    if (q.includes("solo")) return "Solo travel";
+
+    return "";
+  };
+
+  const extractHotelCategory = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("3 stars") || q.includes("3 star")) return "3 stars";
+    if (q.includes("4 stars") || q.includes("4 star")) return "4 stars";
+    if (q.includes("5 stars") || q.includes("5 star")) return "5 stars";
+    if (q.includes("luxury")) return "Luxury hotel";
+    if (q.includes("budget hotel")) return "Budget hotel";
+
+    return "";
+  };
+
+  const extractRoomType = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("single")) return "Single Room";
+    if (q.includes("double")) return "Double Room";
+    if (q.includes("triple")) return "Triple Room";
+    if (q.includes("family room")) return "Family Room";
+    if (q.includes("suite")) return "Suite";
+
+    return "";
+  };
+
+  const extractMealPlan = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("breakfast")) return "Breakfast only";
+    if (q.includes("half board")) return "Half board";
+    if (q.includes("full board")) return "Full board";
+    if (q.includes("all inclusive")) return "All inclusive";
+
+    return "";
+  };
+
+  const extractDatesFlexible = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("flexible dates") || q.includes("yes, flexible")) {
+      return "Flexible";
+    }
+
+    if (q.includes("fixed dates") || q.includes("not flexible")) {
+      return "Fixed";
+    }
+
+    return "";
+  };
+
+  const extractActivities = (text) => {
+    const q = normalize(text);
+    const activities = [];
+
+    if (q.includes("beach")) activities.push("Beach");
+    if (q.includes("safari")) activities.push("Safari");
+    if (q.includes("diving")) activities.push("Diving");
+    if (q.includes("historical") || q.includes("history")) {
+      activities.push("Historical tours");
+    }
+    if (q.includes("nile")) activities.push("Nile cruise");
+    if (q.includes("shopping")) activities.push("Shopping");
+    if (q.includes("relaxation") || q.includes("relax")) {
+      activities.push("Relaxation");
+    }
+    if (q.includes("adventure")) activities.push("Adventure");
+    if (q.includes("activities: not sure")) activities.push("Not sure");
+
+    return activities;
+  };
+
+  const extractTransport = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("airport transfer")) return "Airport transfer";
+    if (q.includes("private car")) return "Private car";
+    if (q.includes("bus")) return "Bus";
+    if (q.includes("no transportation")) return "No transportation needed";
+
+    return "";
+  };
+
+  const extractFlightHelp = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("need flight help") || q.includes("flight assistance")) {
+      return "Yes, I need flight help";
+    }
+
+    if (q.includes("no flight needed") || q.includes("no flight")) {
+      return "No flight needed";
+    }
+
+    return "";
+  };
+
+  const extractSpecialRequests = (text) => {
+    const q = normalize(text);
+    const requests = [];
+
+    if (q.includes("sea view")) requests.push("Sea view");
+    if (q.includes("city center")) requests.push("Near city center");
+    if (q.includes("honeymoon setup")) requests.push("Honeymoon setup");
+    if (q.includes("child-friendly")) requests.push("Child-friendly hotel");
+    if (q.includes("quiet")) requests.push("Quiet hotel");
+    if (q.includes("wheelchair")) requests.push("Wheelchair access");
+    if (q.includes("no special")) return "None";
+
+    return requests.join(", ");
+  };
+
+  const extractContactPreference = (text) => {
+    const q = normalize(text);
+
+    if (q.includes("contact by whatsapp")) return "WhatsApp";
+    if (q.includes("contact by phone")) return "Phone call";
+    if (q.includes("contact by email")) return "Email";
+
+    return "";
+  };
+
+  const extractLeadUpdates = (question) => {
+    const updates = {};
+    const q = normalize(question);
+
+    const detectedType = detectType(question);
+    const destination = extractDestination(question);
+    const dates = extractDateRange(question);
+    const budget = extractBudget(question);
+    const travelersData = extractTravelers(question);
+    const budgetType = extractBudgetType(question);
+    const tripStyle = extractTripStyle(question);
+    const hotelCategory = extractHotelCategory(question);
+    const roomType = extractRoomType(question);
+    const mealPlan = extractMealPlan(question);
+    const datesFlexible = extractDatesFlexible(question);
+    const activities = extractActivities(question);
+    const transport = extractTransport(question);
+    const flightHelp = extractFlightHelp(question);
+    const specialRequests = extractSpecialRequests(question);
+    const contactPreference = extractContactPreference(question);
+
+    if (detectedType) updates.type = detectedType;
+    if (destination) updates.destination = destination;
+    if (dates.checkIn) updates.checkIn = dates.checkIn;
+    if (dates.checkOut) updates.checkOut = dates.checkOut;
+    if (budget) updates.budget = budget;
+    if (budgetType) updates.budgetType = budgetType;
+    if (tripStyle) updates.tripStyle = tripStyle;
+    if (hotelCategory) updates.hotelCategory = hotelCategory;
+    if (roomType) updates.roomType = roomType;
+    if (mealPlan) updates.mealPlan = mealPlan;
+    if (datesFlexible) updates.datesFlexible = datesFlexible;
+    if (activities.length > 0) updates.activities = activities;
+    if (transport) updates.transport = transport;
+    if (flightHelp) updates.flightHelp = flightHelp;
+    if (specialRequests) updates.specialRequests = specialRequests;
+    if (contactPreference) updates.contactPreference = contactPreference;
+
+    if (travelersData.travelers) {
+      updates.travelers = travelersData.travelers;
+      updates.adults = travelersData.adults;
+      updates.children = travelersData.children;
+    }
+
+    if (q.includes("i want a package")) updates.type = "package";
+    if (q.includes("i want a hotel")) updates.type = "hotel";
+
+    return updates;
   };
 
   const destinationMatches = (text, destination) => {
     if (!destination || destination === "Any destination") return true;
     return normalize(text).includes(normalize(destination));
+  };
+
+  const roomMatches = (optionRoom, selectedRoom) => {
+    if (!selectedRoom) return true;
+
+    const selected = normalize(selectedRoom);
+
+    if (
+      selected.includes("family") ||
+      selected.includes("suite")
+    ) {
+      return true;
+    }
+
+    return normalize(optionRoom).includes(selected.split(" ")[0]);
+  };
+
+  const categoryMatches = (hotel, selectedCategory) => {
+    if (!selectedCategory) return true;
+
+    const category = normalize(`${getHotelStars(hotel)} ${hotel?.category || ""}`);
+    const selected = normalize(selectedCategory);
+
+    if (selected.includes("luxury") || selected.includes("budget hotel")) {
+      return true;
+    }
+
+    if (selected.includes("3")) return category.includes("3");
+    if (selected.includes("4")) return category.includes("4");
+    if (selected.includes("5")) return category.includes("5");
+
+    return true;
+  };
+
+  const mealMatches = (hotel, selectedMeal) => {
+    if (!selectedMeal) return true;
+
+    const meal = normalize(getHotelMeal(hotel));
+    const selected = normalize(selectedMeal);
+
+    if (selected.includes("breakfast")) return meal.includes("breakfast");
+    if (selected.includes("half board")) return meal.includes("half");
+    if (selected.includes("full board")) return meal.includes("full");
+    if (selected.includes("all inclusive")) return meal.includes("inclusive");
+
+    return true;
   };
 
   const getLowestHotelPrice = (hotel) => {
@@ -352,35 +791,48 @@ export default function HomeChatbot() {
     return prices.sort((a, b) => a.number - b.number)[0];
   };
 
-  const getHotelRoomOptions = (hotel) => {
+  const getHotelRoomOptions = (hotel, currentLead) => {
     const periods = getHotelPeriods(hotel);
 
-    return periods.flatMap((period) => {
-      const rooms = [
-        {
-          room: "Single Room",
-          priceText: period.single || period.singleRoom || period.single_room,
-        },
-        {
-          room: "Double Room",
-          priceText: period.double || period.doubleRoom || period.double_room,
-        },
-        {
-          room: "Triple Room",
-          priceText: period.triple || period.tripleRoom || period.triple_room,
-        },
-      ];
+    if (periods.length === 0) return [];
 
-      return rooms
-        .map((room) => ({
-          hotel,
-          period,
-          room: room.room,
-          priceText: room.priceText,
-          priceNumber: getPriceNumber(room.priceText),
-        }))
-        .filter((option) => option.priceNumber);
-    });
+    const checkIn = currentLead.checkIn;
+    const checkOut = currentLead.checkOut;
+
+    return periods
+      .filter((period) => {
+        if (currentLead.datesFlexible === "Flexible" && !checkIn && !checkOut) {
+          return true;
+        }
+
+        return isDateInsidePeriod(checkIn, checkOut, period);
+      })
+      .flatMap((period) => {
+        const rooms = [
+          {
+            room: "Single Room",
+            priceText: period.single || period.singleRoom || period.single_room,
+          },
+          {
+            room: "Double Room",
+            priceText: period.double || period.doubleRoom || period.double_room,
+          },
+          {
+            room: "Triple Room",
+            priceText: period.triple || period.tripleRoom || period.triple_room,
+          },
+        ];
+
+        return rooms
+          .map((room) => ({
+            hotel,
+            period,
+            room: room.room,
+            priceText: room.priceText,
+            priceNumber: getPriceNumber(room.priceText),
+          }))
+          .filter((option) => option.priceNumber);
+      });
   };
 
   const preparePackageOptions = () => {
@@ -435,89 +887,250 @@ export default function HomeChatbot() {
     });
   };
 
-  const askType = () => {
-    return {
-      text:
-        `Hello ${userName} 👋\n\nI can guide you step by step like a travel advisor.\n\nFirst, tell me what you want to search for.`,
-      actions: ["I want a package", "I want a hotel", "Contact"],
-    };
-  };
+  const askType = () => ({
+    text:
+      `Hello ${userName} 👋\n\n` +
+      "I can guide you step by step like a professional travel advisor.\n\n" +
+      "First, tell me what you want to search for.",
+    actions: ["I want a package", "I want a hotel", "Contact"],
+  });
 
-  const askDestination = (type) => {
-    const label = type === "hotel" ? "hotel" : "package";
+  const askDestination = (type) => ({
+    text:
+      `Perfect. You are looking for a ${
+        type === "hotel" ? "hotel" : "package"
+      }.\n\nWhich destination do you prefer?`,
+    actions: [
+      "Cairo",
+      "Sharm El Sheikh",
+      "Hurghada",
+      "Luxor",
+      "Dahab",
+      "Any destination",
+    ],
+  });
 
-    return {
-      text:
-        `Perfect. You are looking for a ${label}.\n\nWhich destination do you prefer?\n\nYou can choose a destination, or you can skip this step and give me your budget directly.`,
-      actions: [
-        "Cairo",
-        "Sharm El Sheikh",
-        "Hurghada",
-        "Luxor",
-        "Any destination",
-        "Budget 500$",
-      ],
-    };
-  };
+  const askDate = (currentLead) => ({
+    text:
+      "What are your travel dates?\n\n" +
+      "Example:\n" +
+      "• from 20/06/2026 to 25/06/2026\n" +
+      "• 20-06-2026 to 25-06-2026\n\n" +
+      "If your dates are flexible, choose flexible dates.",
+    actions: [
+      "Dates: 20/06/2026 to 25/06/2026",
+      "Yes, flexible dates",
+      "Contact",
+    ],
+  });
 
-  const askBudget = (type, destination = "") => {
-    const label = type === "hotel" ? "hotel" : "package";
+  const askTravelers = () => ({
+    text: "How many travelers are you?\n\nYou can also mention adults and children.",
+    actions: [
+      "1 adult",
+      "2 adults",
+      "2 adults and 1 child",
+      "Family: 2 adults and 2 children",
+    ],
+  });
 
-    return {
-      text:
-        `Great choice${destination ? `: ${destination}` : ""}.\n\n` +
-        `Now tell me your budget for this ${label}. I will only suggest options that fit your budget.\n\n` +
-        "Example:\n" +
-        "• 300 dollars\n" +
-        "• 500 dollars\n" +
-        "• 900 dollars",
-      actions: ["Budget 300$", "Budget 500$", "Budget 900$", "Contact"],
-    };
-  };
+  const askBudget = (type, destination = "") => ({
+    text:
+      `Great${destination ? `, destination: ${destination}` : ""}.\n\n` +
+      `What is your budget for this ${
+        type === "hotel" ? "hotel" : "package"
+      }?\n\nExample:\n• 300 dollars\n• 500 dollars\n• 900 dollars`,
+    actions: ["Budget 300$", "Budget 500$", "Budget 900$", "Contact"],
+  });
 
-  const noDataAnswer = (type) => {
-    return {
-      text:
-        `I could not access enough live ${type} data right now.\n\n` +
-        "Professional advice: contact our agency team. They can confirm updated prices, availability, dates, and the best offer for you.",
-      actions: ["Contact", "WhatsApp", "Call Agency", "Email Agency"],
-      feedback: true,
-    };
-  };
+  const askBudgetType = () => ({
+    text: "Is your budget per person or total?",
+    actions: ["Per person", "Total budget", "I am not sure"],
+  });
 
-  const recommendPackagesByBudget = (budget, destination = "") => {
-    const allPackages = preparePackageOptions();
+  const askTripStyle = () => ({
+    text: "What type of trip are you looking for?",
+    actions: [
+      "Family trip",
+      "Couple trip",
+      "Honeymoon",
+      "Friends trip",
+      "Business trip",
+      "Solo travel",
+    ],
+  });
 
-    if (allPackages.length === 0) {
-      return noDataAnswer("package");
+  const askHotelCategory = () => ({
+    text: "What hotel category do you prefer?",
+    actions: ["3 stars", "4 stars", "5 stars", "Luxury hotel", "Budget hotel"],
+  });
+
+  const askRoomType = () => ({
+    text: "Which room type do you prefer?",
+    actions: ["Single Room", "Double Room", "Triple Room", "Family Room", "Suite"],
+  });
+
+  const askMealPlan = () => ({
+    text: "Which meal plan do you prefer?",
+    actions: ["Breakfast only", "Half board", "Full board", "All inclusive"],
+  });
+
+  const askActivities = () => ({
+    text: "What activities are you interested in?",
+    actions: [
+      "Beach",
+      "Safari",
+      "Diving",
+      "Historical tours",
+      "Nile cruise",
+      "Shopping",
+      "Relaxation",
+      "Adventure",
+      "Activities: Not sure",
+    ],
+  });
+
+  const askTransport = () => ({
+    text: "Do you need transportation or airport transfer?",
+    actions: [
+      "Airport transfer",
+      "Private car",
+      "Bus",
+      "No transportation needed",
+    ],
+  });
+
+  const askFlight = () => ({
+    text:
+      "Do you need flight assistance?\n\n" +
+      "Flights are coming soon on the website, but the agency team can still help you directly.",
+    actions: ["Need flight help", "No flight needed"],
+  });
+
+  const askSpecialRequests = () => ({
+    text: "Do you have any special requests?",
+    actions: [
+      "Sea view",
+      "Near city center",
+      "Honeymoon setup",
+      "Child-friendly hotel",
+      "Quiet hotel",
+      "Wheelchair access",
+      "No special requests",
+    ],
+  });
+
+  const askContactPreference = () => ({
+    text: "How do you prefer our team to contact you?",
+    actions: ["Contact by WhatsApp", "Contact by Phone call", "Contact by Email"],
+  });
+
+  const dateErrorAnswer = () => ({
+    text:
+      "The travel dates are not correct.\n\n" +
+      "Please send them like this:\n" +
+      "from 20/06/2026 to 25/06/2026\n\n" +
+      "The check-out date must be after the check-in date.",
+    actions: ["Dates: 20/06/2026 to 25/06/2026", "Yes, flexible dates"],
+  });
+
+  const getNextQuestion = (currentLead) => {
+    if (!currentLead.type) return askType();
+
+    if (!currentLead.destination) return askDestination(currentLead.type);
+
+    if (
+      currentLead.datesFlexible !== "Flexible" &&
+      (!currentLead.checkIn || !currentLead.checkOut)
+    ) {
+      return askDate(currentLead);
     }
 
+    if (
+      currentLead.checkIn &&
+      currentLead.checkOut &&
+      !isValidDateRange(currentLead.checkIn, currentLead.checkOut)
+    ) {
+      return dateErrorAnswer();
+    }
+
+    if (!currentLead.travelers) return askTravelers();
+
+    if (!currentLead.budget) {
+      return askBudget(currentLead.type, currentLead.destination);
+    }
+
+    if (!currentLead.budgetType) return askBudgetType();
+
+    if (!currentLead.tripStyle) return askTripStyle();
+
+    if (currentLead.type === "hotel") {
+      if (!currentLead.hotelCategory) return askHotelCategory();
+      if (!currentLead.roomType) return askRoomType();
+      if (!currentLead.mealPlan) return askMealPlan();
+    }
+
+    if (!currentLead.activities || currentLead.activities.length === 0) {
+      return askActivities();
+    }
+
+    if (!currentLead.transport) return askTransport();
+
+    if (!currentLead.flightHelp) return askFlight();
+
+    if (!currentLead.specialRequests) return askSpecialRequests();
+
+    if (!currentLead.contactPreference) return askContactPreference();
+
+    return null;
+  };
+
+  const noDataAnswer = (type) => ({
+    text:
+      `I could not access enough live ${type} data right now.\n\n` +
+      "Professional advice: contact our agency team. They can confirm updated prices, availability, dates, and the best offer for you.",
+    actions: ["Contact", "WhatsApp", "Call Agency", "Email Agency"],
+    feedback: true,
+  });
+
+  const recommendPackagesByBudget = (currentLead) => {
+    const allPackages = preparePackageOptions();
+
+    if (allPackages.length === 0) return noDataAnswer("package");
+
     const filteredPackages = allPackages.filter((option) =>
-      destinationMatches(`${option.name} ${option.place}`, destination)
+      destinationMatches(
+        `${option.name} ${option.place}`,
+        currentLead.destination
+      )
     );
 
     const source = filteredPackages.length > 0 ? filteredPackages : allPackages;
 
     const options = source
-      .filter((option) => option.priceNumber <= budget)
+      .filter((option) => option.priceNumber <= currentLead.budget)
       .sort((a, b) => b.priceNumber - a.priceNumber)
       .slice(0, 3);
 
     if (options.length === 0) {
       const closest = source
-        .filter((option) => option.priceNumber > budget)
+        .filter((option) => option.priceNumber > currentLead.budget)
         .sort((a, b) => a.priceNumber - b.priceNumber)[0];
 
       return {
         text:
-          `I checked the available packages with your budget of ${budget}$` +
-          `${destination ? ` for ${destination}` : ""}.\n\n` +
+          `I checked the available packages with your budget of ${currentLead.budget}$` +
+          `${
+            currentLead.destination
+              ? ` for ${currentLead.destination}`
+              : ""
+          }.\n\n` +
           "Right now, I did not find a package clearly inside this budget.\n\n" +
           (closest
             ? `The closest package I found is:\n${closest.name} — ${closest.priceText}\n\n`
             : "") +
           "Professional advice: contact our team to check updated prices, discounts, dates, and availability.",
-        actions: ["Open Packages", "Contact", "WhatsApp"],
+        actions: ["Open Packages", "Contact", "WhatsApp", "Start New Search"],
         feedback: true,
       };
     }
@@ -530,6 +1143,12 @@ export default function HomeChatbot() {
       meta: [
         option.duration ? `Duration: ${option.duration}` : "",
         option.place ? `Destination: ${option.place}` : "",
+        `Travelers: ${currentLead.travelers}`,
+        `Budget: ${currentLead.budget}$ ${currentLead.budgetType}`,
+        currentLead.tripStyle ? `Trip type: ${currentLead.tripStyle}` : "",
+        currentLead.activities?.length
+          ? `Activities: ${currentLead.activities.join(", ")}`
+          : "",
       ].filter(Boolean),
       reason:
         index === 0
@@ -538,61 +1157,98 @@ export default function HomeChatbot() {
       action: "Open Packages",
     }));
 
-    const best = options[0];
-
     return {
       text:
-        `Based on your budget of ${budget}$` +
-        `${destination ? ` and destination ${destination}` : ""}` +
-        `, I found the best matching packages for you.\n\n` +
-        `Best recommendation: ${best.name}.\n\n` +
+        `Based on your budget of ${currentLead.budget}$` +
+        `${
+          currentLead.destination
+            ? ` and destination ${currentLead.destination}`
+            : ""
+        }` +
+        ", I found the best matching packages for you.\n\n" +
+        `Best recommendation: ${options[0].name}.\n\n` +
         "Why? It gives you strong value while staying inside your budget.",
-      actions: ["Open Packages", "Contact", "WhatsApp"],
+      actions: ["Open Packages", "Contact", "WhatsApp", "Start New Search"],
       cards,
       feedback: true,
     };
   };
 
-  const recommendHotelsByBudget = (budget, destination = "") => {
-    const allHotelOptions = hotelsData.flatMap((hotel) =>
-      getHotelRoomOptions(hotel)
+  const recommendHotelsByBudget = (currentLead) => {
+    let allHotelOptions = hotelsData.flatMap((hotel) =>
+      getHotelRoomOptions(hotel, currentLead)
     );
 
     if (allHotelOptions.length === 0) {
-      return noDataAnswer("hotel");
+      return {
+        text:
+          "I could not find hotel options available for these travel dates.\n\n" +
+          "Professional advice: contact our agency team to confirm updated hotel availability, prices, and possible alternatives.",
+        actions: ["Contact", "WhatsApp", "Call Agency", "Open Hotels"],
+        feedback: true,
+      };
     }
 
-    const filteredHotels = allHotelOptions.filter((option) =>
+    let source = allHotelOptions.filter((option) =>
       destinationMatches(
         `${getHotelName(option.hotel)} ${getHotelCity(option.hotel)}`,
-        destination
+        currentLead.destination
       )
     );
 
-    const source = filteredHotels.length > 0 ? filteredHotels : allHotelOptions;
+    if (source.length === 0) source = allHotelOptions;
+
+    const categoryFiltered = source.filter((option) =>
+      categoryMatches(option.hotel, currentLead.hotelCategory)
+    );
+
+    if (categoryFiltered.length > 0) source = categoryFiltered;
+
+    const mealFiltered = source.filter((option) =>
+      mealMatches(option.hotel, currentLead.mealPlan)
+    );
+
+    if (mealFiltered.length > 0) source = mealFiltered;
+
+    const roomFiltered = source.filter((option) =>
+      roomMatches(option.room, currentLead.roomType)
+    );
+
+    if (roomFiltered.length > 0) source = roomFiltered;
 
     const hotelOptions = source
-      .filter((option) => option.priceNumber <= budget)
+      .filter((option) => option.priceNumber <= currentLead.budget)
       .sort((a, b) => b.priceNumber - a.priceNumber)
       .slice(0, 3);
 
     if (hotelOptions.length === 0) {
       const closest = source
-        .filter((option) => option.priceNumber > budget)
+        .filter((option) => option.priceNumber > currentLead.budget)
         .sort((a, b) => a.priceNumber - b.priceNumber)[0];
 
       return {
         text:
-          `I checked the hotel prices with your budget of ${budget}$` +
-          `${destination ? ` for ${destination}` : ""}.\n\n` +
-          "Right now, I did not find a hotel room clearly inside this budget.\n\n" +
+          `I checked hotels with your budget of ${currentLead.budget}$` +
+          `${
+            currentLead.destination
+              ? ` in ${currentLead.destination}`
+              : ""
+          }` +
+          `${
+            currentLead.checkIn && currentLead.checkOut
+              ? ` from ${formatDateForUser(
+                  currentLead.checkIn
+                )} to ${formatDateForUser(currentLead.checkOut)}`
+              : ""
+          }.\n\n` +
+          "I did not find a hotel clearly inside this budget and preference range.\n\n" +
           (closest
-            ? `The closest hotel option I found is:\n${getHotelName(
-                closest.hotel
-              )} — ${closest.room} — ${closest.priceText}\n\n`
+            ? `Closest option found:\n${getHotelName(closest.hotel)} — ${
+                closest.room
+              } — ${closest.priceText}\n\n`
             : "") +
-          "Professional advice: contact our team to confirm updated hotel prices, travel periods, and availability.",
-        actions: ["Open Hotels", "Contact", "WhatsApp"],
+          "Please contact our agency team to confirm availability, updated prices, and possible offers.",
+        actions: ["Contact", "WhatsApp", "Open Hotels", "Start New Search"],
         feedback: true,
       };
     }
@@ -604,63 +1260,138 @@ export default function HomeChatbot() {
       price: option.priceText,
       meta: [
         `Room: ${option.room}`,
+        `Preferred room: ${currentLead.roomType}`,
         `Meal: ${getHotelMeal(option.hotel)}`,
-        getHotelStars(option.hotel) ? `Category: ${getHotelStars(option.hotel)}` : "",
-        `Period: ${getPeriodFrom(option.period)} → ${getPeriodTo(option.period)}`,
+        currentLead.hotelCategory
+          ? `Preferred category: ${currentLead.hotelCategory}`
+          : "",
+        getHotelStars(option.hotel)
+          ? `Hotel category: ${getHotelStars(option.hotel)}`
+          : "",
+        `Available period: ${getPeriodFrom(option.period)} → ${getPeriodTo(
+          option.period
+        )}`,
+        currentLead.checkIn && currentLead.checkOut
+          ? `Your dates: ${formatDateForUser(
+              currentLead.checkIn
+            )} → ${formatDateForUser(currentLead.checkOut)}`
+          : `Dates: ${currentLead.datesFlexible}`,
+        `Travelers: ${currentLead.travelers}`,
       ].filter(Boolean),
       reason:
         index === 0
-          ? "Best hotel option inside your budget"
-          : "Suitable alternative inside your budget",
+          ? "Best hotel option for your budget and preferences"
+          : "Suitable alternative for your budget and preferences",
       action: "Open Hotels",
     }));
 
-    const best = hotelOptions[0];
-
     return {
       text:
-        `Based on your budget of ${budget}$` +
-        `${destination ? ` and destination ${destination}` : ""}` +
-        `, I found suitable hotel options for you.\n\n` +
-        `Best recommendation: ${getHotelName(best.hotel)}.\n\n` +
-        "Why? It fits your budget and gives you a clear room price and travel period.",
-      actions: ["Open Hotels", "Contact", "WhatsApp"],
+        `Based on your budget of ${currentLead.budget}$` +
+        `${
+          currentLead.destination
+            ? `, destination ${currentLead.destination}`
+            : ""
+        }` +
+        `${
+          currentLead.checkIn && currentLead.checkOut
+            ? `, and dates from ${formatDateForUser(
+                currentLead.checkIn
+              )} to ${formatDateForUser(currentLead.checkOut)}`
+            : ""
+        }` +
+        ", I found suitable hotel options for you.\n\n" +
+        `Best recommendation: ${getHotelName(hotelOptions[0].hotel)}.\n\n` +
+        "Why? It fits your budget, travel period, and hotel preferences.",
+      actions: ["Open Hotels", "Contact", "WhatsApp", "Start New Search"],
       cards,
       feedback: true,
     };
   };
 
-  const recommendByBudget = (question) => {
-    const budget = extractBudget(question);
-    const type = detectType(question);
-    const destination = extractDestination(question) || lead.destination || "";
-
-    if (!budget) return askBudget(type, destination);
-
-    setLead((prev) => ({
-      ...prev,
-      type,
-      destination,
-      budget,
-    }));
-
-    if (type === "hotel") return recommendHotelsByBudget(budget, destination);
-
-    return recommendPackagesByBudget(budget, destination);
+  const buildSummary = (currentLead) => {
+    return (
+      "Great, here is what I understood:\n\n" +
+      `Type: ${currentLead.type === "hotel" ? "Hotel" : "Package"}\n` +
+      `Destination: ${currentLead.destination || "Any destination"}\n` +
+      `Dates: ${
+        currentLead.checkIn && currentLead.checkOut
+          ? `${formatDateForUser(currentLead.checkIn)} → ${formatDateForUser(
+              currentLead.checkOut
+            )}`
+          : currentLead.datesFlexible || "Not specified"
+      }\n` +
+      `Travelers: ${currentLead.travelers || "Not specified"}${
+        currentLead.adults
+          ? ` (${currentLead.adults} adults, ${
+              currentLead.children || 0
+            } children)`
+          : ""
+      }\n` +
+      `Budget: ${currentLead.budget || "Not specified"}$ ${
+        currentLead.budgetType || ""
+      }\n` +
+      `Trip style: ${currentLead.tripStyle || "Not specified"}\n` +
+      `${
+        currentLead.type === "hotel"
+          ? `Hotel category: ${
+              currentLead.hotelCategory || "Not specified"
+            }\nRoom type: ${
+              currentLead.roomType || "Not specified"
+            }\nMeal plan: ${currentLead.mealPlan || "Not specified"}\n`
+          : ""
+      }` +
+      `Activities: ${
+        currentLead.activities?.length
+          ? currentLead.activities.join(", ")
+          : "Not specified"
+      }\n` +
+      `Transportation: ${currentLead.transport || "Not specified"}\n` +
+      `Flight help: ${currentLead.flightHelp || "Not specified"}\n` +
+      `Special requests: ${currentLead.specialRequests || "None"}\n` +
+      `Contact preference: ${currentLead.contactPreference || "Not specified"}`
+    );
   };
 
-  const packageDetails = (item) => {
+  const finalRecommendation = (currentLead) => {
+    const recommendation =
+      currentLead.type === "hotel"
+        ? recommendHotelsByBudget(currentLead)
+        : recommendPackagesByBudget(currentLead);
+
+    const flightNote =
+      currentLead.flightHelp === "Yes, I need flight help"
+        ? "\n\nNote: Flights are coming soon on the website, but our agency team can assist you directly with flight details."
+        : "";
+
     return {
+      ...recommendation,
       text:
-        `${getPackageName(item)}\n\n` +
-        `${getPackagePlace(item) ? `Destination: ${getPackagePlace(item)}\n` : ""}` +
-        `${getPackageDuration(item) ? `Duration: ${getPackageDuration(item)}\n` : ""}` +
-        `Price: ${getPackagePriceText(item) || "Contact us"}\n\n` +
-        "Tell me your budget and I will check if this package fits you.",
-      actions: ["Budget 300$", "Budget 500$", "Budget 900$", "Open Packages"],
-      feedback: true,
+        buildSummary(currentLead) +
+        flightNote +
+        "\n\nNow I will show you the best matching options.\n\n" +
+        recommendation.text,
     };
   };
+
+  const packageDetails = (item) => ({
+    text:
+      `${getPackageName(item)}\n\n` +
+      `${
+        getPackagePlace(item)
+          ? `Destination: ${getPackagePlace(item)}\n`
+          : ""
+      }` +
+      `${
+        getPackageDuration(item)
+          ? `Duration: ${getPackageDuration(item)}\n`
+          : ""
+      }` +
+      `Price: ${getPackagePriceText(item) || "Contact us"}\n\n` +
+      "Tell me your budget and I will check if this package fits you.",
+    actions: ["Budget 300$", "Budget 500$", "Budget 900$", "Open Packages"],
+    feedback: true,
+  });
 
   const hotelDetails = (hotel) => {
     const periods = getHotelPeriods(hotel);
@@ -706,8 +1437,13 @@ export default function HomeChatbot() {
         `${getHotelStars(hotel) ? `Category: ${getHotelStars(hotel)}\n` : ""}` +
         `Starting From: ${lowest.text}\n\n` +
         `Available periods:\n${periodText}\n\n` +
-        "Tell me your budget and I will check which room and period fit you best.",
-      actions: ["Budget 300$", "Budget 500$", "Budget 900$", "Open Hotels"],
+        "Tell me your budget and travel dates. I will check which room and period fit you best.",
+      actions: [
+        "Budget 300$",
+        "Budget 500$",
+        "Dates: 20/06/2026 to 25/06/2026",
+        "Open Hotels",
+      ],
       feedback: true,
     };
   };
@@ -716,7 +1452,8 @@ export default function HomeChatbot() {
     if (isLoggedIn) {
       return {
         text:
-          `Perfect ✅ ${userName}, you already have an account.\n\nYou can choose an offer, send a booking request, and follow everything from your profile.`,
+          `Perfect ✅ ${userName}, you already have an account.\n\n` +
+          "You can choose an offer, send a booking request, and follow everything from your profile.",
         actions: ["I want a package", "I want a hotel", "Budget 500$"],
         feedback: true,
       };
@@ -724,50 +1461,37 @@ export default function HomeChatbot() {
 
     return {
       text:
-        "You can create an account from the website navigation.\n\nWith an account, you can send booking requests, follow your reservations, and receive faster support from our team.",
+        "You can create an account from the website navigation.\n\n" +
+        "With an account, you can send booking requests, follow your reservations, and receive faster support from our team.",
       actions: ["I want a package", "I want a hotel", "Contact"],
       feedback: true,
     };
   };
 
-  const bookingAnswer = () => {
-    return {
-      text: isLoggedIn
-        ? "To book: open Packages or Hotels, choose your offer, click Book Now, select your date, and send the request. You can follow it later from your profile."
-        : "To book: open Packages or Hotels, choose your offer, then follow the booking steps. For faster confirmation, contact our agency team.",
-      actions: ["Open Packages", "Open Hotels", "Contact"],
-      feedback: true,
-    };
-  };
+  const bookingAnswer = () => ({
+    text: isLoggedIn
+      ? "To book: open Packages or Hotels, choose your offer, click Book Now, select your date, and send the request. You can follow it later from your profile."
+      : "To book: open Packages or Hotels, choose your offer, then follow the booking steps. For faster confirmation, contact our agency team.",
+    actions: ["Open Packages", "Open Hotels", "Contact"],
+    feedback: true,
+  });
 
-  const contactAnswer = () => {
-    return {
-      text:
-        "Of course. Here are Egypt Holiday Travel contact details:\n\n" +
-        `WhatsApp: ${AGENCY_CONTACT.whatsappDisplay}\n` +
-        `Phone: ${AGENCY_CONTACT.phoneDisplay}\n` +
-        `Email: ${AGENCY_CONTACT.email}\n\n` +
-        "You can contact us to confirm prices, travel dates, hotel availability, packages, and booking details.",
-      actions: ["WhatsApp", "Call Agency", "Email Agency"],
-      feedback: true,
-    };
-  };
+  const contactAnswer = () => ({
+    text:
+      "Of course. Here are Egypt Holiday Travel contact details:\n\n" +
+      `WhatsApp: ${AGENCY_CONTACT.whatsappDisplay}\n` +
+      `Phone: ${AGENCY_CONTACT.phoneDisplay}\n` +
+      `Email: ${AGENCY_CONTACT.email}\n\n` +
+      "You can contact us to confirm prices, travel dates, hotel availability, packages, and booking details.",
+    actions: ["WhatsApp", "Call Agency", "Email Agency"],
+    feedback: true,
+  });
 
-  const getAnswer = (question) => {
-    const q = normalize(question);
-    const budget = extractBudget(question);
-    const destination = extractDestination(question);
+  const isContactRequest = (q) => {
+    if (q.includes("contact by")) return false;
 
-    if (
-      q.includes("help me choose") ||
-      q.includes("start") ||
-      q.includes("guide me")
-    ) {
-      return askType();
-    }
-
-    if (
-      q.includes("contact") ||
+    return (
+      q === "contact" ||
       q.includes("phone") ||
       q.includes("number") ||
       q.includes("numero") ||
@@ -777,104 +1501,29 @@ export default function HomeChatbot() {
       q.includes("whatsapp") ||
       q.includes("whatssap") ||
       q.includes("watsap") ||
-      q.includes("whats") ||
       q.includes("email") ||
       q.includes("gmail") ||
       q.includes("call") ||
       q.includes("give me the number")
-    ) {
-      return contactAnswer();
+    );
+  };
+
+  const getAnswer = (question) => {
+    const q = normalize(question);
+
+    if (q.includes("start new search") || q.includes("new search")) {
+      resetChat();
+      return INITIAL_MESSAGE;
     }
 
-    if (budget) return recommendByBudget(question);
-
-    if (destination || q.includes("any destination")) {
-      const selectedDestination = q.includes("any destination")
-        ? "Any destination"
-        : destination;
-
-      setLead((prev) => ({
-        ...prev,
-        destination: selectedDestination,
-      }));
-
-      return askBudget(detectType(question), selectedDestination);
-    }
+    if (isContactRequest(q)) return contactAnswer();
 
     if (
-      q.includes("package") ||
-      q.includes("packages") ||
-      q.includes("pack") ||
-      q.includes("pac") ||
-      q.includes("paka") ||
-      q.includes("trip")
+      q.includes("help me choose") ||
+      q.includes("start") ||
+      q.includes("guide me")
     ) {
-      setTripType("package");
-
-      setLead((prev) => ({
-        ...prev,
-        type: "package",
-      }));
-
-      return askDestination("package");
-    }
-
-    if (
-      q.includes("hotel") ||
-      q.includes("hotels") ||
-      q.includes("room") ||
-      q.includes("rooms")
-    ) {
-      setTripType("hotel");
-
-      setLead((prev) => ({
-        ...prev,
-        type: "hotel",
-      }));
-
-      return askDestination("hotel");
-    }
-
-    if (
-      q.includes("budget") ||
-      q.includes("pudget") ||
-      q.includes("price") ||
-      q.includes("cost") ||
-      q.includes("dollar") ||
-      q.includes("usd") ||
-      q.includes("$") ||
-      q.includes("flous") ||
-      q.includes("prix")
-    ) {
-      return askBudget(detectType(question), lead.destination);
-    }
-
-    const selectedHotel = findHotel(question);
-
-    if (selectedHotel) {
-      setTripType("hotel");
-
-      setLead((prev) => ({
-        ...prev,
-        type: "hotel",
-        destination: getHotelCity(selectedHotel),
-      }));
-
-      return hotelDetails(selectedHotel);
-    }
-
-    const selectedPackage = findPackage(question);
-
-    if (selectedPackage) {
-      setTripType("package");
-
-      setLead((prev) => ({
-        ...prev,
-        type: "package",
-        destination: getPackagePlace(selectedPackage),
-      }));
-
-      return packageDetails(selectedPackage);
+      return askType();
     }
 
     if (
@@ -896,15 +1545,50 @@ export default function HomeChatbot() {
       return bookingAnswer();
     }
 
-    return {
-      text:
-        "I can guide you professionally.\n\nTell me first what you want: a package or a hotel. Then choose a destination and give me your budget. I will recommend the best suitable options from the site.\n\nIf you need our agency contact, write: WhatsApp, phone number, or email.",
-      actions: ["I want a package", "I want a hotel", "Contact", "Help me choose"],
+    const selectedHotel = findHotel(question);
+    if (selectedHotel && !q.includes("i want a hotel")) {
+      setTripType("hotel");
+      setLead((prev) => ({
+        ...prev,
+        type: "hotel",
+        destination: getHotelCity(selectedHotel),
+      }));
+      return hotelDetails(selectedHotel);
+    }
+
+    const selectedPackage = findPackage(question);
+    if (selectedPackage && !q.includes("i want a package")) {
+      setTripType("package");
+      setLead((prev) => ({
+        ...prev,
+        type: "package",
+        destination: getPackagePlace(selectedPackage),
+      }));
+      return packageDetails(selectedPackage);
+    }
+
+    const updates = extractLeadUpdates(question);
+    const currentLead = {
+      ...lead,
+      ...updates,
     };
+
+    if (updates.type) {
+      setTripType(updates.type);
+    }
+
+    setLead(currentLead);
+
+    const nextQuestion = getNextQuestion(currentLead);
+
+    if (nextQuestion) return nextQuestion;
+
+    return finalRecommendation(currentLead);
   };
 
   const sendMessage = (customText = null) => {
     const question = (customText || input).trim();
+
     if (!question || isTyping) return;
 
     setMessages((prev) => [...prev, { sender: "user", text: question }]);
@@ -942,7 +1626,10 @@ export default function HomeChatbot() {
           type === "good"
             ? "Thank you for your feedback ✅ I am happy I helped you."
             : "Thank you for your feedback. I will try to guide you better. You can also contact our agency team for direct support.",
-        actions: type === "bad" ? ["Contact", "WhatsApp"] : ["I want a package", "I want a hotel"],
+        actions:
+          type === "bad"
+            ? ["Contact", "WhatsApp"]
+            : ["I want a package", "I want a hotel"],
       },
     ]);
   };
@@ -959,7 +1646,7 @@ export default function HomeChatbot() {
     }
 
     if (action === "Contact") {
-      sendMessage("Give me the agency contact details");
+      sendMessage("Contact");
       return;
     }
 
@@ -978,60 +1665,12 @@ export default function HomeChatbot() {
       return;
     }
 
-    if (action === "I want a package") {
-      setTripType("package");
-      setLead((prev) => ({ ...prev, type: "package" }));
-      sendMessage("I want a package");
+    if (action === "Start New Search") {
+      resetChat();
       return;
     }
 
-    if (action === "I want a hotel") {
-      setTripType("hotel");
-      setLead((prev) => ({ ...prev, type: "hotel" }));
-      sendMessage("I want a hotel");
-      return;
-    }
-
-    if (action === "Help me choose") {
-      sendMessage("Help me choose");
-      return;
-    }
-
-    if (DESTINATIONS.includes(action) || action === "Any destination") {
-      setLead((prev) => ({
-        ...prev,
-        destination: action,
-      }));
-
-      sendMessage(`My destination is ${action}`);
-      return;
-    }
-
-    if (action === "Budget 300$") {
-      sendMessage(
-        `My budget is 300 dollars for ${lead.type || tripType || "package"} ${
-          lead.destination ? `in ${lead.destination}` : ""
-        }`
-      );
-      return;
-    }
-
-    if (action === "Budget 500$") {
-      sendMessage(
-        `My budget is 500 dollars for ${lead.type || tripType || "package"} ${
-          lead.destination ? `in ${lead.destination}` : ""
-        }`
-      );
-      return;
-    }
-
-    if (action === "Budget 900$") {
-      sendMessage(
-        `My budget is 900 dollars for ${lead.type || tripType || "package"} ${
-          lead.destination ? `in ${lead.destination}` : ""
-        }`
-      );
-    }
+    sendMessage(action);
   };
 
   const getActionIcon = (action) => {
@@ -1039,12 +1678,47 @@ export default function HomeChatbot() {
 
     if (lower.includes("package")) return <FaSuitcaseRolling />;
     if (lower.includes("hotel")) return <FaHotel />;
-    if (lower.includes("budget")) return <FaMoneyBillWave />;
+    if (lower.includes("budget") || lower.includes("$")) return <FaMoneyBillWave />;
+    if (lower.includes("date")) return <FaCalendarAlt />;
+    if (
+      lower.includes("adult") ||
+      lower.includes("child") ||
+      lower.includes("family") ||
+      lower.includes("traveler")
+    ) {
+      return <FaUsers />;
+    }
+    if (
+      lower.includes("single") ||
+      lower.includes("double") ||
+      lower.includes("triple") ||
+      lower.includes("suite") ||
+      lower.includes("room")
+    ) {
+      return <FaBed />;
+    }
+    if (
+      lower.includes("breakfast") ||
+      lower.includes("board") ||
+      lower.includes("inclusive")
+    ) {
+      return <FaUtensils />;
+    }
+    if (
+      lower.includes("transfer") ||
+      lower.includes("car") ||
+      lower.includes("bus") ||
+      lower.includes("transport")
+    ) {
+      return <FaCar />;
+    }
+    if (lower.includes("flight")) return <FaPlane />;
     if (lower.includes("contact")) return <FaPhoneAlt />;
     if (lower.includes("whatsapp")) return <FaWhatsapp />;
     if (lower.includes("call")) return <FaPhoneAlt />;
     if (lower.includes("email")) return <FaEnvelope />;
     if (lower.includes("help")) return <FaCheckCircle />;
+
     if (DESTINATIONS.includes(action) || action === "Any destination") {
       return <FaMapMarkerAlt />;
     }
@@ -1093,10 +1767,17 @@ export default function HomeChatbot() {
                 {msg.cards?.length > 0 && (
                   <div className="eht-recommendations">
                     {msg.cards.map((card, cardIndex) => (
-                      <div className="eht-reco-card" key={`${card.title}-${cardIndex}`}>
+                      <div
+                        className="eht-reco-card"
+                        key={`${card.title}-${cardIndex}`}
+                      >
                         <div className="eht-reco-top">
                           <div className="eht-reco-icon">
-                            {card.type === "hotel" ? <FaHotel /> : <FaSuitcaseRolling />}
+                            {card.type === "hotel" ? (
+                              <FaHotel />
+                            ) : (
+                              <FaSuitcaseRolling />
+                            )}
                           </div>
 
                           <div>
@@ -1185,7 +1866,7 @@ export default function HomeChatbot() {
           <div className="eht-chatbot-input">
             <input
               type="text"
-              placeholder="Ask about packages, hotels, budget, destination..."
+              placeholder="Ask about packages, hotels, budget, destination, dates..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
