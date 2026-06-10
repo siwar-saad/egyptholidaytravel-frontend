@@ -499,7 +499,9 @@ export default function Users() {
                             : "email-status-badge not-verified"
                         }
                       >
-                        {emailVerified ? "Email verified" : "Email not verified"}
+                        {emailVerified
+                          ? "Email verified"
+                          : "Email not verified"}
                       </span>
                     </div>
 
@@ -508,9 +510,11 @@ export default function Users() {
                   </div>
 
                   <div className="client-actions">
-                    <button type="button" onClick={() => openEditUser(user)}>
-                      Edit
-                    </button>
+                    {role !== "admin" && (
+                      <button type="button" onClick={() => openEditUser(user)}>
+                        Edit
+                      </button>
+                    )}
 
                     <button
                       type="button"

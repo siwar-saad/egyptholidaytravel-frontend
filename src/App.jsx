@@ -10,25 +10,33 @@ import ResetPassword from "./page/login_signup/ResetPassword";
 import Packages from "./page/packages/Packages";
 import Hotels from "./page/hotel/Hotels";
 import FlightComingSoon from "./page/flight/flightcomingsoon";
+import DestinationsComingSoon from "./page/destination/DestinationsComingSoon";
 
-import Admin from "./page/admin/Admin";
 import AdminLayout from "./page/admin/AdminLayout";
-import AdminReviews from "./page/admin/AdminReviews";
+import Dashboard from "./page/admin/Dashboard";
+import AdminPackages from "./page/admin/Packages";
+import AdminHotels from "./page/admin/Hotels";
+import Reservations from "./page/admin/Reservations";
 import CreateReservation from "./page/admin/CreateReservation";
+import Users from "./page/admin/Users";
+import Payments from "./page/admin/Payments";
+import Messages from "./page/admin/Messages";
+import Subscribers from "./page/admin/Subscribers";
+import AdminReviews from "./page/admin/AdminReviews";
+import Profile from "./page/admin/Profile";
+import Settings from "./page/admin/Settings";
 
 import UserProfile from "./page/client/profile/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import HomeChatbot from "./components/HomeChatbot";
-
 import ScrollToTop from "./components/ScrollToTop";
-
-import DestinationsComingSoon from "./page/destination/DestinationsComingSoon";
 
 function App() {
   return (
     <BrowserRouter>
-    <ScrollToTop />
+      <ScrollToTop />
+
       <Routes>
         {/* AUTH */}
         <Route path="/login" element={<Login />} />
@@ -41,7 +49,8 @@ function App() {
         <Route path="/packages" element={<Packages />} />
         <Route path="/hotels" element={<Hotels />} />
         <Route path="/destinations" element={<DestinationsComingSoon />} />
-        {/* FLIGHT COMING SOON */}
+
+        {/* FLIGHTS */}
         <Route path="/flight" element={<FlightComingSoon />} />
         <Route path="/flights" element={<FlightComingSoon />} />
 
@@ -55,12 +64,50 @@ function App() {
           }
         />
 
-        {/* ADMIN */}
+        {/* ADMIN DASHBOARD */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute requiredRole="admin">
-              <Admin />
+              <AdminLayout>
+                <Dashboard />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN PACKAGES */}
+        <Route
+          path="/admin/packages"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <AdminPackages />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN HOTELS */}
+        <Route
+          path="/admin/hotels"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <AdminHotels />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN RESERVATIONS */}
+        <Route
+          path="/admin/reservations"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Reservations />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />
@@ -77,6 +124,54 @@ function App() {
           }
         />
 
+        {/* ADMIN USERS */}
+        <Route
+          path="/admin/clients"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Users />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN PAYMENTS */}
+        <Route
+          path="/admin/payments"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Payments />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN MESSAGES */}
+        <Route
+          path="/admin/messages"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Messages />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN SUBSCRIBERS */}
+        <Route
+          path="/admin/subscribers"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Subscribers />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
         {/* ADMIN REVIEWS */}
         <Route
           path="/admin/reviews"
@@ -84,6 +179,30 @@ function App() {
             <ProtectedRoute requiredRole="admin">
               <AdminLayout>
                 <AdminReviews />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN PROFILE */}
+        <Route
+          path="/admin/profile"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Profile />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ADMIN SETTINGS */}
+        <Route
+          path="/admin/settings"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Settings />
               </AdminLayout>
             </ProtectedRoute>
           }
