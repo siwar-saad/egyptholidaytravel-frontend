@@ -16,12 +16,6 @@ import {
   FaStar,
   FaGlobeAfrica,
   FaCheckCircle,
-  FaCalendarAlt,
-  FaUsers,
-  FaBed,
-  FaUtensils,
-  FaCar,
-  FaPlane,
 } from "react-icons/fa";
 
 import API from "../api";
@@ -89,7 +83,7 @@ export default function HomeChatbot() {
   const [packagesData, setPackagesData] = useState([]);
   const [hotelsData, setHotelsData] = useState([]);
   const [user, setUser] = useState(null);
-  const [tripType, setTripType] = useState("");
+  const [, setTripType] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [feedbackDone, setFeedbackDone] = useState(false);
   const [lead, setLead] = useState(INITIAL_LEAD);
@@ -709,10 +703,7 @@ export default function HomeChatbot() {
 
     const selected = normalize(selectedRoom);
 
-    if (
-      selected.includes("family") ||
-      selected.includes("suite")
-    ) {
+    if (selected.includes("family") || selected.includes("suite")) {
       return true;
     }
 
@@ -722,7 +713,9 @@ export default function HomeChatbot() {
   const categoryMatches = (hotel, selectedCategory) => {
     if (!selectedCategory) return true;
 
-    const category = normalize(`${getHotelStars(hotel)} ${hotel?.category || ""}`);
+    const category = normalize(
+      `${getHotelStars(hotel)} ${hotel?.category || ""}`
+    );
     const selected = normalize(selectedCategory);
 
     if (selected.includes("luxury") || selected.includes("budget hotel")) {
@@ -910,7 +903,7 @@ export default function HomeChatbot() {
     ],
   });
 
-  const askDate = (currentLead) => ({
+  const askDate = () => ({
     text:
       "What are your travel dates?\n\n" +
       "Example:\n" +
@@ -925,7 +918,9 @@ export default function HomeChatbot() {
   });
 
   const askTravelers = () => ({
-    text: "How many travelers are you?\n\nYou can also mention adults and children.",
+    text:
+      "How many travelers are you?\n\n" +
+      "You can also mention adults and children.",
     actions: [
       "1 adult",
       "2 adults",
@@ -967,7 +962,13 @@ export default function HomeChatbot() {
 
   const askRoomType = () => ({
     text: "Which room type do you prefer?",
-    actions: ["Single Room", "Double Room", "Triple Room", "Family Room", "Suite"],
+    actions: [
+      "Single Room",
+      "Double Room",
+      "Triple Room",
+      "Family Room",
+      "Suite",
+    ],
   });
 
   const askMealPlan = () => ({
@@ -1022,7 +1023,11 @@ export default function HomeChatbot() {
 
   const askContactPreference = () => ({
     text: "How do you prefer our team to contact you?",
-    actions: ["Contact by WhatsApp", "Contact by Phone call", "Contact by Email"],
+    actions: [
+      "Contact by WhatsApp",
+      "Contact by Phone call",
+      "Contact by Email",
+    ],
   });
 
   const dateErrorAnswer = () => ({
@@ -1043,7 +1048,7 @@ export default function HomeChatbot() {
       currentLead.datesFlexible !== "Flexible" &&
       (!currentLead.checkIn || !currentLead.checkOut)
     ) {
-      return askDate(currentLead);
+      return askDate();
     }
 
     if (
@@ -1099,10 +1104,7 @@ export default function HomeChatbot() {
     if (allPackages.length === 0) return noDataAnswer("package");
 
     const filteredPackages = allPackages.filter((option) =>
-      destinationMatches(
-        `${option.name} ${option.place}`,
-        currentLead.destination
-      )
+      destinationMatches(`${option.name} ${option.place}`, currentLead.destination)
     );
 
     const source = filteredPackages.length > 0 ? filteredPackages : allPackages;
@@ -1175,7 +1177,7 @@ export default function HomeChatbot() {
   };
 
   const recommendHotelsByBudget = (currentLead) => {
-    let allHotelOptions = hotelsData.flatMap((hotel) =>
+    const allHotelOptions = hotelsData.flatMap((hotel) =>
       getHotelRoomOptions(hotel, currentLead)
     );
 
@@ -1512,7 +1514,9 @@ export default function HomeChatbot() {
     const q = normalize(question);
 
     if (q.includes("start new search") || q.includes("new search")) {
-      resetChat();
+      setLead(INITIAL_LEAD);
+      setTripType("");
+      setFeedbackDone(false);
       return INITIAL_MESSAGE;
     }
 
@@ -1678,16 +1682,28 @@ export default function HomeChatbot() {
 
     if (lower.includes("package")) return <FaSuitcaseRolling />;
     if (lower.includes("hotel")) return <FaHotel />;
-    if (lower.includes("budget") || lower.includes("$")) return <FaMoneyBillWave />;
-    if (lower.includes("date")) return <FaCalendarAlt />;
+
+    if (lower.includes("budget") || lower.includes("$")) {
+      return <FaMoneyBillWave />;
+    }
+
+    if (
+      lower.includes("date") ||
+      lower.includes("flexible") ||
+      lower.includes("fixed")
+    ) {
+      return <FaCheckCircle />;
+    }
+
     if (
       lower.includes("adult") ||
       lower.includes("child") ||
       lower.includes("family") ||
       lower.includes("traveler")
     ) {
-      return <FaUsers />;
+      return <FaCheckCircle />;
     }
+
     if (
       lower.includes("single") ||
       lower.includes("double") ||
@@ -1695,24 +1711,27 @@ export default function HomeChatbot() {
       lower.includes("suite") ||
       lower.includes("room")
     ) {
-      return <FaBed />;
+      return <FaHotel />;
     }
+
     if (
       lower.includes("breakfast") ||
       lower.includes("board") ||
       lower.includes("inclusive")
     ) {
-      return <FaUtensils />;
+      return <FaCheckCircle />;
     }
+
     if (
       lower.includes("transfer") ||
       lower.includes("car") ||
       lower.includes("bus") ||
       lower.includes("transport")
     ) {
-      return <FaCar />;
+      return <FaCheckCircle />;
     }
-    if (lower.includes("flight")) return <FaPlane />;
+
+    if (lower.includes("flight")) return <FaCheckCircle />;
     if (lower.includes("contact")) return <FaPhoneAlt />;
     if (lower.includes("whatsapp")) return <FaWhatsapp />;
     if (lower.includes("call")) return <FaPhoneAlt />;
@@ -1816,21 +1835,23 @@ export default function HomeChatbot() {
                   </div>
                 )}
 
-                {msg.actions && msg.sender === "bot" && msg.actions.length > 0 && (
-                  <div className="eht-actions">
-                    {msg.actions.map((action) => (
-                      <button
-                        type="button"
-                        key={action}
-                        onClick={() => handleAction(action)}
-                        title={action}
-                      >
-                        {getActionIcon(action)}
-                        <span>{action}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {msg.actions &&
+                  msg.sender === "bot" &&
+                  msg.actions.length > 0 && (
+                    <div className="eht-actions">
+                      {msg.actions.map((action) => (
+                        <button
+                          type="button"
+                          key={action}
+                          onClick={() => handleAction(action)}
+                          title={action}
+                        >
+                          {getActionIcon(action)}
+                          <span>{action}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                 {msg.feedback && msg.sender === "bot" && !feedbackDone && (
                   <div className="eht-feedback">
