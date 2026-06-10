@@ -17,8 +17,8 @@ export default function ContactPopup({ onClose }) {
           <a href="tel:01050383173">☎️ 01050383173</a>
           <a href="tel:01111787867">☎️ 01111787867</a>
 
-          <a href="mailto:ghaddabnessrine@gmail.com">
-            📧 ghaddabnessrine@gmail.com
+          <a href="mailto:amr@egyptholiday-travel.com">
+            📧 amr@egyptholiday-travel.com
           </a>
 
           <a href="https://wa.me/201099999234" target="_blank" rel="noreferrer">
