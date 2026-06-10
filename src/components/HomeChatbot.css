@@ -1073,3 +1073,43 @@
     transition: none !important;
   }
 }
+
+/* ================= MOBILE FLOATING BUTTON SEPARATION ================= */
+
+@media (max-width: 700px) {
+  .eht-chatbot-fab {
+    right: 16px !important;
+    bottom: 92px !important;
+    z-index: 9999999 !important;
+  }
+
+  .eht-chatbot-window {
+    bottom: 92px !important;
+    height: calc(100dvh - 108px) !important;
+    max-height: calc(100dvh - 108px) !important;
+  }
+
+  .book-floating-btn,
+  .floating-book-btn,
+  .booking-floating-btn,
+  .package-book-floating,
+  .mobile-book-btn {
+    right: 16px !important;
+    bottom: 18px !important;
+    z-index: 9999998 !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .eht-chatbot-fab {
+    bottom: 88px !important;
+  }
+
+  .eht-chatbot-window {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 88px !important;
+    height: calc(100dvh - 102px) !important;
+    max-height: calc(100dvh - 102px) !important;
+  }
+}
