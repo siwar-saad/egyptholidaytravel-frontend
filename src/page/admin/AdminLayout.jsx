@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa";
 
 import API from "../../api";
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/navbar";
 import "./Admin.css";
 
 export default function AdminLayout({ children }) {
