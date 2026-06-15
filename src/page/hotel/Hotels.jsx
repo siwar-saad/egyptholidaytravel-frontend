@@ -7,7 +7,7 @@ import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
 import "./Hotels.css";
 
-import heroImg from "../../assets/image/bghotel.png";
+import heroImg from "../../assets/image/bghotel.webp";
 
 const ITEMS_PER_PAGE = 14;
 const TODAY = new Date().toISOString().split("T")[0];

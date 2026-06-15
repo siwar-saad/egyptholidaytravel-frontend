@@ -10,12 +10,12 @@ import HomeInfoSection from "./homeInfo/HomeInfoSection";
 import InfoPopup from "./homeInfo/InfoPopup";
 
 /* IMAGES */
-import cairoCover from "../assets/image/cairo.jpeg";
-import dahabImg from "../assets/image/dahab.jpeg";
-import sharmImg from "../assets/image/sharm.jpeg";
-import bgImg from "../assets/image/bg.png";
-import LuxorImg from "../assets/image/Luxor.jpg";
-import pyra from "../assets/image/pyra.png";
+import cairoCover from "../assets/image/cairo.webp";
+import dahabImg from "../assets/image/dahab.webp";
+import sharmImg from "../assets/image/sharm.webp";
+import bgImg from "../assets/image/bg.webp";
+import LuxorImg from "../assets/image/Luxor.webp";
+import pyra from "../assets/image/pyra.webp";
 
 /* FEATURED PACKAGES IMAGES */
 import cairoHurghadaPackage from "../assets/image/cairo-hurghada1.png";
