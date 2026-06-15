@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaChevronDown } from "react-icons/fa";
 
@@ -29,6 +29,45 @@ const normalizeText = (value = "") => {
     .replace(/resort/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+};
+
+const getHotelPriceValue = (hotel = {}) => {
+  const prices = [
+    hotel.single_room,
+    hotel.double_room,
+    hotel.triple_room,
+    hotel.price,
+    ...(Array.isArray(hotel.periods)
+      ? hotel.periods.flatMap((period) => [
+          period.single,
+          period.double,
+          period.triple,
+          period.price,
+        ])
+      : []),
+  ]
+    .map((price) => {
+      const match = String(price || "")
+        .replace(/,/g, "")
+        .match(/\d+(?:\.\d+)?/);
+
+      return match ? Number(match[0]) : null;
+    })
+    .filter((price) => price !== null && !Number.isNaN(price));
+
+  return prices.length > 0 ? Math.min(...prices) : null;
+};
+
+const matchHotelPriceFilter = (price, filter) => {
+  if (filter === "all") return true;
+  if (price === null || Number.isNaN(price)) return false;
+
+  if (filter === "under-100") return price < 100;
+  if (filter === "100-250") return price >= 100 && price <= 250;
+  if (filter === "250-500") return price > 250 && price <= 500;
+  if (filter === "over-500") return price > 500;
+
+  return true;
 };
 
 const EMPTY_BOOKING_DATA = {
@@ -119,6 +158,12 @@ export default function Hotels() {
 
   const [openBookingCountry, setOpenBookingCountry] = useState(false);
   const [homeHotelHandled, setHomeHotelHandled] = useState(false);
+
+  const [selectedHotelNameFilter, setSelectedHotelNameFilter] = useState("all");
+  const [selectedCityFilter, setSelectedCityFilter] = useState("all");
+  const [selectedMealFilter, setSelectedMealFilter] = useState("all");
+  const [selectedHotelPriceFilter, setSelectedHotelPriceFilter] = useState("all");
+
 
   const [hotelAlert, setHotelAlert] = useState({
     show: false,
@@ -228,23 +273,104 @@ export default function Hotels() {
     setHomeHotelHandled(true);
   }, [hotels, location.state, homeHotelHandled]);
 
+  const hotelNameOptions = useMemo(() => {
+    const names = hotels
+      .map((hotel) => hotel.name || hotel.title)
+      .filter(Boolean)
+      .map((name) => String(name).trim());
+
+    return [...new Set(names)].sort((a, b) => a.localeCompare(b));
+  }, [hotels]);
+
+  const cityOptions = useMemo(() => {
+    const cities = hotels
+      .map((hotel) => hotel.city)
+      .filter(Boolean)
+      .map((city) => String(city).trim());
+
+    return [...new Set(cities)].sort((a, b) => a.localeCompare(b));
+  }, [hotels]);
+
+  const mealOptions = useMemo(() => {
+    const meals = hotels
+      .map((hotel) => hotel.meal)
+      .filter(Boolean)
+      .map((meal) => String(meal).trim());
+
+    return [...new Set(meals)].sort((a, b) => a.localeCompare(b));
+  }, [hotels]);
+
+  const filteredHotels = useMemo(() => {
+    return hotels.filter((hotel) => {
+      const hotelName = String(hotel.name || hotel.title || "");
+      const hotelCity = String(hotel.city || "");
+      const hotelMeal = String(hotel.meal || "");
+      const hotelPrice = getHotelPriceValue(hotel);
+
+      const matchesName =
+        selectedHotelNameFilter === "all" ||
+        hotelName === selectedHotelNameFilter;
+
+      const matchesCity =
+        selectedCityFilter === "all" || hotelCity === selectedCityFilter;
+
+      const matchesMeal =
+        selectedMealFilter === "all" || hotelMeal === selectedMealFilter;
+
+      const matchesPrice = matchHotelPriceFilter(
+        hotelPrice,
+        selectedHotelPriceFilter
+      );
+
+      return matchesName && matchesCity && matchesMeal && matchesPrice;
+    });
+  }, [
+    hotels,
+    selectedHotelNameFilter,
+    selectedCityFilter,
+    selectedMealFilter,
+    selectedHotelPriceFilter,
+  ]);
+
+  const hasActiveHotelFilters =
+    selectedHotelNameFilter !== "all" ||
+    selectedCityFilter !== "all" ||
+    selectedMealFilter !== "all" ||
+    selectedHotelPriceFilter !== "all";
+
   const totalHotelPages = Math.max(
     1,
-    Math.ceil(hotels.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredHotels.length / ITEMS_PER_PAGE)
   );
 
   const hotelStartIndex = (currentHotelPage - 1) * ITEMS_PER_PAGE;
 
-  const paginatedHotels = hotels.slice(
+  const paginatedHotels = filteredHotels.slice(
     hotelStartIndex,
     hotelStartIndex + ITEMS_PER_PAGE
   );
+
+  useEffect(() => {
+    setCurrentHotelPage(1);
+  }, [
+    selectedHotelNameFilter,
+    selectedCityFilter,
+    selectedMealFilter,
+    selectedHotelPriceFilter,
+  ]);
 
   useEffect(() => {
     if (currentHotelPage > totalHotelPages) {
       setCurrentHotelPage(totalHotelPages);
     }
   }, [currentHotelPage, totalHotelPages]);
+
+  const resetHotelFilters = () => {
+    setSelectedHotelNameFilter("all");
+    setSelectedCityFilter("all");
+    setSelectedMealFilter("all");
+    setSelectedHotelPriceFilter("all");
+  };
 
   const goToHotelPage = (page) => {
     const safePage = Math.min(Math.max(page, 1), totalHotelPages);
@@ -485,7 +611,101 @@ export default function Hotels() {
           </p>
         </section>
 
-        {Object.values(hotelGroups).map((group) => (
+        <section className="hotels-filter-section">
+          <div className="hotels-filter-panel">
+            <div className="hotel-filter-field hotel-filter-wide">
+              <label htmlFor="hotel-name-filter">Hotel Name</label>
+
+              <select
+                id="hotel-name-filter"
+                value={selectedHotelNameFilter}
+                onChange={(e) => setSelectedHotelNameFilter(e.target.value)}
+              >
+                <option value="all">All hotels</option>
+                {hotelNameOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="hotel-filter-field">
+              <label htmlFor="hotel-city-filter">City</label>
+
+              <select
+                id="hotel-city-filter"
+                value={selectedCityFilter}
+                onChange={(e) => setSelectedCityFilter(e.target.value)}
+              >
+                <option value="all">All cities</option>
+                {cityOptions.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="hotel-filter-field">
+              <label htmlFor="hotel-meal-filter">Meal Plan</label>
+
+              <select
+                id="hotel-meal-filter"
+                value={selectedMealFilter}
+                onChange={(e) => setSelectedMealFilter(e.target.value)}
+              >
+                <option value="all">All meals</option>
+                {mealOptions.map((meal) => (
+                  <option key={meal} value={meal}>
+                    {meal}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="hotel-filter-field">
+              <label htmlFor="hotel-price-filter">Price</label>
+
+              <select
+                id="hotel-price-filter"
+                value={selectedHotelPriceFilter}
+                onChange={(e) => setSelectedHotelPriceFilter(e.target.value)}
+              >
+                <option value="all">All prices</option>
+                <option value="under-100">Under 100</option>
+                <option value="100-250">100 - 250</option>
+                <option value="250-500">250 - 500</option>
+                <option value="over-500">Over 500</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              className="hotel-reset-filter"
+              onClick={resetHotelFilters}
+              disabled={!hasActiveHotelFilters}
+            >
+              Reset
+            </button>
+          </div>
+
+          <div className="hotels-results-info">
+            <span>
+              {filteredHotels.length} hotel
+              {filteredHotels.length === 1 ? "" : "s"} found
+            </span>
+
+            {hasActiveHotelFilters && <small>Filters applied</small>}
+          </div>
+        </section>
+
+        {filteredHotels.length === 0 ? (
+          <section className="hotel-section">
+            <p className="empty-msg">No hotels match the selected filters.</p>
+          </section>
+        ) : (
+          Object.values(hotelGroups).map((group) => (
           <HotelSection
             key={group.title}
             title={group.title}
@@ -493,9 +713,10 @@ export default function Hotels() {
             hotels={group.hotels}
             onSelect={openHotel}
           />
-        ))}
+          ))
+        )}
 
-        {hotels.length > ITEMS_PER_PAGE && (
+        {filteredHotels.length > ITEMS_PER_PAGE && (
           <Pagination
             currentPage={currentHotelPage}
             totalPages={totalHotelPages}

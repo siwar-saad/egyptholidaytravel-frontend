@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
@@ -12,6 +12,7 @@ import {
   FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
+  FaFilter,
   FaHotel,
   FaMapMarkedAlt,
   FaPhoneAlt,
@@ -91,6 +92,71 @@ const cleanPackageTitle = (value) =>
     .replace(/\s+/g, " ")
     .trim();
 
+const getPackagePriceValue = (price = "") => {
+  const cleanPrice = String(price || "").replace(/,/g, "");
+  const match = cleanPrice.match(/\d+(?:\.\d+)?/);
+
+  return match ? Number(match[0]) : null;
+};
+
+const matchPriceFilter = (price, filter) => {
+  if (filter === "all") return true;
+  if (price === null || Number.isNaN(price)) return false;
+
+  if (filter === "under-500") return price < 500;
+  if (filter === "500-1000") return price >= 500 && price <= 1000;
+  if (filter === "1000-2000") return price > 1000 && price <= 2000;
+  if (filter === "over-2000") return price > 2000;
+
+  return true;
+};
+
+const EGYPT_PACKAGE_KEYWORDS = [
+  "egypt",
+  "cairo",
+  "giza",
+  "alexandria",
+  "luxor",
+  "aswan",
+  "hurghada",
+  "sharm",
+  "dahab",
+  "marsa alam",
+  "nile",
+  "sokhna",
+  "sinai",
+  "pyramids",
+  "pyramid",
+];
+
+const getPackageTextForCategory = (item = {}) =>
+  [
+    item.name,
+    item.backendName,
+    item.route,
+    item.country,
+    item.destination,
+    item.city,
+    item.location,
+    item.region,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+const isEgyptPackage = (item = {}) => {
+  const text = getPackageTextForCategory(item);
+
+  return EGYPT_PACKAGE_KEYWORDS.some((keyword) => text.includes(keyword));
+};
+
+const getPackageCategoryTitle = (category) => {
+  if (category === "egypt") return "Egypt Packages";
+  if (category === "others") return "Other Destinations";
+
+  return "Available Packages";
+};
+
 export default function Packages() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -98,6 +164,11 @@ export default function Packages() {
   const [packagesData, setPackagesData] = useState([]);
   const [packagesLoading, setPackagesLoading] = useState(true);
   const [currentPackagePage, setCurrentPackagePage] = useState(1);
+
+  const [selectedPackageCategory, setSelectedPackageCategory] = useState(null);
+  const [selectedPackageNameFilter, setSelectedPackageNameFilter] = useState("all");
+  const [selectedDurationFilter, setSelectedDurationFilter] = useState("all");
+  const [selectedPriceFilter, setSelectedPriceFilter] = useState("all");
 
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [bookingPackage, setBookingPackage] = useState(null);
@@ -159,6 +230,16 @@ export default function Packages() {
     startPrice:
       item.startPrice || item.start_price || item.price || "Contact us",
     image: getImageUrl(item.image),
+    country: item.country || item.destinationCountry || item.destination_country || "",
+    destination: item.destination || item.destinationName || item.destination_name || "",
+    city: item.city || "",
+    location: item.location || "",
+    region:
+      item.region ||
+      item.category ||
+      item.packageCategory ||
+      item.package_category ||
+      "",
     options: Array.isArray(item.options) ? item.options : [],
     itinerary: Array.isArray(item.itinerary) ? item.itinerary : [],
     programme: item.programme || "",
@@ -185,17 +266,120 @@ export default function Packages() {
     fetchPackages();
   }, []);
 
+  const egyptPackages = useMemo(
+    () => packagesData.filter((item) => isEgyptPackage(item)),
+    [packagesData]
+  );
+
+  const otherPackages = useMemo(
+    () => packagesData.filter((item) => !isEgyptPackage(item)),
+    [packagesData]
+  );
+
+  const categoryPackages = useMemo(() => {
+    if (selectedPackageCategory === "egypt") return egyptPackages;
+    if (selectedPackageCategory === "others") return otherPackages;
+
+    return [];
+  }, [egyptPackages, otherPackages, selectedPackageCategory]);
+
+  const packageNameOptions = useMemo(() => {
+    const names = categoryPackages
+      .map((item) => item.name)
+      .filter(Boolean)
+      .map((name) => String(name).trim());
+
+    return [...new Set(names)];
+  }, [categoryPackages]);
+
+  const durationOptions = useMemo(() => {
+    const durations = categoryPackages
+      .map((item) => item.duration)
+      .filter(Boolean)
+      .map((duration) => String(duration).trim());
+
+    return [...new Set(durations)];
+  }, [categoryPackages]);
+
+  const filteredPackages = useMemo(() => {
+    return categoryPackages.filter((item) => {
+      const matchesName =
+        selectedPackageNameFilter === "all" ||
+        String(item.name || "") === selectedPackageNameFilter;
+
+      const matchesDuration =
+        selectedDurationFilter === "all" ||
+        String(item.duration || "") === selectedDurationFilter;
+
+      const itemPrice = getPackagePriceValue(item.startPrice);
+      const matchesPrice = matchPriceFilter(itemPrice, selectedPriceFilter);
+
+      return matchesName && matchesDuration && matchesPrice;
+    });
+  }, [
+    categoryPackages,
+    selectedPackageNameFilter,
+    selectedDurationFilter,
+    selectedPriceFilter,
+  ]);
+
+  const hasActivePackageFilters =
+    selectedPackageNameFilter !== "all" ||
+    selectedDurationFilter !== "all" ||
+    selectedPriceFilter !== "all";
+
   const totalPackagePages = Math.max(
     1,
-    Math.ceil(packagesData.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredPackages.length / ITEMS_PER_PAGE)
   );
 
   const packageStartIndex = (currentPackagePage - 1) * ITEMS_PER_PAGE;
 
-  const paginatedPackages = packagesData.slice(
+  const paginatedPackages = filteredPackages.slice(
     packageStartIndex,
     packageStartIndex + ITEMS_PER_PAGE
   );
+
+  const resetPackageFilters = () => {
+    setSelectedPackageNameFilter("all");
+    setSelectedDurationFilter("all");
+    setSelectedPriceFilter("all");
+  };
+
+  const choosePackageCategory = (category) => {
+    setSelectedPackageCategory(category);
+    resetPackageFilters();
+    setCurrentPackagePage(1);
+
+    setTimeout(() => {
+      document.querySelector(".packages-list-section")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
+  };
+
+  const backToPackageCategories = () => {
+    setSelectedPackageCategory(null);
+    resetPackageFilters();
+    setCurrentPackagePage(1);
+
+    setTimeout(() => {
+      document.querySelector(".packages-category-section")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
+  };
+
+  useEffect(() => {
+    setCurrentPackagePage(1);
+  }, [
+    selectedPackageCategory,
+    selectedPackageNameFilter,
+    selectedDurationFilter,
+    selectedPriceFilter,
+  ]);
 
   useEffect(() => {
     if (currentPackagePage > totalPackagePages) {
@@ -225,6 +409,7 @@ export default function Packages() {
     );
 
     if (packageToOpen) {
+      setSelectedPackageCategory(isEgyptPackage(packageToOpen) ? "egypt" : "others");
       setSelectedPackage(packageToOpen);
     }
 
@@ -484,84 +669,173 @@ export default function Packages() {
           </div>
         </section>
 
-        <section className="packages-list-section">
-          <div className="packages-section-head">
-            <span>Our Offers</span>
-            <h2>Available Packages</h2>
-            <p>
-              Each page shows up to 14 packages. Use pagination below to see
-              more offers.
-            </p>
-          </div>
+        {!selectedPackageCategory ? (
+          <PackageCategoryChooser
+            egyptCount={egyptPackages.length}
+            othersCount={otherPackages.length}
+            loading={packagesLoading}
+            onChoose={choosePackageCategory}
+          />
+        ) : (
+          <section className="packages-list-section">
+            <div className="packages-section-head">
+              <span>Our Offers</span>
+              <h2>{getPackageCategoryTitle(selectedPackageCategory)}</h2>
+              <p>Filter packages by name, duration and starting price.</p>
 
-          <div className="packages-grid-pro">
-            {packagesLoading ? (
-              <p className="empty-packages-message">Loading packages...</p>
-            ) : packagesData.length === 0 ? (
-              <p className="empty-packages-message">
-                No published packages yet.
-              </p>
-            ) : (
-              paginatedPackages.map((item) => (
-                <article className="package-card-pro" key={item.id}>
-                  <div className="package-img-box">
-                    <img src={item.image} alt={item.name} loading="lazy" />
+              <button
+                type="button"
+                className="packages-category-back"
+                onClick={backToPackageCategories}
+              >
+                ← Back to Egypt / Others
+              </button>
+            </div>
 
-                    <div className="package-img-overlay">
-                      <span>{item.duration}</span>
+            <div className="packages-filter-panel">
+              <div className="packages-filter-field">
+                <label htmlFor="package-name-filter">Package Name</label>
+
+                <select
+                  id="package-name-filter"
+                  value={selectedPackageNameFilter}
+                  onChange={(e) => setSelectedPackageNameFilter(e.target.value)}
+                >
+                  <option value="all">All packages</option>
+                  {packageNameOptions.map((name) => (
+                    <option value={name} key={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="packages-filter-field">
+                <label htmlFor="package-duration-filter">Duration</label>
+
+                <select
+                  id="package-duration-filter"
+                  value={selectedDurationFilter}
+                  onChange={(e) => setSelectedDurationFilter(e.target.value)}
+                >
+                  <option value="all">All durations</option>
+                  {durationOptions.map((duration) => (
+                    <option value={duration} key={duration}>
+                      {duration}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="packages-filter-field">
+                <label htmlFor="package-price-filter">Price</label>
+
+                <select
+                  id="package-price-filter"
+                  value={selectedPriceFilter}
+                  onChange={(e) => setSelectedPriceFilter(e.target.value)}
+                >
+                  <option value="all">All prices</option>
+                  <option value="under-500">Under 500</option>
+                  <option value="500-1000">500 - 1000</option>
+                  <option value="1000-2000">1000 - 2000</option>
+                  <option value="over-2000">Over 2000</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                className="packages-reset-filter"
+                onClick={resetPackageFilters}
+                disabled={!hasActivePackageFilters}
+              >
+                <FaFilter />
+                Reset
+              </button>
+            </div>
+
+            <div className="packages-results-info">
+              <span>
+                {filteredPackages.length} package
+                {filteredPackages.length === 1 ? "" : "s"} found
+              </span>
+
+              {hasActivePackageFilters && <small>Filters applied</small>}
+            </div>
+
+            <div className="packages-grid-pro">
+              {packagesLoading ? (
+                <p className="empty-packages-message">Loading packages...</p>
+              ) : categoryPackages.length === 0 ? (
+                <p className="empty-packages-message">
+                  No packages available in this category yet.
+                </p>
+              ) : filteredPackages.length === 0 ? (
+                <p className="empty-packages-message">
+                  No packages match the selected filters.
+                </p>
+              ) : (
+                paginatedPackages.map((item) => (
+                  <article className="package-card-pro" key={item.id}>
+                    <div className="package-img-box">
+                      <img src={item.image} alt={item.name} loading="lazy" />
+
+                      <div className="package-img-overlay">
+                        <span>{item.duration}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="package-card-body">
-                    <h3>{item.name}</h3>
+                    <div className="package-card-body">
+                      <h3>{item.name}</h3>
 
-                    <div className="package-info-row">
-                      <FaMapMarkedAlt />
-                      <span>{item.route}</span>
+                      <div className="package-info-row">
+                        <FaMapMarkedAlt />
+                        <span>{item.route}</span>
+                      </div>
+
+                      <div className="package-info-row">
+                        <FaCalendarAlt />
+                        <span>{item.duration}</span>
+                      </div>
+
+                      <div className="package-info-row">
+                        {item.route.includes("Luxor") ? <FaTrain /> : <FaBus />}
+                        <span>{item.transfer}</span>
+                      </div>
+
+                      <div className="package-price-box">
+                        <small>Starting Price</small>
+                        <strong>{item.startPrice}</strong>
+                      </div>
+
+                      <div className="package-card-actions">
+                        <button type="button" onClick={() => openPackage(item)}>
+                          View Details
+                        </button>
+
+                        <button
+                          type="button"
+                          className="package-book-btn"
+                          onClick={() => openPackageBooking(item)}
+                        >
+                          Book Now
+                        </button>
+                      </div>
                     </div>
+                  </article>
+                ))
+              )}
+            </div>
 
-                    <div className="package-info-row">
-                      <FaCalendarAlt />
-                      <span>{item.duration}</span>
-                    </div>
-
-                    <div className="package-info-row">
-                      {item.route.includes("Luxor") ? <FaTrain /> : <FaBus />}
-                      <span>{item.transfer}</span>
-                    </div>
-
-                    <div className="package-price-box">
-                      <small>Starting Price</small>
-                      <strong>{item.startPrice}</strong>
-                    </div>
-
-                    <div className="package-card-actions">
-                      <button type="button" onClick={() => openPackage(item)}>
-                        View Details
-                      </button>
-
-                      <button
-                        type="button"
-                        className="package-book-btn"
-                        onClick={() => openPackageBooking(item)}
-                      >
-                        Book Now
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))
+            {!packagesLoading && filteredPackages.length > ITEMS_PER_PAGE && (
+              <Pagination
+                currentPage={currentPackagePage}
+                totalPages={totalPackagePages}
+                onPageChange={goToPackagePage}
+              />
             )}
-          </div>
-
-          {!packagesLoading && packagesData.length > ITEMS_PER_PAGE && (
-            <Pagination
-              currentPage={currentPackagePage}
-              totalPages={totalPackagePages}
-              onPageChange={goToPackagePage}
-            />
-          )}
-        </section>
+          </section>
+        )}
 
         <section className="packages-contact-pro" id="packages-contact">
           <div className="packages-contact-card">
@@ -655,6 +929,68 @@ export default function Packages() {
 
       <Footer />
     </div>
+  );
+}
+
+function PackageCategoryChooser({ egyptCount, othersCount, loading, onChoose }) {
+  return (
+    <section className="packages-category-section">
+      <div className="packages-section-head">
+        <span>Choose Destination</span>
+        <h2>Select Your Package Type</h2>
+        <p>
+          Choose Egypt packages or explore other international destinations.
+        </p>
+      </div>
+
+      <div className="packages-category-grid">
+        <button
+          type="button"
+          className="package-category-card egypt"
+          onClick={() => onChoose("egypt")}
+          disabled={loading}
+        >
+          <div className="package-category-overlay"></div>
+
+          <div className="package-category-content">
+            <span className="package-category-icon">
+              <FaMapMarkedAlt />
+            </span>
+
+            <h3>Egypt</h3>
+            <p>
+              Discover Cairo, Nile cruises, Red Sea stays, Luxor, Aswan and top
+              Egypt holiday packages.
+            </p>
+
+            <strong>{loading ? "Loading..." : `${egyptCount} packages`}</strong>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          className="package-category-card others"
+          onClick={() => onChoose("others")}
+          disabled={loading}
+        >
+          <div className="package-category-overlay"></div>
+
+          <div className="package-category-content">
+            <span className="package-category-icon">
+              <FaPlaneDeparture />
+            </span>
+
+            <h3>Others</h3>
+            <p>
+              Explore travel offers for other countries and international
+              destinations outside Egypt.
+            </p>
+
+            <strong>{loading ? "Loading..." : `${othersCount} packages`}</strong>
+          </div>
+        </button>
+      </div>
+    </section>
   );
 }
 
