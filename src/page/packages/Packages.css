@@ -1872,3 +1872,305 @@
     min-width: 70px;
   }
 }
+
+/* ================= PACKAGE FILTERS: NAME + DURATION + PRICE ================= */
+.packages-filter-panel {
+  width: 100%;
+  margin: 0 auto 18px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  gap: 14px;
+  align-items: end;
+  background: #ffffff;
+  border: 1px solid rgba(147, 84, 38, 0.16);
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(55, 38, 23, 0.08);
+}
+
+.packages-filter-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.packages-filter-field label {
+  color: #5f4028;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.packages-filter-field select {
+  width: 100%;
+  height: 50px;
+  border: 1px solid rgba(147, 84, 38, 0.22);
+  border-radius: 16px;
+  background: #fffaf5;
+  color: #322116;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 800;
+  outline: none;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.packages-filter-field select:focus {
+  border-color: #a87446;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(168, 116, 70, 0.12);
+}
+
+.packages-reset-filter {
+  height: 50px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #a87446, #935426);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.25s ease;
+  box-shadow: 0 12px 26px rgba(147, 84, 38, 0.18);
+}
+
+.packages-reset-filter:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(147, 84, 38, 0.26);
+}
+
+.packages-reset-filter:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.packages-results-info {
+  width: 100%;
+  margin: 0 auto 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #6a4a32;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.packages-results-info small {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(168, 116, 70, 0.11);
+  color: #935426;
+  font-weight: 900;
+}
+
+@media (max-width: 980px) {
+  .packages-filter-panel {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .packages-reset-filter {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .packages-filter-panel {
+    grid-template-columns: 1fr;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .packages-filter-field select,
+  .packages-reset-filter {
+    height: 46px;
+  }
+
+  .packages-results-info {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+}
+
+/* ================= EGYPT / OTHERS ENTRY CARDS ================= */
+.packages-category-section {
+  width: min(1180px, calc(100% - 40px));
+  margin: 60px auto 70px;
+}
+
+.packages-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.package-category-card {
+  min-height: 330px;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: 32px;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  background: #2a2117;
+  box-shadow: 0 26px 58px rgba(55, 35, 18, 0.18);
+  transition: 0.35s ease;
+  font-family: "Inika", serif;
+}
+
+.package-category-card:hover:not(:disabled) {
+  transform: translateY(-8px);
+  box-shadow: 0 34px 70px rgba(55, 35, 18, 0.28);
+}
+
+.package-category-card:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.package-category-card.egypt {
+  background-image:
+    linear-gradient(rgba(28, 18, 11, 0.30), rgba(28, 18, 11, 0.82)),
+    url("https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=1400&q=85");
+  background-size: cover;
+  background-position: center 48%;
+}
+
+.package-category-card.others {
+  background-image:
+    linear-gradient(rgba(28, 18, 11, 0.38), rgba(28, 18, 11, 0.78)),
+    url("https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80");
+  background-size: cover;
+  background-position: center;
+}
+
+.package-category-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(240, 189, 119, 0.22), transparent 45%),
+    linear-gradient(to top, rgba(22, 14, 8, 0.92), rgba(22, 14, 8, 0.12));
+  z-index: 1;
+}
+
+.package-category-content {
+  position: relative;
+  z-index: 2;
+  min-height: 330px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #ffffff;
+}
+
+.package-category-icon {
+  width: 58px;
+  height: 58px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #f0bd77;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.package-category-content h3 {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(34px, 4vw, 54px);
+  line-height: 1;
+}
+
+.package-category-content p {
+  max-width: 510px;
+  margin: 0;
+  color: #fff3e5;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 700;
+}
+
+.package-category-content strong {
+  width: fit-content;
+  margin-top: 18px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #935426;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.packages-category-back {
+  margin-top: 22px;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #f3e9df;
+  color: #935426;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.packages-category-back:hover {
+  background: #935426;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 760px) {
+  .packages-category-section {
+    width: calc(100% - 24px);
+    margin: 45px auto 55px;
+  }
+
+  .packages-category-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .package-category-card,
+  .package-category-content {
+    min-height: 260px;
+  }
+
+  .package-category-content {
+    padding: 24px;
+  }
+
+  .package-category-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .package-category-content p {
+    font-size: 13.5px;
+  }
+}
+
+
+/* Egypt card image enhancement */
+.package-category-card.egypt .package-category-overlay {
+  background:
+    radial-gradient(circle at top right, rgba(240, 189, 119, 0.30), transparent 42%),
+    linear-gradient(to top, rgba(22, 14, 8, 0.94), rgba(22, 14, 8, 0.08));
+}

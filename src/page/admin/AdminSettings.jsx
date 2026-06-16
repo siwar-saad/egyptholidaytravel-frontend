@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import API from "../../api";
 import "./Admin.css";
 
@@ -16,18 +15,6 @@ const DEFAULT_NOTICE = {
   message: "",
 };
 
-const DEFAULT_PASSWORD = {
-  oldPassword: "",
-  newPassword: "",
-  confirmPassword: "",
-};
-
-const DEFAULT_SHOW_PASSWORDS = {
-  oldPassword: false,
-  newPassword: false,
-  confirmPassword: false,
-};
-
 export default function AdminSettings() {
   const [activePopup, setActivePopup] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,8 +22,6 @@ export default function AdminSettings() {
 
   const [notice, setNotice] = useState(DEFAULT_NOTICE);
   const [agency, setAgency] = useState(DEFAULT_AGENCY);
-  const [password, setPassword] = useState(DEFAULT_PASSWORD);
-  const [showPasswords, setShowPasswords] = useState(DEFAULT_SHOW_PASSWORDS);
 
   const [contacts, setContacts] = useState([]);
   const [newContact, setNewContact] = useState("");
@@ -53,18 +38,8 @@ export default function AdminSettings() {
     setNotice(DEFAULT_NOTICE);
   };
 
-  const resetPasswordForm = () => {
-    setPassword(DEFAULT_PASSWORD);
-    setShowPasswords(DEFAULT_SHOW_PASSWORDS);
-  };
-
   const openPopup = (popupName) => {
     clearNotice();
-
-    if (popupName === "password") {
-      resetPasswordForm();
-    }
-
     setActivePopup(popupName);
   };
 
@@ -72,14 +47,6 @@ export default function AdminSettings() {
     setActivePopup(null);
     clearNotice();
     setActionLoading(false);
-    resetPasswordForm();
-  };
-
-  const togglePassword = (field) => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
   };
 
   const loadSettings = async () => {
@@ -139,53 +106,6 @@ export default function AdminSettings() {
     }
   };
 
-  const savePassword = async () => {
-    clearNotice();
-
-    if (!password.oldPassword.trim()) {
-      showNotice("error", "Please enter your current password.");
-      return;
-    }
-
-    if (!password.newPassword.trim()) {
-      showNotice("error", "Please enter a new password.");
-      return;
-    }
-
-    if (password.newPassword.length < 6) {
-      showNotice("error", "New password must contain at least 6 characters.");
-      return;
-    }
-
-    if (password.newPassword !== password.confirmPassword) {
-      showNotice("error", "New password and confirmation do not match.");
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-
-      await API.put("/admin/settings/password", password);
-
-      showNotice("success", "Password updated successfully.");
-
-      resetPasswordForm();
-
-      setTimeout(() => {
-        closePopup();
-      }, 1200);
-    } catch (error) {
-      showNotice(
-        "error",
-        error.response?.data?.error ||
-          error.response?.data?.message ||
-          "Current password is incorrect."
-      );
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
   const addContact = () => {
     clearNotice();
 
@@ -203,7 +123,9 @@ export default function AdminSettings() {
 
   const removeContact = (index) => {
     clearNotice();
+
     setContacts((prev) => prev.filter((_, i) => i !== index));
+
     showNotice(
       "success",
       "Phone number removed. Click Save Contacts to confirm."
@@ -257,36 +179,7 @@ export default function AdminSettings() {
     if (!notice.message) return null;
 
     return (
-      <div className={`settings-notice ${notice.type}`}>
-        {notice.message}
-      </div>
-    );
-  };
-
-  const renderPasswordInput = (field, placeholder) => {
-    return (
-      <div className="settings-password-field">
-        <input
-          type={showPasswords[field] ? "text" : "password"}
-          placeholder={placeholder}
-          value={password[field]}
-          onChange={(e) =>
-            setPassword({
-              ...password,
-              [field]: e.target.value,
-            })
-          }
-        />
-
-        <button
-          type="button"
-          className="settings-eye-btn"
-          onClick={() => togglePassword(field)}
-          aria-label={showPasswords[field] ? "Hide password" : "Show password"}
-        >
-          {showPasswords[field] ? <FaEyeSlash /> : <FaEye />}
-        </button>
-      </div>
+      <div className={`settings-notice ${notice.type}`}>{notice.message}</div>
     );
   };
 
@@ -296,7 +189,7 @@ export default function AdminSettings() {
         <div className="settings-header-pro">
           <div>
             <h2>Settings</h2>
-            <p>Manage agency information, admin security and contact numbers.</p>
+            <p>Manage agency information and contact numbers.</p>
           </div>
         </div>
 
@@ -316,21 +209,6 @@ export default function AdminSettings() {
                 <small>
                   Update agency profile, email, address and social media.
                 </small>
-              </span>
-
-              <span className="settings-arrow-pro">→</span>
-            </button>
-
-            <button
-              type="button"
-              className="settings-card-pro"
-              onClick={() => openPopup("password")}
-            >
-              <span className="settings-icon-pro">🔒</span>
-
-              <span className="settings-text-pro">
-                <strong>Change Admin Password</strong>
-                <small>Change your admin password securely.</small>
               </span>
 
               <span className="settings-arrow-pro">→</span>
@@ -418,48 +296,6 @@ export default function AdminSettings() {
                 disabled={actionLoading}
               >
                 {actionLoading ? "Saving..." : "Save Changes"}
-              </button>
-
-              <button
-                type="button"
-                className="settings-cancel-btn"
-                onClick={closePopup}
-                disabled={actionLoading}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activePopup === "password" && (
-        <div className="settings-popup-overlay">
-          <div className="settings-popup">
-            <button
-              type="button"
-              className="settings-popup-close"
-              onClick={closePopup}
-              disabled={actionLoading}
-            >
-              ×
-            </button>
-
-            <h2>Change Admin Password</h2>
-
-            {renderNotice()}
-
-            {renderPasswordInput("oldPassword", "Current Password")}
-            {renderPasswordInput("newPassword", "New Password")}
-            {renderPasswordInput("confirmPassword", "Confirm New Password")}
-
-            <div className="settings-popup-actions">
-              <button
-                type="button"
-                onClick={savePassword}
-                disabled={actionLoading}
-              >
-                {actionLoading ? "Updating..." : "Update Password"}
               </button>
 
               <button

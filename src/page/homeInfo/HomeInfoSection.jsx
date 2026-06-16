@@ -1,4 +1,4 @@
-import cairoImg from "../../assets/image/egy.png";
+import cairoImg from "../../assets/image/egy.webp";
 import { infoSections } from "./infoData";
 
 export default function HomeInfoSection({ onOpen }) {

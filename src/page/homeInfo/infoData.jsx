@@ -13,9 +13,9 @@ import geography from "../../assets/image/geography.jpg";
 import desert from "../../assets/image/desert.jpg";
 import nile from "../../assets/image/nile.jpg";
 
-import pyra from "../../assets/image/pyra.png";
+import pyra from "../../assets/image/pyra.webp";
 import aswan from "../../assets/image/aswan.jpeg";
-import sharm from "../../assets/image/sharm.jpeg";
+import sharm from "../../assets/image/sharm.webp";
 
 import egyptian from "../../assets/image/egyptian.jpg";
 import food from "../../assets/image/food.jpg";
