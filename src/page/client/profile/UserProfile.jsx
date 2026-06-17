@@ -186,6 +186,37 @@ const mergeBookings = (apiBookings = [], adminBookings = []) => {
   });
 };
 
+const compressProfilePhoto = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const image = new Image();
+
+      image.onload = () => {
+        const maxSize = 720;
+        const ratio = Math.min(maxSize / image.width, maxSize / image.height, 1);
+        const canvas = document.createElement("canvas");
+        const width = Math.round(image.width * ratio);
+        const height = Math.round(image.height * ratio);
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, width, height);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+
+      image.onerror = reject;
+      image.src = reader.result;
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 export default function UserProfile() {
   const [activePage, setActivePage] = useState("dashboard");
 
@@ -497,16 +528,13 @@ export default function UserProfile() {
     }
   };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-    const reader = new FileReader();
-
-    reader.onloadend = async () => {
-      const imageBase64 = reader.result;
-
+    try {
+      const imageBase64 = await compressProfilePhoto(file);
       const updatedUser = normalizeUser({
         ...user,
         avatar: imageBase64,
@@ -524,7 +552,7 @@ export default function UserProfile() {
       );
 
       try {
-        await API.put("/client/profile", {
+        const res = await API.put("/client/profile", {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
           phone: updatedUser.phone,
@@ -533,14 +561,33 @@ export default function UserProfile() {
           avatar: updatedUser.avatar,
           profileImage: updatedUser.profileImage,
         });
+
+        const savedUser = normalizeUser({
+          ...updatedUser,
+          ...res.data,
+          avatar: res.data?.avatar || updatedUser.avatar,
+          profileImage: res.data?.avatar || updatedUser.profileImage,
+        });
+
+        setUser(savedUser);
+        setEditForm(savedUser);
+        saveStoredUser(savedUser);
       } catch (err) {
         console.log("Photo update failed:", err.response?.data || err.message);
-        alert("Photo saved locally, but backend update failed");
-      }
-    };
+        const revertedUser = normalizeUser(user);
 
-    reader.readAsDataURL(file);
-    e.target.value = "";
+        setUser(revertedUser);
+        setEditForm(revertedUser);
+        saveStoredUser(revertedUser);
+
+        alert(err.response?.data?.error || "Photo update failed");
+      }
+    } catch (err) {
+      console.log("Photo compression failed:", err);
+      alert("Unable to read this photo. Please choose another image.");
+    } finally {
+      e.target.value = "";
+    }
   };
 
   const handleRemovePhoto = () => {
