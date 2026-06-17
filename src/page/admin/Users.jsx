@@ -318,9 +318,10 @@ export default function Users() {
         setUsers((prev) => [newUser, ...prev]);
 
         notify(
-          role === "admin"
-            ? "Admin added successfully."
-            : "Client added successfully."
+          res.data?.message ||
+            (role === "admin"
+              ? "Admin added successfully and password email sent."
+              : "Client added successfully and password email sent.")
         );
       }
 
