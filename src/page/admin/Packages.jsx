@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import API from "../../api";
 
 const DEFAULT_COVER =
@@ -332,13 +332,9 @@ export default function Packages() {
       itinerary: safeArray(editingPackage?.itinerary),
     };
 
-    setSaving(true);
-
-    setShowPackageForm(false);
-    setNewPackage(EMPTY_PACKAGE);
-    setEditingPackage(null);
-
     try {
+      setSaving(true);
+
       const res = isEditing
         ? await API.put(`/admin/packages/${editingPackageId}`, packageData)
         : await API.post("/admin/packages", packageData);
@@ -364,6 +360,7 @@ export default function Packages() {
         "Saved Successfully"
       );
 
+      closePackageForm();
       fetchPackages();
     } catch (err) {
       console.log("Save package error:", err.response?.data || err.message);
@@ -371,9 +368,7 @@ export default function Packages() {
       notify(
         err.response?.data?.error ||
           err.response?.data?.message ||
-          (isEditing
-            ? "Unable to update package."
-            : "Unable to add package."),
+          (isEditing ? "Unable to update package." : "Unable to add package."),
         "error",
         isEditing ? "Update Failed" : "Save Failed"
       );
@@ -419,6 +414,12 @@ export default function Packages() {
       return;
     }
 
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this package?"
+    );
+
+    if (!confirmed) return;
+
     try {
       await API.delete(`/admin/packages/${id}`);
 
@@ -451,7 +452,7 @@ export default function Packages() {
 
           <button
             type="button"
-            className="add-package-btn-pro"
+            className="package-main-action-btn"
             onClick={openPackageForm}
           >
             <FaPlus /> Add New Package
@@ -475,9 +476,13 @@ export default function Packages() {
           <div className="packages-admin-grid">
             {filteredPackages.map((item, index) => {
               const packageId = getPackageId(item);
+              const visibility = item?.visibility || "Private";
 
               return (
-                <div className="package-admin-card" key={packageId || index}>
+                <div
+                  className="package-admin-card package-card-pro"
+                  key={packageId || index}
+                >
                   <img
                     src={getImageUrl(
                       item?.image || item?.image_url || item?.cover
@@ -506,36 +511,39 @@ export default function Packages() {
                           "No price"}
                       </span>
 
-                      <span>{item?.visibility || "Private"}</span>
+                      <span>{visibility}</span>
                     </div>
                   </div>
 
-                  <div className="package-admin-actions">
-                    <button type="button" onClick={() => openEditPackage(item)}>
-                      Edit
+                  <div className="package-admin-actions package-actions-pro">
+                    <button
+                      type="button"
+                      className="package-edit-action-btn"
+                      onClick={() => openEditPackage(item)}
+                    >
+                      <FaEdit /> Edit
                     </button>
 
                     <select
-                      className={`package-select ${
-                        item?.visibility === "Published"
-                          ? "uploaded"
-                          : "missing"
+                      className={`package-visibility-select ${
+                        visibility === "Published" ? "published" : "private"
                       }`}
-                      value={item?.visibility || "Private"}
-                      onChange={(e) => {
-                        const value = e.target.value;
-
-                        if (value === "Delete") {
-                          deletePackage(packageId);
-                        } else {
-                          updatePackageVisibility(packageId, value);
-                        }
-                      }}
+                      value={visibility}
+                      onChange={(e) =>
+                        updatePackageVisibility(packageId, e.target.value)
+                      }
                     >
                       <option value="Published">Published</option>
                       <option value="Private">Private</option>
-                      <option value="Delete">Delete</option>
                     </select>
+
+                    <button
+                      type="button"
+                      className="package-delete-action-btn"
+                      onClick={() => deletePackage(packageId)}
+                    >
+                      <FaTrash /> Delete
+                    </button>
                   </div>
                 </div>
               );
@@ -681,7 +689,11 @@ export default function Packages() {
                         alt="Package preview"
                       />
 
-                      <button type="button" onClick={removePackageImage}>
+                      <button
+                        type="button"
+                        className="package-remove-image-btn"
+                        onClick={removePackageImage}
+                      >
                         ×
                       </button>
                     </div>
@@ -689,6 +701,11 @@ export default function Packages() {
                 )}
 
                 <select
+                  className={`package-visibility-select ${
+                    newPackage.visibility === "Published"
+                      ? "published"
+                      : "private"
+                  }`}
                   value={newPackage.visibility}
                   onChange={(e) =>
                     updatePackageField("visibility", e.target.value)
@@ -700,7 +717,12 @@ export default function Packages() {
               </div>
 
               <div className="package-popup-actions package-popup-actions-sticky">
-                <button type="button" onClick={savePackage} disabled={saving}>
+                <button
+                  type="button"
+                  className="package-save-action-btn"
+                  onClick={savePackage}
+                  disabled={saving}
+                >
                   {saving
                     ? "Saving..."
                     : editingPackage

@@ -12,6 +12,7 @@
   --admin-text: #24160f;
   --admin-muted: #7b6859;
   --admin-accent: #935426;
+  --admin-accent-light: #a8642c;
   --admin-accent-dark: #6f3a15;
   --admin-danger: #b42318;
   --admin-success: #16833a;
@@ -42,7 +43,6 @@ body {
 
 /* =========================================================
    ADMIN LAYOUT
-   Navbar is imported normally in AdminLayout.jsx.
 ========================================================= */
 
 .admin-wrapper {
@@ -58,6 +58,12 @@ body {
   overflow-x: hidden;
 }
 
+.admin-wrapper .navbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 5000 !important;
+}
+
 .admin-page {
   width: 100%;
   min-height: calc(100vh - 95px);
@@ -65,18 +71,17 @@ body {
   grid-template-columns: var(--admin-sidebar-width) minmax(0, 1fr);
   align-items: stretch;
   margin: 0;
-  padding: 0;
+  padding: 26px 0 0 !important;
   overflow-x: hidden;
 }
 
 .admin-main {
   width: 100%;
   min-width: 0;
-  padding: 34px;
+  padding: 0 34px 34px !important;
   overflow-x: hidden;
 }
 
-/* Old custom admin top navbar removed */
 .admin-top-navbar,
 .admin-top-brand,
 .admin-top-links,
@@ -97,6 +102,7 @@ body {
   max-width: var(--admin-sidebar-width);
   height: calc(100vh - 95px);
   min-height: calc(100vh - 95px);
+  margin-top: 0 !important;
   background: rgba(255, 255, 255, 0.96);
   border-right: 1px solid rgba(147, 84, 38, 0.1);
   box-shadow: 14px 0 40px rgba(60, 38, 22, 0.06);
@@ -217,7 +223,6 @@ body {
   color: #ffffff;
 }
 
-/* Mobile sidebar controls */
 .admin-mobile-menu-btn,
 .admin-sidebar-close,
 .admin-mobile-overlay {
@@ -225,7 +230,7 @@ body {
 }
 
 /* =========================================================
-   HEADERS / PANELS / BUTTONS
+   HEADERS / PANELS
 ========================================================= */
 
 .admin-top,
@@ -296,6 +301,18 @@ body {
   line-height: 1.6;
 }
 
+/* =========================================================
+   PRO ADMIN BUTTONS
+========================================================= */
+
+button {
+  font-family: inherit;
+}
+
+.admin-main button {
+  outline: none;
+}
+
 .admin-actions,
 .quick-actions,
 .package-form-actions,
@@ -303,7 +320,8 @@ body {
 .settings-popup-actions,
 .contact-popup-actions,
 .client-actions,
-.admin-review-actions {
+.admin-review-actions,
+.panel-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -319,12 +337,14 @@ body {
 .settings-popup-actions button,
 .save-contact-btn,
 .cancel-contact-btn,
-.refresh-btn {
+.refresh-btn,
+.add-contact-btn {
   border: none;
-  border-radius: 17px;
-  background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark));
+  min-height: 46px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--admin-accent-light), var(--admin-accent-dark));
   color: #ffffff;
-  padding: 13px 20px;
+  padding: 0 22px;
   font-family: inherit;
   font-weight: 900;
   cursor: pointer;
@@ -333,7 +353,8 @@ body {
   justify-content: center;
   gap: 8px;
   transition: var(--admin-transition);
-  box-shadow: 0 12px 26px rgba(147, 84, 38, 0.18);
+  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.22);
+  white-space: nowrap;
 }
 
 .admin-actions button:hover,
@@ -344,24 +365,119 @@ body {
 .add-package-btn-pro:hover,
 .package-popup-actions button:hover,
 .settings-popup-actions button:hover,
-.refresh-btn:hover {
+.refresh-btn:hover,
+.save-contact-btn:hover,
+.add-contact-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 36px rgba(147, 84, 38, 0.28);
+  box-shadow: 0 20px 42px rgba(147, 84, 38, 0.32);
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
+.panel-actions {
+  align-items: center;
+}
+
+.panel-actions button {
+  height: 48px;
+}
+
+.panel-actions button:last-child {
+  background: #fff3e8 !important;
+  color: var(--admin-accent) !important;
+  border: 1px solid rgba(147, 84, 38, 0.15) !important;
   box-shadow: none !important;
+}
+
+.panel-actions button:last-child:hover {
+  background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 16px 32px rgba(147, 84, 38, 0.24) !important;
 }
 
 .outline-btn,
 .cancel-package-btn,
 .settings-cancel-btn,
 .cancel-contact-btn {
-  background: var(--admin-soft-2) !important;
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 999px !important;
+  background: #f2e7dd !important;
   color: var(--admin-accent) !important;
+  border: 1px solid rgba(147, 84, 38, 0.12) !important;
+  box-shadow: none !important;
+}
+
+.outline-btn:hover,
+.cancel-package-btn:hover,
+.settings-cancel-btn:hover,
+.cancel-contact-btn:hover {
+  background: var(--admin-accent) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.package-admin-actions button,
+.client-actions button,
+.admin-review-actions button,
+.remove-contact-btn,
+.add-contact-btn,
+.edit-reservation-btn {
+  border: none;
+  min-height: 40px;
+  border-radius: 999px;
+  padding: 0 17px;
+  font-family: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  transition: var(--admin-transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.package-edit-btn,
+.client-actions button:first-child,
+.admin-review-actions .make-public-btn,
+.edit-reservation-btn {
+  background: linear-gradient(135deg, var(--admin-accent-light), var(--admin-accent-dark)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 26px rgba(147, 84, 38, 0.22) !important;
+}
+
+.package-edit-btn:hover,
+.client-actions button:first-child:hover,
+.admin-review-actions .make-public-btn:hover,
+.edit-reservation-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(147, 84, 38, 0.32) !important;
+}
+
+.package-delete-btn,
+.delete-client-btn,
+.admin-review-actions .delete-review-btn,
+.remove-contact-btn {
+  background: #fff1f1 !important;
+  color: var(--admin-danger) !important;
+  border: 1px solid rgba(180, 35, 24, 0.14) !important;
+  box-shadow: none !important;
+}
+
+.package-delete-btn:hover,
+.delete-client-btn:hover,
+.admin-review-actions .delete-review-btn:hover,
+.remove-contact-btn:hover {
+  background: var(--admin-danger) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(180, 35, 24, 0.22) !important;
+}
+
+button:disabled,
+.admin-main button:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
   box-shadow: none !important;
 }
 
@@ -519,7 +635,7 @@ select:focus,
 }
 
 /* =========================================================
-   TABLES / STATUS
+   TABLES
 ========================================================= */
 
 .table-wrapper,
@@ -527,6 +643,17 @@ select:focus,
   width: 100%;
   overflow-x: auto;
   border-radius: 18px;
+}
+
+.table-wrapper::-webkit-scrollbar,
+.reservation-table-wrap::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb,
+.reservation-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(147, 84, 38, 0.45);
+  border-radius: 999px;
 }
 
 table {
@@ -565,7 +692,12 @@ tbody tr {
 
 tbody tr:hover {
   background: #ffffff;
+  box-shadow: 0 10px 24px rgba(60, 38, 22, 0.06);
 }
+
+/* =========================================================
+   STATUS / BADGES
+========================================================= */
 
 .status,
 .pdf-ok,
@@ -576,7 +708,8 @@ tbody tr:hover {
 .admin-message-date,
 .review-status,
 .email-status-badge,
-.user-role-badge {
+.user-role-badge,
+.created-by-badge {
   display: inline-flex;
   align-items: center;
   width: max-content;
@@ -591,7 +724,8 @@ tbody tr:hover {
 .confirmed,
 .pdf-ok,
 .review-status.public,
-.email-status-badge.verified {
+.email-status-badge.verified,
+.created-by-badge.admin {
   background: #e6f7ec;
   color: var(--admin-success);
 }
@@ -599,7 +733,8 @@ tbody tr:hover {
 .unpaid,
 .pending,
 .review-status.private,
-.user-role-badge.admin {
+.user-role-badge.admin,
+.created-by-badge.user {
   background: #fff1d8;
   color: var(--admin-warning);
 }
@@ -614,6 +749,56 @@ tbody tr:hover {
 .user-role-badge.client {
   background: #f0e2d6;
   color: var(--admin-accent);
+}
+
+/* Status select pro */
+.status-select {
+  min-width: 130px;
+  height: 40px;
+  border-radius: 999px !important;
+  padding: 0 38px 0 16px !important;
+  border: 1px solid transparent !important;
+  outline: none !important;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: var(--admin-transition);
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 12px;
+  box-shadow: none !important;
+}
+
+.status-select.pending {
+  background-color: #fff3dc !important;
+  color: #9b6200 !important;
+  border-color: rgba(168, 103, 0, 0.18) !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41 0.59L6 5.17L10.59 0.59L12 2L6 8L0 2L1.41 0.59Z' fill='%239b6200'/%3E%3C/svg%3E");
+}
+
+.status-select.confirmed {
+  background-color: #e7f8ed !important;
+  color: #16833a !important;
+  border-color: rgba(22, 131, 58, 0.18) !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41 0.59L6 5.17L10.59 0.59L12 2L6 8L0 2L1.41 0.59Z' fill='%2316833a'/%3E%3C/svg%3E");
+}
+
+.status-select.cancelled {
+  background-color: #ffeaea !important;
+  color: #b42318 !important;
+  border-color: rgba(180, 35, 24, 0.18) !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41 0.59L6 5.17L10.59 0.59L12 2L6 8L0 2L1.41 0.59Z' fill='%23b42318'/%3E%3C/svg%3E");
+}
+
+.status-select:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(60, 38, 22, 0.08) !important;
+}
+
+.status-select:focus {
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1) !important;
 }
 
 /* =========================================================
@@ -661,6 +846,7 @@ tbody tr:hover {
     opacity: 0;
     transform: translateY(12px) scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -705,9 +891,9 @@ tbody tr:hover {
 .settings-popup-close,
 .admin-delete-confirm-close,
 .user-notice-close {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
   border: none;
   border-radius: 50%;
   background: var(--admin-soft-2);
@@ -716,6 +902,8 @@ tbody tr:hover {
   font-weight: 900;
   cursor: pointer;
   transition: var(--admin-transition);
+  display: grid;
+  place-items: center;
 }
 
 .close-package-popup:hover,
@@ -815,43 +1003,6 @@ tbody tr:hover {
   flex-wrap: wrap;
 }
 
-.package-admin-actions button,
-.client-actions button,
-.admin-review-actions button,
-.remove-contact-btn,
-.add-contact-btn {
-  border: none;
-  border-radius: 16px;
-  padding: 13px 18px;
-  font-family: inherit;
-  font-weight: 900;
-  cursor: pointer;
-  transition: var(--admin-transition);
-}
-
-.package-edit-btn,
-.client-actions button:first-child,
-.admin-review-actions .make-public-btn {
-  background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark));
-  color: #ffffff;
-}
-
-.package-delete-btn,
-.delete-client-btn,
-.admin-review-actions .delete-review-btn,
-.remove-contact-btn {
-  background: #fff1f1 !important;
-  color: var(--admin-danger) !important;
-}
-
-.package-delete-btn:hover,
-.delete-client-btn:hover,
-.admin-review-actions .delete-review-btn:hover,
-.remove-contact-btn:hover {
-  background: var(--admin-danger) !important;
-  color: #ffffff !important;
-}
-
 .hotel-preview-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -904,6 +1055,12 @@ tbody tr:hover {
   background: linear-gradient(135deg, var(--admin-accent), var(--admin-accent-dark));
   color: #ffffff;
   box-shadow: 0 14px 26px rgba(147, 84, 38, 0.22);
+}
+
+.user-tabs button:hover,
+.reservation-switcher button:hover,
+.booking-tabs button:hover {
+  transform: translateY(-2px);
 }
 
 .client-tools {
@@ -1433,6 +1590,12 @@ tbody tr:hover {
   display: grid;
   place-items: center;
   cursor: pointer;
+  box-shadow: 0 12px 24px rgba(147, 84, 38, 0.25);
+  transition: var(--admin-transition);
+}
+
+.admin-messenger-composer button:hover {
+  transform: translateY(-2px);
 }
 
 /* =========================================================
@@ -1467,7 +1630,7 @@ tbody tr:hover {
 
   .admin-main {
     width: 100%;
-    padding: 22px;
+    padding: 22px !important;
   }
 
   .admin-mobile-menu-btn {
@@ -1591,7 +1754,7 @@ tbody tr:hover {
 
 @media (max-width: 700px) {
   .admin-main {
-    padding: 14px;
+    padding: 14px !important;
   }
 
   .admin-panel {
@@ -1622,6 +1785,22 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
+  .panel-actions,
+  .admin-actions,
+  .quick-actions,
+  .package-popup-actions,
+  .settings-popup-actions {
+    width: 100%;
+  }
+
+  .panel-actions button,
+  .admin-actions button,
+  .quick-actions button,
+  .package-popup-actions button,
+  .settings-popup-actions button {
+    width: 100%;
+  }
+
   .package-admin-card {
     grid-template-columns: 1fr;
   }
@@ -1636,6 +1815,13 @@ tbody tr:hover {
   .settings-popup-actions,
   .package-popup-actions {
     flex-direction: column;
+  }
+
+  .package-admin-actions button,
+  .admin-review-actions button,
+  .client-actions button,
+  .edit-reservation-btn {
+    width: 100%;
   }
 
   .settings-card-pro {
@@ -1683,11 +1869,15 @@ tbody tr:hover {
     border-radius: 22px;
     padding: 22px 16px;
   }
+
+  .status-select {
+    min-width: 120px;
+  }
 }
 
 @media (max-width: 420px) {
   .admin-main {
-    padding: 10px;
+    padding: 10px !important;
   }
 
   .admin-panel {
@@ -1725,22 +1915,541 @@ tbody tr:hover {
     max-width: 94%;
   }
 }
-/* FIX ADMIN CONTENT UNDER NORMAL NAVBAR */
-.admin-wrapper .navbar {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 5000 !important;
+/* =========================================================
+   FIX UGLY ADMIN BUTTONS / TABS
+   Paste this at the VERY END of Admin.css
+========================================================= */
+
+.reservation-switcher button,
+.user-tabs button,
+.booking-tabs button {
+  background-image: none !important;
+  background: #f3ebe4 !important;
+  color: #935426 !important;
+  border: 1px solid rgba(147, 84, 38, 0.12) !important;
+  min-height: 58px !important;
+  border-radius: 18px !important;
+  font-family: "Inika", serif !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  transition: 0.25s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
 }
 
-.admin-page {
-  padding-top: 26px !important;
-  margin-top: 0 !important;
+.reservation-switcher button:hover,
+.user-tabs button:hover,
+.booking-tabs button:hover {
+  background-image: none !important;
+  background: #fff5ed !important;
+  color: #6f3a15 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 22px rgba(147, 84, 38, 0.12) !important;
 }
 
-.admin-main {
-  padding-top: 0 !important;
+.reservation-switcher button.active,
+.user-tabs button.active,
+.booking-tabs button.active {
+  background-image: none !important;
+  background: linear-gradient(135deg, #a45a22, #6f3a15) !important;
+  color: #ffffff !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.24) !important;
 }
 
-.admin-sidebar {
-  margin-top: 0 !important;
+.reservation-switcher button.active:hover,
+.user-tabs button.active:hover,
+.booking-tabs button.active:hover {
+  background-image: none !important;
+  background: linear-gradient(135deg, #b66a31, #7b4218) !important;
+  color: #ffffff !important;
+}
+
+/* Fix Add / Refresh buttons */
+.panel-actions button {
+  background-image: none !important;
+  background: linear-gradient(135deg, #a45a22, #6f3a15) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  height: 48px !important;
+  padding: 0 22px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 14px 30px rgba(147, 84, 38, 0.22) !important;
+}
+
+.panel-actions button:last-child {
+  background-image: none !important;
+  background: #fff3e8 !important;
+  color: #935426 !important;
+  border: 1px solid rgba(147, 84, 38, 0.16) !important;
+  box-shadow: none !important;
+}
+
+.panel-actions button:last-child:hover {
+  background: #935426 !important;
+  color: #ffffff !important;
+}
+
+/* Fix Edit button */
+.edit-reservation-btn {
+  background-image: none !important;
+  background: linear-gradient(135deg, #a45a22, #6f3a15) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  min-height: 40px !important;
+  padding: 0 17px !important;
+  font-family: "Inika", serif !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  box-shadow: 0 12px 26px rgba(147, 84, 38, 0.22) !important;
+}
+
+.edit-reservation-btn:hover {
+  background-image: none !important;
+  background: linear-gradient(135deg, #b66a31, #7b4218) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 16px 34px rgba(147, 84, 38, 0.32) !important;
+}
+
+/* Fix status select only */
+.status-select {
+  background-repeat: no-repeat !important;
+  background-size: 12px !important;
+  background-position: right 15px center !important;
+}
+
+/* Remove ugly pattern from any admin button */
+.admin-panel button,
+.admin-main button {
+  background-repeat: no-repeat !important;
+}
+/* =========================================================
+   HOTELS BUTTONS LIKE RESERVATIONS
+========================================================= */
+
+.hotel-admin-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+.hotel-main-action-btn,
+.hotel-edit-btn,
+.hotel-small-action-btn,
+.hotel-save-btn {
+  background-image: none !important;
+  background: linear-gradient(135deg, #a45a22, #6f3a15) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  font-family: "Inika", serif !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 12px 26px rgba(147, 84, 38, 0.22) !important;
+  transition: 0.25s ease !important;
+}
+
+.hotel-main-action-btn {
+  min-height: 48px !important;
+  padding: 0 22px !important;
+}
+
+.hotel-edit-btn,
+.hotel-small-action-btn {
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  font-size: 13px !important;
+}
+
+.hotel-save-btn {
+  min-height: 46px !important;
+  padding: 0 24px !important;
+}
+
+.hotel-main-action-btn:hover,
+.hotel-edit-btn:hover,
+.hotel-small-action-btn:hover,
+.hotel-save-btn:hover {
+  background-image: none !important;
+  background: linear-gradient(135deg, #b66a31, #7b4218) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 16px 34px rgba(147, 84, 38, 0.32) !important;
+}
+
+/* Delete hotel button */
+.hotel-delete-btn {
+  background-image: none !important;
+  background: #fff1f1 !important;
+  color: #b42318 !important;
+  border: 1px solid rgba(180, 35, 24, 0.14) !important;
+  border-radius: 999px !important;
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  font-family: "Inika", serif !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  transition: 0.25s ease !important;
+}
+
+.hotel-delete-btn:hover {
+  background: #b42318 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 30px rgba(180, 35, 24, 0.22) !important;
+}
+
+/* Published / Private select like reservation status */
+.hotel-visibility-select {
+  min-width: 135px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+  padding: 0 38px 0 16px !important;
+  border: 1px solid rgba(147, 84, 38, 0.16) !important;
+  outline: none !important;
+  font-family: "Inika", serif !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-repeat: no-repeat !important;
+  background-position: right 15px center !important;
+  background-size: 12px !important;
+  box-shadow: none !important;
+  transition: 0.25s ease !important;
+}
+
+.hotel-visibility-select.published {
+  background-color: #e6f7ec !important;
+  color: #16833a !important;
+  border-color: rgba(22, 131, 58, 0.18) !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41 0.59L6 5.17L10.59 0.59L12 2L6 8L0 2L1.41 0.59Z' fill='%2316833a'/%3E%3C/svg%3E") !important;
+}
+
+.hotel-visibility-select.private {
+  background-color: #fff3dc !important;
+  color: #9b6200 !important;
+  border-color: rgba(168, 103, 0, 0.18) !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41 0.59L6 5.17L10.59 0.59L12 2L6 8L0 2L1.41 0.59Z' fill='%239b6200'/%3E%3C/svg%3E") !important;
+}
+
+.hotel-visibility-select:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 18px rgba(60, 38, 22, 0.08) !important;
+}
+
+.hotel-visibility-select:focus {
+  border-color: #935426 !important;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1) !important;
+}
+
+/* Set cover button */
+.set-cover-btn {
+  background-image: none !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #935426 !important;
+  border: 1px solid rgba(147, 84, 38, 0.16) !important;
+  border-radius: 999px !important;
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  font-family: "Inika", serif !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  box-shadow: 0 8px 18px rgba(60, 38, 22, 0.12) !important;
+  transition: 0.25s ease !important;
+}
+
+.set-cover-btn:hover {
+  background: #935426 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Remove image small X */
+.remove-hotel-image-btn {
+  background-image: none !important;
+  background: #b42318 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  display: grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 10px 20px rgba(180, 35, 24, 0.25) !important;
+  transition: 0.25s ease !important;
+}
+
+.remove-hotel-image-btn:hover {
+  transform: scale(1.08) rotate(90deg) !important;
+}
+
+/* Remove period */
+.remove-period-btn {
+  background-image: none !important;
+  background: #fff1f1 !important;
+  color: #b42318 !important;
+  border: 1px solid rgba(180, 35, 24, 0.14) !important;
+  border-radius: 999px !important;
+  min-height: 42px !important;
+  padding: 0 18px !important;
+  font-family: "Inika", serif !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  transition: 0.25s ease !important;
+}
+
+.remove-period-btn:hover {
+  background: #b42318 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Remove ugly old patterns */
+.hotel-admin-actions button,
+.hotel-admin-actions select,
+.hotel-main-action-btn,
+.hotel-edit-btn,
+.hotel-delete-btn,
+.hotel-small-action-btn,
+.hotel-save-btn,
+.set-cover-btn,
+.remove-hotel-image-btn,
+.remove-period-btn {
+  background-repeat: no-repeat !important;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .hotel-admin-actions {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .hotel-edit-btn,
+  .hotel-delete-btn,
+  .hotel-visibility-select {
+    width: 100% !important;
+  }
+
+  .hotel-main-action-btn {
+    width: 100% !important;
+  }
+}
+/* =========================================================
+   PACKAGES BUTTONS LIKE RESERVATIONS
+========================================================= */
+
+.package-actions-pro {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+.package-main-action-btn,
+.package-edit-action-btn,
+.package-save-action-btn {
+  background-image: none !important;
+  background: linear-gradient(135deg, #a45a22, #6f3a15) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  font-family: "Inika", serif !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  box-shadow: 0 12px 26px rgba(147, 84, 38, 0.22) !important;
+  transition: 0.25s ease !important;
+}
+
+.package-main-action-btn {
+  min-height: 48px !important;
+  padding: 0 22px !important;
+}
+
+.package-edit-action-btn {
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  font-size: 13px !important;
+}
+
+.package-save-action-btn {
+  min-height: 46px !important;
+  padding: 0 24px !important;
+}
+
+.package-main-action-btn:hover,
+.package-edit-action-btn:hover,
+.package-save-action-btn:hover {
+  background-image: none !important;
+  background: linear-gradient(135deg, #b66a31, #7b4218) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 16px 34px rgba(147, 84, 38, 0.32) !important;
+}
+
+/* Delete package button */
+.package-delete-action-btn {
+  background-image: none !important;
+  background: #fff1f1 !important;
+  color: #b42318 !important;
+  border: 1px solid rgba(180, 35, 24, 0.14) !important;
+  border-radius: 999px !important;
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  font-family: "Inika", serif !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  transition: 0.25s ease !important;
+}
+
+.package-delete-action-btn:hover {
+  background: #b42318 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 30px rgba(180, 35, 24, 0.22) !important;
+}
+
+/* Published / Private select like reservation status */
+.package-visibility-select {
+  min-width: 135px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+  padding: 0 38px 0 16px !important;
+  border: 1px solid rgba(147, 84, 38, 0.16) !important;
+  outline: none !important;
+  font-family: "Inika", serif !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-repeat: no-repeat !important;
+  background-position: right 15px center !important;
+  background-size: 12px !important;
+  box-shadow: none !important;
+  transition: 0.25s ease !important;
+}
+
+.package-visibility-select.published {
+  background-color: #e6f7ec !important;
+  color: #16833a !important;
+  border-color: rgba(22, 131, 58, 0.18) !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41 0.59L6 5.17L10.59 0.59L12 2L6 8L0 2L1.41 0.59Z' fill='%2316833a'/%3E%3C/svg%3E") !important;
+}
+
+.package-visibility-select.private {
+  background-color: #fff3dc !important;
+  color: #9b6200 !important;
+  border-color: rgba(168, 103, 0, 0.18) !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.41 0.59L6 5.17L10.59 0.59L12 2L6 8L0 2L1.41 0.59Z' fill='%239b6200'/%3E%3C/svg%3E") !important;
+}
+
+.package-visibility-select:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 18px rgba(60, 38, 22, 0.08) !important;
+}
+
+.package-visibility-select:focus {
+  border-color: #935426 !important;
+  box-shadow: 0 0 0 4px rgba(147, 84, 38, 0.1) !important;
+}
+
+/* Remove image X */
+.package-remove-image-btn {
+  background-image: none !important;
+  background: #b42318 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  display: grid !important;
+  place-items: center !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 10px 20px rgba(180, 35, 24, 0.25) !important;
+  transition: 0.25s ease !important;
+}
+
+.package-remove-image-btn:hover {
+  transform: scale(1.08) rotate(90deg) !important;
+}
+
+/* Remove ugly old patterns */
+.package-actions-pro button,
+.package-actions-pro select,
+.package-main-action-btn,
+.package-edit-action-btn,
+.package-delete-action-btn,
+.package-save-action-btn,
+.package-visibility-select,
+.package-remove-image-btn {
+  background-repeat: no-repeat !important;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .package-actions-pro {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .package-edit-action-btn,
+  .package-delete-action-btn,
+  .package-visibility-select {
+    width: 100% !important;
+  }
+
+  .package-main-action-btn {
+    width: 100% !important;
+  }
 }

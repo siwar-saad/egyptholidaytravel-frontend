@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaEdit } from "react-icons/fa";
 import API from "../../api";
 
 const EMPTY_FORM = {
@@ -129,8 +129,12 @@ export default function Reservations({ showSuccess }) {
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+
+  const [editMode, setEditMode] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   const notify = (message) => {
     if (typeof showSuccess === "function") showSuccess(message);
@@ -158,6 +162,7 @@ export default function Reservations({ showSuccess }) {
     return {
       id: booking.id || booking._id || `package-${index}`,
       type: "package",
+
       client:
         customerInfo.fullName ||
         customerInfo.full_name ||
@@ -166,8 +171,10 @@ export default function Reservations({ showSuccess }) {
         booking.full_name ||
         booking.client ||
         "Client",
+
       email: customerInfo.email || booking.email || "-",
       phone: customerInfo.phone || booking.phone || "-",
+
       packageName:
         searchParams.name ||
         searchParams.backendName ||
@@ -175,6 +182,17 @@ export default function Reservations({ showSuccess }) {
         booking.packageName ||
         booking.package_name ||
         "Package",
+
+      route: searchParams.route || booking.route || "",
+      duration: searchParams.duration || booking.duration || "",
+      totalPrice:
+        searchParams.totalPrice ||
+        searchParams.total_price ||
+        booking.totalPrice ||
+        booking.total_price ||
+        booking.price ||
+        "",
+
       date:
         searchParams.travelDate ||
         searchParams.travel_date ||
@@ -182,6 +200,7 @@ export default function Reservations({ showSuccess }) {
         booking.travel_date ||
         booking.date ||
         "-",
+
       travelers: customerInfo.travelers || booking.travelers || "-",
       roomType: searchParams.roomType || booking.roomType || booking.room_type || "-",
       status: booking.status || "Pending",
@@ -206,6 +225,7 @@ export default function Reservations({ showSuccess }) {
     return {
       id: booking.id || booking._id || `hotel-${index}`,
       type: "hotel",
+
       client:
         customerInfo.fullName ||
         customerInfo.full_name ||
@@ -214,32 +234,55 @@ export default function Reservations({ showSuccess }) {
         booking.full_name ||
         booking.client ||
         "Client",
+
       email: customerInfo.email || booking.email || "-",
       phone: customerInfo.phone || booking.phone || "-",
+
       hotelName:
         selectedHotel.name ||
         booking.hotelName ||
         booking.hotel_name ||
         "Hotel",
+
       city: selectedHotel.city || booking.city || "-",
+      mealPlan:
+        selectedHotel.mealPlan ||
+        selectedHotel.meal_plan ||
+        selectedHotel.meal ||
+        booking.mealPlan ||
+        booking.meal_plan ||
+        booking.meal ||
+        "",
+
+      totalPrice:
+        selectedHotel.totalPrice ||
+        selectedHotel.total_price ||
+        booking.totalPrice ||
+        booking.total_price ||
+        booking.price ||
+        "",
+
       roomType:
         selectedHotel.roomType ||
         selectedHotel.room_type ||
         booking.roomType ||
         booking.room_type ||
         "-",
+
       checkIn:
         selectedHotel.checkIn ||
         selectedHotel.check_in ||
         booking.checkIn ||
         booking.check_in ||
         "-",
+
       checkOut:
         selectedHotel.checkOut ||
         selectedHotel.check_out ||
         booking.checkOut ||
         booking.check_out ||
         "-",
+
       travelers: customerInfo.travelers || booking.travelers || "-",
       status: booking.status || "Pending",
       notes: customerInfo.notes || booking.notes || "",
@@ -321,14 +364,60 @@ export default function Reservations({ showSuccess }) {
   const openCreateForm = (
     type = reservationTab === "hotels" ? "hotel" : "package"
   ) => {
+    setEditMode(false);
+    setSelectedBooking(null);
     setForm({ ...EMPTY_FORM, type });
     setShowForm(true);
   };
 
-  const closeCreateForm = () => {
+  const openEditForm = (booking) => {
+    setEditMode(true);
+    setSelectedBooking(booking);
+
+    if (booking.type === "package") {
+      setForm({
+        ...EMPTY_FORM,
+        type: "package",
+        packageName: booking.packageName || "",
+        route: booking.route || "",
+        duration: booking.duration || "",
+        travelDate: booking.date !== "-" ? booking.date : "",
+        roomType: booking.roomType || "Double Room",
+        fullName: booking.client || "",
+        email: booking.email !== "-" ? booking.email : "",
+        phone: booking.phone !== "-" ? booking.phone : "",
+        travelers: booking.travelers !== "-" ? booking.travelers : "",
+        notes: booking.notes || "",
+        totalPrice: booking.totalPrice || "",
+      });
+    } else {
+      setForm({
+        ...EMPTY_FORM,
+        type: "hotel",
+        hotelName: booking.hotelName || "",
+        city: booking.city !== "-" ? booking.city : "",
+        mealPlan: booking.mealPlan || "",
+        checkIn: booking.checkIn !== "-" ? booking.checkIn : "",
+        checkOut: booking.checkOut !== "-" ? booking.checkOut : "",
+        roomType: booking.roomType || "Double Room",
+        fullName: booking.client || "",
+        email: booking.email !== "-" ? booking.email : "",
+        phone: booking.phone !== "-" ? booking.phone : "",
+        travelers: booking.travelers !== "-" ? booking.travelers : "",
+        notes: booking.notes || "",
+        totalPrice: booking.totalPrice || "",
+      });
+    }
+
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
     setShowForm(false);
     setForm(EMPTY_FORM);
     setSaving(false);
+    setEditMode(false);
+    setSelectedBooking(null);
   };
 
   const choosePackage = (packageId) => {
@@ -358,41 +447,60 @@ export default function Reservations({ showSuccess }) {
       ...prev,
       hotelName: selectedHotel.name || "",
       city: selectedHotel.city || "",
-      mealPlan: selectedHotel.meal || "",
+      mealPlan: selectedHotel.meal || selectedHotel.mealPlan || "",
       totalPrice: selectedHotel.price || "",
     }));
   };
 
-  const createReservation = async () => {
-    if (saving) return;
+  const buildPayload = () => {
+    const adminName = getCurrentAdminName();
 
+    return {
+      ...form,
+      fullName: form.fullName.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+
+      createdBy: editMode ? undefined : "admin",
+      createdByRole: editMode ? undefined : "admin",
+      createdByName: editMode ? undefined : adminName,
+      reservationSource: editMode ? undefined : "admin",
+      isAdminCreated: editMode ? undefined : true,
+
+      updatedBy: "admin",
+      updatedByRole: "admin",
+      updatedByName: adminName,
+      updatedAt: new Date().toISOString(),
+    };
+  };
+
+  const validateForm = () => {
     const isHotel = form.type === "hotel";
 
     if (!form.fullName.trim() || !form.email.trim()) {
       notify("Client name and email are required.");
-      return;
+      return false;
     }
 
     if (isHotel && !form.hotelName.trim()) {
       notify("Hotel name is required.");
-      return;
+      return false;
     }
 
     if (!isHotel && !form.packageName.trim()) {
       notify("Package name is required.");
-      return;
+      return false;
     }
 
-    const adminName = getCurrentAdminName();
+    return true;
+  };
 
-    const payload = {
-      ...form,
-      createdBy: "admin",
-      createdByRole: "admin",
-      createdByName: adminName,
-      reservationSource: "admin",
-      isAdminCreated: true,
-    };
+  const createReservation = async () => {
+    if (saving) return;
+    if (!validateForm()) return;
+
+    const isHotel = form.type === "hotel";
+    const payload = buildPayload();
 
     try {
       setSaving(true);
@@ -404,12 +512,47 @@ export default function Reservations({ showSuccess }) {
       }
 
       notify("Reservation created successfully.");
-      closeCreateForm();
+      closeForm();
       fetchReservations();
     } catch (err) {
       notify(err.response?.data?.error || "Unable to create reservation.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const editReservation = async () => {
+    if (saving) return;
+    if (!selectedBooking) return;
+    if (!validateForm()) return;
+
+    const payload = buildPayload();
+
+    const endpoint =
+      selectedBooking.type === "hotel"
+        ? `/admin/hotels/reservations/${selectedBooking.id}`
+        : `/admin/reservations/${selectedBooking.id}`;
+
+    try {
+      setSaving(true);
+
+      await API.put(endpoint, payload);
+
+      notify("Reservation updated successfully.");
+      closeForm();
+      fetchReservations();
+    } catch (err) {
+      notify(err.response?.data?.error || "Unable to update reservation.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveReservation = () => {
+    if (editMode) {
+      editReservation();
+    } else {
+      createReservation();
     }
   };
 
@@ -442,7 +585,7 @@ export default function Reservations({ showSuccess }) {
         <div className="panel-head">
           <div>
             <h2>Reservations</h2>
-            <p>Admin can create hotel and package bookings manually.</p>
+            <p>Admin can create and edit hotel and package bookings manually.</p>
           </div>
 
           <div className="panel-actions">
@@ -504,6 +647,7 @@ export default function Reservations({ showSuccess }) {
                   <th>Created Date</th>
                   <th>Created Time</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
@@ -565,6 +709,16 @@ export default function Reservations({ showSuccess }) {
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </td>
+
+                    <td>
+                      <button
+                        type="button"
+                        className="edit-reservation-btn"
+                        onClick={() => openEditForm(booking)}
+                      >
+                        <FaEdit /> Edit
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -578,14 +732,18 @@ export default function Reservations({ showSuccess }) {
           <div className="package-popup">
             <div className="package-popup-head">
               <div>
-                <h2>Add Booking</h2>
-                <p>Create a manual package or hotel reservation.</p>
+                <h2>{editMode ? "Edit Booking" : "Add Booking"}</h2>
+                <p>
+                  {editMode
+                    ? "Update package or hotel reservation information."
+                    : "Create a manual package or hotel reservation."}
+                </p>
               </div>
 
               <button
                 type="button"
                 className="close-package-popup"
-                onClick={closeCreateForm}
+                onClick={closeForm}
               >
                 ×
               </button>
@@ -594,6 +752,7 @@ export default function Reservations({ showSuccess }) {
             <div className="package-popup-form">
               <select
                 value={form.type}
+                disabled={editMode}
                 onChange={(e) =>
                   setForm({ ...EMPTY_FORM, type: e.target.value })
                 }
@@ -604,14 +763,16 @@ export default function Reservations({ showSuccess }) {
 
               {form.type === "package" ? (
                 <>
-                  <select onChange={(e) => choosePackage(e.target.value)}>
-                    <option value="">Choose existing package</option>
-                    {packages.map((item) => (
-                      <option value={item.id} key={item.id}>
-                        {item.name || item.title}
-                      </option>
-                    ))}
-                  </select>
+                  {!editMode && (
+                    <select onChange={(e) => choosePackage(e.target.value)}>
+                      <option value="">Choose existing package</option>
+                      {packages.map((item) => (
+                        <option value={item.id} key={item.id}>
+                          {item.name || item.title}
+                        </option>
+                      ))}
+                    </select>
+                  )}
 
                   <input
                     type="text"
@@ -642,14 +803,16 @@ export default function Reservations({ showSuccess }) {
                 </>
               ) : (
                 <>
-                  <select onChange={(e) => chooseHotel(e.target.value)}>
-                    <option value="">Choose existing hotel</option>
-                    {hotels.map((item) => (
-                      <option value={item.id} key={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
+                  {!editMode && (
+                    <select onChange={(e) => chooseHotel(e.target.value)}>
+                      <option value="">Choose existing hotel</option>
+                      {hotels.map((item) => (
+                        <option value={item.id} key={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
 
                   <input
                     type="text"
@@ -741,14 +904,18 @@ export default function Reservations({ showSuccess }) {
               />
 
               <div className="package-popup-actions">
-                <button type="button" onClick={createReservation} disabled={saving}>
-                  {saving ? "Saving..." : "Save Booking"}
+                <button type="button" onClick={saveReservation} disabled={saving}>
+                  {saving
+                    ? "Saving..."
+                    : editMode
+                    ? "Save Changes"
+                    : "Save Booking"}
                 </button>
 
                 <button
                   type="button"
                   className="cancel-package-btn"
-                  onClick={closeCreateForm}
+                  onClick={closeForm}
                   disabled={saving}
                 >
                   Cancel

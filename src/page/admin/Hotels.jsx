@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import API from "../../api";
 
 const emptyPeriod = {
@@ -323,11 +323,7 @@ export default function Hotels() {
         };
       });
 
-      notify(
-        "Hotel photos uploaded successfully.",
-        "success",
-        "Photos Uploaded"
-      );
+      notify("Hotel photos uploaded successfully.", "success", "Photos Uploaded");
     } catch (err) {
       notify(
         err.response?.data?.error || "Unable to upload hotel photos.",
@@ -439,11 +435,9 @@ export default function Hotels() {
       return;
     }
 
-    setSaving(true);
-
-    closeHotelForm();
-
     try {
+      setSaving(true);
+
       if (isEditing) {
         const res = await API.put(`/admin/${hotelId}`, payload);
 
@@ -453,22 +447,15 @@ export default function Hotels() {
           )
         );
 
-        notify(
-          "Hotel updated successfully.",
-          "success",
-          "Hotel Updated"
-        );
+        notify("Hotel updated successfully.", "success", "Hotel Updated");
       } else {
         const res = await API.post("/admin/add", payload);
         setHotels((current) => [res.data, ...current]);
 
-        notify(
-          "Hotel added successfully.",
-          "success",
-          "Hotel Added"
-        );
+        notify("Hotel added successfully.", "success", "Hotel Added");
       }
 
+      closeHotelForm();
       loadHotels();
     } catch (err) {
       notify(
@@ -512,11 +499,7 @@ export default function Hotels() {
         )
       );
 
-      notify(
-        "Hotel visibility updated.",
-        "success",
-        "Visibility Updated"
-      );
+      notify("Hotel visibility updated.", "success", "Visibility Updated");
     } catch (err) {
       notify(
         err.response?.data?.error || "Unable to update hotel visibility.",
@@ -532,6 +515,10 @@ export default function Hotels() {
       return;
     }
 
+    const confirmed = window.confirm("Are you sure you want to delete this hotel?");
+
+    if (!confirmed) return;
+
     try {
       await API.delete(`/admin/${hotelId}`);
 
@@ -539,11 +526,7 @@ export default function Hotels() {
         current.filter((hotel) => getHotelId(hotel) !== hotelId)
       );
 
-      notify(
-        "Hotel deleted successfully.",
-        "success",
-        "Hotel Deleted"
-      );
+      notify("Hotel deleted successfully.", "success", "Hotel Deleted");
     } catch (err) {
       notify(
         err.response?.data?.error || "Unable to delete hotel.",
@@ -562,7 +545,11 @@ export default function Hotels() {
             <p>Manage hotel photos, meal plans, prices and travel periods.</p>
           </div>
 
-          <button className="add-package-btn-pro" onClick={openAddHotel}>
+          <button
+            type="button"
+            className="add-package-btn-pro hotel-main-action-btn"
+            onClick={openAddHotel}
+          >
             <FaPlus /> Add New Hotel
           </button>
         </div>
@@ -587,9 +574,10 @@ export default function Hotels() {
 
               const firstPeriod = periods[0] || {};
               const hotelId = getHotelId(hotel);
+              const visibility = hotel.visibility || "Private";
 
               return (
-                <div className="package-admin-card" key={hotelId}>
+                <div className="package-admin-card hotel-admin-card" key={hotelId}>
                   <img
                     src={getImageUrl(hotel.image) || defaultCover}
                     alt={hotel.name || "Hotel"}
@@ -614,36 +602,39 @@ export default function Hotels() {
                     <div className="package-admin-meta">
                       <span>Single: {firstPeriod.single || "-"}</span>
                       <span>Double: {firstPeriod.double || "-"}</span>
-                      <span>{hotel.visibility || "Private"}</span>
+                      <span>{visibility}</span>
                     </div>
                   </div>
 
-                  <div className="package-admin-actions">
-                    <button type="button" onClick={() => openEditHotel(hotel)}>
-                      Edit
+                  <div className="package-admin-actions hotel-admin-actions">
+                    <button
+                      type="button"
+                      className="hotel-edit-btn"
+                      onClick={() => openEditHotel(hotel)}
+                    >
+                      <FaEdit /> Edit
                     </button>
 
                     <select
-                      className={`package-select ${
-                        hotel?.visibility === "Published"
-                          ? "uploaded"
-                          : "missing"
+                      className={`hotel-visibility-select ${
+                        visibility === "Published" ? "published" : "private"
                       }`}
-                      value={hotel?.visibility || "Private"}
-                      onChange={(e) => {
-                        const value = e.target.value;
-
-                        if (value === "Delete") {
-                          deleteHotel(hotelId);
-                        } else {
-                          updateHotelVisibility(hotel, value);
-                        }
-                      }}
+                      value={visibility}
+                      onChange={(e) =>
+                        updateHotelVisibility(hotel, e.target.value)
+                      }
                     >
                       <option value="Published">Published</option>
                       <option value="Private">Private</option>
-                      <option value="Delete">Delete</option>
                     </select>
+
+                    <button
+                      type="button"
+                      className="hotel-delete-btn"
+                      onClick={() => deleteHotel(hotelId)}
+                    >
+                      <FaTrash /> Delete
+                    </button>
                   </div>
                 </div>
               );
@@ -699,6 +690,9 @@ export default function Hotels() {
               />
 
               <select
+                className={`hotel-visibility-select ${
+                  hotelForm.visibility === "Published" ? "published" : "private"
+                }`}
                 value={hotelForm.visibility}
                 onChange={(e) =>
                   setHotelForm({ ...hotelForm, visibility: e.target.value })
@@ -762,7 +756,11 @@ export default function Hotels() {
                     onChange={(e) => setManualImageUrl(e.target.value)}
                   />
 
-                  <button type="button" onClick={addManualImage}>
+                  <button
+                    type="button"
+                    className="hotel-small-action-btn"
+                    onClick={addManualImage}
+                  >
                     Add
                   </button>
                 </div>
@@ -819,7 +817,11 @@ export default function Hotels() {
                 <div className="hotel-period-editor-head">
                   <h3>Rates & Travel Periods</h3>
 
-                  <button type="button" onClick={addPeriod}>
+                  <button
+                    type="button"
+                    className="hotel-small-action-btn"
+                    onClick={addPeriod}
+                  >
                     Add Period
                   </button>
                 </div>
@@ -896,7 +898,12 @@ export default function Hotels() {
               </div>
 
               <div className="package-popup-actions">
-                <button type="button" onClick={saveHotel} disabled={saving}>
+                <button
+                  type="button"
+                  className="hotel-save-btn"
+                  onClick={saveHotel}
+                  disabled={saving}
+                >
                   {saving ? "Saving..." : "Save Hotel"}
                 </button>
 
@@ -904,6 +911,7 @@ export default function Hotels() {
                   type="button"
                   className="cancel-package-btn"
                   onClick={closeHotelForm}
+                  disabled={saving}
                 >
                   Cancel
                 </button>
