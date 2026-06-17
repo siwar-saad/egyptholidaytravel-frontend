@@ -5,6 +5,10 @@ import Footer from "../../components/footer";
 import API from "../../api";
 import "./Packages.css";
 
+import turkeyPackage1 from "../../assets/image/turkey-package-1.webp";
+import turkeyPackage2 from "../../assets/image/turkey-package-2.webp";
+import turkeyPackage3 from "../../assets/image/turkey-package-3.webp";
+
 import {
   FaChevronDown,
   FaArrowLeft,
@@ -129,6 +133,462 @@ const EGYPT_PACKAGE_KEYWORDS = [
   "pyramid",
 ];
 
+
+const TURKEY_OTHER_PACKAGES = [
+  {
+    id: "turkey-sharm-cairo-5n6d",
+    forceCategory: "others",
+    country: "Turkey",
+    destination: "Sharm El Sheikh + Cairo",
+    region: "others",
+    name: "Turkey Package: 5 Nights / 6 Days Sharm + Cairo",
+    backendName:
+      "5 GECE 6 GÜN SHARM + KAHİRE TURU - 4 GECE SHARM + 1 GECE KAHİRE",
+    route: "Turkey (SAW) → Sharm El Sheikh → Cairo",
+    duration: "5 Nights / 6 Days",
+    transfer: "Flight + Airport Transfers + Bus to Cairo",
+    transferReduction:
+      "Flight: 11:00 SAW → SSH Air Cairo with 20 KG baggage. Return flight will be confirmed.",
+    startPrice: "From 799 USD",
+    image: turkeyPackage1,
+    options: [
+      {
+        title: "Hotel Options / Price Per Person",
+        rows: [
+          {
+            city: "Sharm + Cairo",
+            nights: "4 + 1",
+            hotel: "Park Regency Resort 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+220 USD",
+            dbl: "949 USD",
+            tpl: "949 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "4 + 1",
+            hotel: "Marriott Renaissance Golden 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+200 USD",
+            dbl: "929 USD",
+            tpl: "929 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "4 + 1",
+            hotel: "Safir Waterfalls Resort 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+150 USD",
+            dbl: "869 USD",
+            tpl: "869 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "4 + 1",
+            hotel: "Safir Waterfalls Resort 5* + Amarante Pyramids 5*",
+            meal: "AI + BB",
+            sgl: "+140 USD",
+            dbl: "829 USD",
+            tpl: "829 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "4 + 1",
+            hotel: "Queen Sharm Resort 4* + Flamenco Cairo Hotel 4*",
+            meal: "AI + BB",
+            sgl: "+130 USD",
+            dbl: "799 USD",
+            tpl: "799 USD",
+          },
+        ],
+      },
+    ],
+    itinerary: [
+      {
+        day: "Day 1",
+        title: "Arrival to Sharm El Sheikh",
+        details: [
+          "Meeting at Istanbul Sabiha Gökçen Airport and flight to Sharm El Sheikh.",
+          "Airport welcome, hotel transfer and check-in.",
+          "Included city tour: Old Market, El Sahaba Mosque and Farsha Cafe.",
+        ],
+      },
+      {
+        day: "Day 2",
+        title: "Free Day in Sharm",
+        details: [
+          "Breakfast and free time to enjoy the beach, pool and all-inclusive hotel services.",
+          "Optional activities: ATV Safari, Bedouin Night, Ras Mohammed boat trip, diving, water sports or Dahab tour.",
+        ],
+      },
+      {
+        day: "Day 3",
+        title: "Relaxation in Sharm",
+        details: [
+          "Free day by the Red Sea with hotel activities and optional tours.",
+          "Evening visit can be arranged to Naama Bay or Soho Square.",
+        ],
+      },
+      {
+        day: "Day 4",
+        title: "Sharm Free Time / Bus to Cairo",
+        details: [
+          "Free day at the hotel.",
+          "Late-night departure to Cairo by bus at 00:15.",
+        ],
+      },
+      {
+        day: "Day 5",
+        title: "Cairo Tour",
+        details: [
+          "Arrival to Cairo in the morning.",
+          "Included tour: Giza Pyramids, Great Sphinx and Grand Egyptian Museum.",
+          "Hotel transfer and optional Nile dinner cruise in the evening.",
+        ],
+      },
+      {
+        day: "Day 6",
+        title: "Departure",
+        details: [
+          "Breakfast and check-out.",
+          "Transfer to the airport for the Istanbul flight.",
+        ],
+      },
+    ],
+    included: [
+      "Flight tickets and airport taxes",
+      "4 nights all-inclusive accommodation in Sharm, 1 night bed & breakfast accommodation in Cairo",
+      "Airport / hotel / airport transfers",
+      "Panoramic city tours",
+      "Turkish assistance service",
+      "Pyramids tour and Grand Egyptian Museum",
+    ],
+    programme:
+      "Extra Tours: ATV Safari + Bedouin Night (25$) | Ras Mohammed Boat Trip + Diving (40$) | Water Sports Package (70$) | Dahab Tour (25$) | Nile Dinner Cruise (25$)",
+  },
+  {
+    id: "turkey-sharm-cairo-7n8d-6-1",
+    forceCategory: "others",
+    country: "Turkey",
+    destination: "Sharm El Sheikh + Cairo",
+    region: "others",
+    name: "Turkey Package: 7 Nights / 8 Days Sharm + Cairo",
+    backendName:
+      "7 GECE 8 GÜN SHARM + KAHİRE TURU - 6 GECE SHARM + 1 GECE KAHİRE",
+    route: "Turkey (SAW) → Sharm El Sheikh → Cairo",
+    duration: "7 Nights / 8 Days",
+    transfer: "Flight + Airport Transfers + Bus to Cairo",
+    transferReduction:
+      "Flight: 11:00 SAW → SSH Air Cairo / Return 08:00 Cairo → SAW Air Cairo with 30 KG + 8 KG baggage.",
+    startPrice: "From 899 USD",
+    image: turkeyPackage2,
+    options: [
+      {
+        title: "Hotel Options / Price Per Person",
+        rows: [
+          {
+            city: "Sharm + Cairo",
+            nights: "6 + 1",
+            hotel: "Park Regency Resort 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+300 USD",
+            dbl: "1049 USD",
+            tpl: "1049 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "6 + 1",
+            hotel: "Marriott Renaissance Golden 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+250 USD",
+            dbl: "1029 USD",
+            tpl: "1029 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "6 + 1",
+            hotel: "Safir Waterfalls Resort 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+250 USD",
+            dbl: "969 USD",
+            tpl: "969 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "6 + 1",
+            hotel: "Safir Waterfalls Resort 5* + Amarante Pyramids 5*",
+            meal: "AI + BB",
+            sgl: "+200 USD",
+            dbl: "929 USD",
+            tpl: "929 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "6 + 1",
+            hotel: "Queen Sharm Resort 4* + Flamenco Cairo Hotel 4*",
+            meal: "AI + BB",
+            sgl: "+180 USD",
+            dbl: "899 USD",
+            tpl: "899 USD",
+          },
+        ],
+      },
+    ],
+    itinerary: [
+      {
+        day: "Day 1",
+        title: "Arrival to Sharm El Sheikh",
+        details: [
+          "Meeting at Istanbul Sabiha Gökçen Airport and flight to Sharm El Sheikh.",
+          "Airport welcome, hotel transfer, check-in and Sharm city tour.",
+          "Visits include Old Market, El Sahaba Mosque and Farsha Cafe.",
+        ],
+      },
+      {
+        day: "Day 2",
+        title: "Free Day in Sharm",
+        details: [
+          "Breakfast and free time at the hotel beach, pool and all-inclusive services.",
+          "Optional tours can be arranged during the day.",
+        ],
+      },
+      {
+        day: "Day 3",
+        title: "Sharm Activities",
+        details: [
+          "Free time to enjoy the Red Sea atmosphere.",
+          "Optional ATV Safari, Bedouin Night, Ras Mohammed, diving, water sports or Dahab tour.",
+        ],
+      },
+      {
+        day: "Day 4",
+        title: "Sharm Leisure",
+        details: [
+          "Relaxing day at the resort.",
+          "Optional evening visit to Naama Bay or Soho Square.",
+        ],
+      },
+      {
+        day: "Day 5",
+        title: "Sharm Free Day",
+        details: [
+          "Enjoy the beach, hotel facilities and optional tours.",
+          "Overnight at the Sharm hotel.",
+        ],
+      },
+      {
+        day: "Day 6",
+        title: "Night Transfer to Cairo",
+        details: [
+          "Free day at the hotel.",
+          "Late-night departure to Cairo by bus at 00:15.",
+        ],
+      },
+      {
+        day: "Day 7",
+        title: "Cairo Tour",
+        details: [
+          "Morning arrival to Cairo.",
+          "Included visit: Giza Pyramids, Great Sphinx and Grand Egyptian Museum.",
+          "Optional Nile dinner cruise in the evening.",
+        ],
+      },
+      {
+        day: "Day 8",
+        title: "Departure",
+        details: [
+          "Breakfast and check-out.",
+          "Airport transfer and flight back to Istanbul.",
+        ],
+      },
+    ],
+    included: [
+      "Flight tickets and airport taxes",
+      "6 nights all-inclusive accommodation in Sharm, 1 night bed & breakfast accommodation in Cairo",
+      "Airport / hotel / airport transfers",
+      "Panoramic city tours",
+      "Turkish assistance service",
+      "Pyramids tour and Grand Egyptian Museum",
+    ],
+    programme:
+      "Extra Tours: ATV Safari + Bedouin Night (25$) | Ras Mohammed Boat Trip + Diving (40$) | Water Sports Package (70$) | Dahab Tour (25$) | Nile Dinner Cruise (25$)",
+  },
+  {
+    id: "turkey-sharm-cairo-7n8d-5-2",
+    forceCategory: "others",
+    country: "Turkey",
+    destination: "Sharm El Sheikh + Cairo",
+    region: "others",
+    name: "Turkey Package: 7 Nights / 8 Days Sharm + Cairo Deluxe",
+    backendName:
+      "7 GECE 8 GÜN SHARM + KAHİRE TURU - 5 GECE SHARM + 2 GECE KAHİRE",
+    route: "Turkey (SAW) → Sharm El Sheikh → Cairo",
+    duration: "7 Nights / 8 Days",
+    transfer: "Flight + Airport Transfers + Cairo Stay",
+    transferReduction:
+      "Flight: 11:00 SAW → SSH Air Cairo / Return 08:00 Cairo → SAW Air Cairo with 30 KG + 8 KG baggage.",
+    startPrice: "From 899 USD",
+    image: turkeyPackage3,
+    options: [
+      {
+        title: "Hotel Options / Price Per Person",
+        rows: [
+          {
+            city: "Sharm + Cairo",
+            nights: "5 + 2",
+            hotel: "Park Regency Resort 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+300 USD",
+            dbl: "1049 USD",
+            tpl: "1049 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "5 + 2",
+            hotel: "Marriott Renaissance Golden 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+250 USD",
+            dbl: "1029 USD",
+            tpl: "1029 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "5 + 2",
+            hotel: "Safir Waterfalls Resort 5* + Hilton Cairo 5*",
+            meal: "AI + BB",
+            sgl: "+250 USD",
+            dbl: "969 USD",
+            tpl: "969 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "5 + 2",
+            hotel: "Safir Waterfalls Resort 5* + Amarante Pyramids 5*",
+            meal: "AI + BB",
+            sgl: "+200 USD",
+            dbl: "929 USD",
+            tpl: "929 USD",
+          },
+          {
+            city: "Sharm + Cairo",
+            nights: "5 + 2",
+            hotel: "Queen Sharm Resort 4* + Flamenco Cairo Hotel 4*",
+            meal: "AI + BB",
+            sgl: "+180 USD",
+            dbl: "899 USD",
+            tpl: "899 USD",
+          },
+        ],
+      },
+    ],
+    itinerary: [
+      {
+        day: "Day 1",
+        title: "Arrival to Sharm El Sheikh",
+        details: [
+          "Meeting at Istanbul Sabiha Gökçen Airport and flight to Sharm El Sheikh.",
+          "Airport welcome, hotel transfer and check-in.",
+          "Included Sharm city tour: Old Market, El Sahaba Mosque and Farsha Cafe.",
+        ],
+      },
+      {
+        day: "Day 2",
+        title: "Free Day in Sharm",
+        details: [
+          "Breakfast and free time at the beach, pool and all-inclusive hotel services.",
+          "Optional tours available during the day.",
+        ],
+      },
+      {
+        day: "Day 3",
+        title: "Sharm Optional Tours",
+        details: [
+          "Enjoy the Red Sea and hotel activities.",
+          "Optional ATV Safari, Bedouin Night, Ras Mohammed, diving, water sports or Dahab tour.",
+        ],
+      },
+      {
+        day: "Day 4",
+        title: "Sharm Leisure",
+        details: [
+          "Free day at the resort.",
+          "Optional evening visit to Naama Bay or Soho Square.",
+        ],
+      },
+      {
+        day: "Day 5",
+        title: "Last Day in Sharm",
+        details: [
+          "Free time to enjoy the resort facilities.",
+          "Overnight at the Sharm hotel.",
+        ],
+      },
+      {
+        day: "Day 6",
+        title: "Transfer to Cairo",
+        details: [
+          "Morning departure to Cairo.",
+          "Hotel transfer and check-in.",
+          "Included Old Cairo and El Hussein area visit.",
+        ],
+      },
+      {
+        day: "Day 7",
+        title: "Pyramids and Museum",
+        details: [
+          "Included tour: Pyramids, Sphinx and Egyptian Museum.",
+          "Overnight at the Cairo hotel.",
+        ],
+      },
+      {
+        day: "Day 8",
+        title: "Departure",
+        details: [
+          "Breakfast and check-out.",
+          "Transfer to the airport and return flight to Istanbul.",
+        ],
+      },
+    ],
+    included: [
+      "Flight tickets and airport taxes",
+      "5 nights all-inclusive accommodation in Sharm, 2 nights bed & breakfast accommodation in Cairo",
+      "Airport / hotel / airport transfers",
+      "Panoramic city tours",
+      "Turkish assistance service",
+      "Pyramids tour and Egyptian Museum",
+    ],
+    programme:
+      "Extra Tours: ATV Safari + Bedouin Night (25$) | Ras Mohammed Boat Trip + Diving (40$) | Water Sports Package (70$) | Dahab Tour (25$) | Nile Dinner Cruise (25$)",
+  },
+];
+
+const getPackageUniqueKey = (item = {}) =>
+  [
+    item.id,
+    item.name,
+    item.duration,
+    item.route,
+    item.backendName,
+  ]
+    .filter(Boolean)
+    .join("::")
+    .toLowerCase();
+
+const mergePackagesWithoutDuplicates = (items = []) => {
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const key = getPackageUniqueKey(item);
+
+    if (!key) return true;
+    if (seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
+};
+
+
 const getPackageTextForCategory = (item = {}) =>
   [
     item.name,
@@ -145,16 +605,52 @@ const getPackageTextForCategory = (item = {}) =>
     .toLowerCase();
 
 const isEgyptPackage = (item = {}) => {
+  const forcedCategory = String(item.forceCategory || "")
+    .toLowerCase()
+    .trim();
+
+  const categoryText = [
+    item.forceCategory,
+    item.country,
+    item.region,
+    item.category,
+    item.packageCategory,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (
+    forcedCategory === "others" ||
+    forcedCategory === "other" ||
+    categoryText.includes("turkey") ||
+    categoryText.includes("turkiye") ||
+    categoryText.includes("türkiye") ||
+    categoryText.includes("others") ||
+    categoryText.includes("international")
+  ) {
+    return false;
+  }
+
+  if (forcedCategory === "egypt") return true;
+
   const text = getPackageTextForCategory(item);
 
   return EGYPT_PACKAGE_KEYWORDS.some((keyword) => text.includes(keyword));
 };
+
+
 
 const getPackageCategoryTitle = (category) => {
   if (category === "egypt") return "Egypt Packages";
   if (category === "others") return "Other Destinations";
 
   return "Available Packages";
+};
+
+const handlePackageImageError = (event) => {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = turkeyPackage1;
 };
 
 export default function Packages() {
@@ -166,6 +662,7 @@ export default function Packages() {
   const [currentPackagePage, setCurrentPackagePage] = useState(1);
 
   const [selectedPackageCategory, setSelectedPackageCategory] = useState(null);
+  const [selectedOtherRoute, setSelectedOtherRoute] = useState(null);
   const [selectedPackageNameFilter, setSelectedPackageNameFilter] = useState("all");
   const [selectedDurationFilter, setSelectedDurationFilter] = useState("all");
   const [selectedPriceFilter, setSelectedPriceFilter] = useState("all");
@@ -240,6 +737,12 @@ export default function Packages() {
       item.packageCategory ||
       item.package_category ||
       "",
+    forceCategory:
+      item.forceCategory ||
+      item.force_category ||
+      item.categoryType ||
+      item.category_type ||
+      "",
     options: Array.isArray(item.options) ? item.options : [],
     itinerary: Array.isArray(item.itinerary) ? item.itinerary : [],
     programme: item.programme || "",
@@ -254,10 +757,15 @@ export default function Packages() {
         const res = await API.get("/packages");
         const loadedPackages = Array.isArray(res.data) ? res.data : [];
 
-        setPackagesData(loadedPackages.map(normalizePackage));
+        const mergedPackages = mergePackagesWithoutDuplicates([
+          ...loadedPackages.map(normalizePackage),
+          ...TURKEY_OTHER_PACKAGES.map(normalizePackage),
+        ]);
+
+        setPackagesData(mergedPackages);
       } catch (err) {
         console.log("Public packages error:", err.response?.data || err.message);
-        setPackagesData([]);
+        setPackagesData(TURKEY_OTHER_PACKAGES.map(normalizePackage));
       } finally {
         setPackagesLoading(false);
       }
@@ -271,17 +779,27 @@ export default function Packages() {
     [packagesData]
   );
 
-  const otherPackages = useMemo(
-    () => packagesData.filter((item) => !isEgyptPackage(item)),
-    [packagesData]
+
+  const turkeyToEgyptPackages = useMemo(
+    () => TURKEY_OTHER_PACKAGES.map(normalizePackage),
+    []
   );
 
   const categoryPackages = useMemo(() => {
     if (selectedPackageCategory === "egypt") return egyptPackages;
-    if (selectedPackageCategory === "others") return otherPackages;
+
+    if (selectedPackageCategory === "others") {
+      if (selectedOtherRoute === "turkey-egypt") return turkeyToEgyptPackages;
+      return [];
+    }
 
     return [];
-  }, [egyptPackages, otherPackages, selectedPackageCategory]);
+  }, [
+    egyptPackages,
+    turkeyToEgyptPackages,
+    selectedPackageCategory,
+    selectedOtherRoute,
+  ]);
 
   const packageNameOptions = useMemo(() => {
     const names = categoryPackages
@@ -348,6 +866,24 @@ export default function Packages() {
 
   const choosePackageCategory = (category) => {
     setSelectedPackageCategory(category);
+    setSelectedOtherRoute(null);
+    resetPackageFilters();
+    setCurrentPackagePage(1);
+
+    setTimeout(() => {
+      document
+        .querySelector(
+          category === "others" ? ".packages-other-routes-section" : ".packages-list-section"
+        )
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+    }, 80);
+  };
+
+  const chooseOtherRoute = (route) => {
+    setSelectedOtherRoute(route);
     resetPackageFilters();
     setCurrentPackagePage(1);
 
@@ -359,8 +895,24 @@ export default function Packages() {
     }, 80);
   };
 
+  const backToOtherRoutes = () => {
+    setSelectedOtherRoute(null);
+    resetPackageFilters();
+    setCurrentPackagePage(1);
+
+    setTimeout(() => {
+      document.querySelector(".packages-other-routes-section")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
+  };
+
+
+
   const backToPackageCategories = () => {
     setSelectedPackageCategory(null);
+    setSelectedOtherRoute(null);
     resetPackageFilters();
     setCurrentPackagePage(1);
 
@@ -376,6 +928,7 @@ export default function Packages() {
     setCurrentPackagePage(1);
   }, [
     selectedPackageCategory,
+    selectedOtherRoute,
     selectedPackageNameFilter,
     selectedDurationFilter,
     selectedPriceFilter,
@@ -409,7 +962,16 @@ export default function Packages() {
     );
 
     if (packageToOpen) {
-      setSelectedPackageCategory(isEgyptPackage(packageToOpen) ? "egypt" : "others");
+      if (isEgyptPackage(packageToOpen)) {
+        setSelectedPackageCategory("egypt");
+        setSelectedOtherRoute(null);
+      } else {
+        setSelectedPackageCategory("others");
+        setSelectedOtherRoute(
+          isTurkeyToEgyptPackage(packageToOpen) ? "turkey-egypt" : null
+        );
+      }
+
       setSelectedPackage(packageToOpen);
     }
 
@@ -672,23 +1234,48 @@ export default function Packages() {
         {!selectedPackageCategory ? (
           <PackageCategoryChooser
             egyptCount={egyptPackages.length}
-            othersCount={otherPackages.length}
+            othersCount={1}
             loading={packagesLoading}
             onChoose={choosePackageCategory}
+          />
+        ) : selectedPackageCategory === "others" && !selectedOtherRoute ? (
+          <OtherRoutesChooser
+            packageCount={turkeyToEgyptPackages.length}
+            loading={packagesLoading}
+            onChoose={chooseOtherRoute}
+            onBack={backToPackageCategories}
           />
         ) : (
           <section className="packages-list-section">
             <div className="packages-section-head">
-              <span>Our Offers</span>
-              <h2>{getPackageCategoryTitle(selectedPackageCategory)}</h2>
-              <p>Filter packages by name, duration and starting price.</p>
+              <span>
+                {selectedOtherRoute === "turkey-egypt" ? "International Route" : "Our Offers"}
+              </span>
+
+              <h2>
+                {selectedOtherRoute === "turkey-egypt"
+                  ? "From Turkey to Egypt Packages"
+                  : getPackageCategoryTitle(selectedPackageCategory)}
+              </h2>
+
+              <p>
+                {selectedOtherRoute === "turkey-egypt"
+                  ? "Explore the available packages from Istanbul SAW to Sharm El Sheikh and Cairo."
+                  : "Filter packages by name, duration and starting price."}
+              </p>
 
               <button
                 type="button"
                 className="packages-category-back"
-                onClick={backToPackageCategories}
+                onClick={
+                  selectedOtherRoute === "turkey-egypt"
+                    ? backToOtherRoutes
+                    : backToPackageCategories
+                }
               >
-                ← Back to Egypt / Others
+                {selectedOtherRoute === "turkey-egypt"
+                  ? "← Back to Other Destinations"
+                  : "← Back to Egypt / Others"}
               </button>
             </div>
 
@@ -778,7 +1365,12 @@ export default function Packages() {
                 paginatedPackages.map((item) => (
                   <article className="package-card-pro" key={item.id}>
                     <div className="package-img-box">
-                      <img src={item.image} alt={item.name} loading="lazy" />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        loading="lazy"
+                        onError={handlePackageImageError}
+                      />
 
                       <div className="package-img-overlay">
                         <span>{item.duration}</span>
@@ -982,11 +1574,70 @@ function PackageCategoryChooser({ egyptCount, othersCount, loading, onChoose }) 
 
             <h3>Others</h3>
             <p>
-              Explore travel offers for other countries and international
-              destinations outside Egypt.
+              Explore Turkey packages and international offers inside the
+              Others destination block.
             </p>
 
-            <strong>{loading ? "Loading..." : `${othersCount} packages`}</strong>
+            <strong>
+              {loading
+                ? "Loading..."
+                : `${othersCount} destination${othersCount === 1 ? "" : "s"}`}
+            </strong>
+          </div>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+
+
+function OtherRoutesChooser({ packageCount, loading, onChoose, onBack }) {
+  return (
+    <section className="packages-other-routes-section">
+      <div className="packages-section-head">
+        <span>Other Destinations</span>
+        <h2>Choose Your Route</h2>
+        <p>
+          Select the international route first. After clicking it, the packages
+          for this route will appear.
+        </p>
+
+        <button
+          type="button"
+          className="packages-category-back"
+          onClick={onBack}
+        >
+          ← Back to Egypt / Others
+        </button>
+      </div>
+
+      <div className="other-routes-grid">
+        <button
+          type="button"
+          className="package-category-card from-turkey-egypt"
+          onClick={() => onChoose("turkey-egypt")}
+          disabled={loading}
+        >
+          <div className="package-category-overlay"></div>
+
+          <div className="package-category-content">
+            <span className="package-category-icon">
+              <FaPlaneDeparture />
+            </span>
+
+            <h3>From Turkey to Egypt</h3>
+
+            <p>
+              Istanbul SAW → Sharm El Sheikh → Cairo with hotels, transfers and
+              organized tours.
+            </p>
+
+            <strong>
+              {loading
+                ? "Loading..."
+                : `${packageCount} package${packageCount === 1 ? "" : "s"}`}
+            </strong>
           </div>
         </button>
       </div>
@@ -1006,7 +1657,7 @@ function PackageModal({ item, onClose, onBook }) {
         </button>
 
         <div className="package-modal-image">
-          <img src={item.image} alt={item.name} />
+          <img src={item.image} alt={item.name} onError={handlePackageImageError} />
 
           <div>
             <span>{item.duration}</span>
@@ -1042,29 +1693,7 @@ function PackageModal({ item, onClose, onBook }) {
             </div>
           )}
 
-          {hasItinerary ? (
-            <div className="package-itinerary">
-              {item.itinerary.map((day) => (
-                <div className="package-day-card" key={day.day}>
-                  <div className="package-day-number">{day.day}</div>
-
-                  <div className="package-day-content">
-                    <h3>{day.title}</h3>
-
-                    <ul>
-                      {Array.isArray(day.details) &&
-                        day.details.map((detail, index) => (
-                          <li key={`${day.day}-${index}`}>
-                            <FaCheckCircle />
-                            <span>{detail}</span>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : hasOptions ? (
+          {hasOptions && (
             <div className="package-options">
               {item.options.map((option) => (
                 <div className="package-option-card" key={option.title}>
@@ -1108,13 +1737,46 @@ function PackageModal({ item, onClose, onBook }) {
                 </div>
               ))}
             </div>
-          ) : (
+          )}
+
+          {hasItinerary && (
+            <div className="package-itinerary">
+              {item.itinerary.map((day) => (
+                <div className="package-day-card" key={day.day}>
+                  <div className="package-day-number">{day.day}</div>
+
+                  <div className="package-day-content">
+                    <h3>{day.title}</h3>
+
+                    <ul>
+                      {Array.isArray(day.details) &&
+                        day.details.map((detail, index) => (
+                          <li key={`${day.day}-${index}`}>
+                            <FaCheckCircle />
+                            <span>{detail}</span>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!hasOptions && !hasItinerary && (
             <div className="package-option-card">
               <h3>Programme</h3>
               <p className="package-programme-text">
                 {item.programme ||
                   "Package details will be confirmed by our team."}
               </p>
+            </div>
+          )}
+
+          {item.programme && (hasOptions || hasItinerary) && (
+            <div className="package-option-card package-extra-programme">
+              <h3>Extra Tours</h3>
+              <p className="package-programme-text">{item.programme}</p>
             </div>
           )}
 
