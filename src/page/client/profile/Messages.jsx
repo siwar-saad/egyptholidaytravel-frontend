@@ -152,27 +152,6 @@ export default function Messages({
                       </div>
                     </div>
 
-                    {msg.reply && (
-                      <div className="chat-row incoming">
-                        <div className="messenger-avatar small">E</div>
-
-                        <div className="chat-bubble">
-                          <p>{msg.reply}</p>
-
-                          <span>
-                            {msg.repliedAt
-                              ? new Date(msg.repliedAt).toLocaleTimeString(
-                                  "en-GB",
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )
-                              : "Reply"}
-                          </span>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })

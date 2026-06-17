@@ -81,21 +81,6 @@ const formatChatTime = (msg) =>
     minute: "2-digit",
   });
 
-const formatDateValue = (value) => {
-  if (!value) return "";
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return date.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
 const formatConversationTime = (msg) => {
   const date = getMessageDate(msg);
   const today = new Date();
@@ -365,25 +350,29 @@ export default function Messages({ showSuccess, onUnreadChange }) {
 
       const savedMessage = res.data?.data || {};
 
-      const repliedAt =
-        savedMessage.repliedAt ||
-        savedMessage.replied_at ||
-        savedMessage.updatedAt ||
-        savedMessage.updated_at ||
-        new Date().toISOString();
-
       setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          String(getMessageId(msg)) === String(replyTargetId)
-            ? {
-                ...msg,
-                reply: cleanReply,
-                repliedAt,
-                repliedAtTime: formatDateValue(repliedAt),
-                isRead: true,
-              }
-            : msg
-        )
+        [
+          ...prevMessages.map((msg) =>
+            String(getMessageId(msg)) === String(replyTargetId)
+              ? {
+                  ...msg,
+                  isRead: true,
+                }
+              : msg
+          ),
+          {
+            ...savedMessage,
+            sender: savedMessage.sender || "admin",
+            message: savedMessage.message || cleanReply,
+            isRead: Boolean(savedMessage.isRead || savedMessage.is_read),
+          },
+        ].filter((msg, index, allMessages) => {
+          const id = getMessageId(msg);
+
+          if (!id) return true;
+
+          return allMessages.findIndex((item) => getMessageId(item) === id) === index;
+        })
       );
 
       setReplyDrafts((prevDrafts) => ({
@@ -462,8 +451,6 @@ export default function Messages({ showSuccess, onUnreadChange }) {
 
                   <span className="admin-mail-preview">
                     <strong>{conversation.name || "Visitor"}</strong>
-                    <small>{conversation.email || "No email"}</small>
-                    <small>{conversation.phone || "No phone"}</small>
 
                     <em
                       className={
@@ -556,21 +543,6 @@ export default function Messages({ showSuccess, onUnreadChange }) {
                           </div>
                         </div>
 
-                        {msg.reply && (
-                          <div className="admin-chat-row outgoing">
-                            <div className="admin-chat-bubble agency">
-                              <p>{msg.reply}</p>
-
-                              {(msg.repliedAtTime || msg.repliedAt) && (
-                                <span>
-                                  {formatDateValue(
-                                    msg.repliedAtTime || msg.repliedAt
-                                  )}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     );
                   })}

@@ -1,9 +1,10 @@
 import "./Login.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaChevronDown, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
 import API from "../../api";
+import useRedirectIfLoggedIn from "../../hooks/useRedirectIfLoggedIn";
 import pyramid from "../../assets/image/pyramid.webp";
 import passport from "../../assets/image/passport.webp";
 import visa from "../../assets/image/visa.webp";
@@ -24,7 +25,7 @@ const COUNTRIES = [
 export default function Signup() {
   const navigate = useNavigate();
 
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const checkingAuth = useRedirectIfLoggedIn();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -52,52 +53,6 @@ export default function Signup() {
   const [showCodePopup, setShowCodePopup] = useState(false);
   const [codeError, setCodeError] = useState("");
   const [codeMessage, setCodeMessage] = useState("");
-
-  useEffect(() => {
-    let mounted = true;
-
-    const redirectIfLoggedIn = async () => {
-      try {
-        const storedUser = JSON.parse(
-          localStorage.getItem("user") ||
-            sessionStorage.getItem("user") ||
-            "null"
-        );
-
-        if (storedUser) {
-          navigate(storedUser.role === "admin" ? "/admin" : "/profile", {
-            replace: true,
-          });
-          return;
-        }
-
-        const res = await API.get("/auth/me", {
-          skipAuthRedirect: true,
-        });
-
-        const user = res.data?.user || res.data;
-
-        if (user) {
-          navigate(user.role === "admin" ? "/admin" : "/profile", {
-            replace: true,
-          });
-          return;
-        }
-      } catch {
-        // User is not logged in
-      } finally {
-        if (mounted) {
-          setCheckingAuth(false);
-        }
-      }
-    };
-
-    redirectIfLoggedIn();
-
-    return () => {
-      mounted = false;
-    };
-  }, [navigate]);
 
   const chooseCountry = (country) => {
     setSelectedCountry(country);

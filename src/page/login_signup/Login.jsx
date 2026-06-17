@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
 import API from "../../api";
+import useRedirectIfLoggedIn from "../../hooks/useRedirectIfLoggedIn";
 import "./Login.css";
 
 import Navbar from "../../components/navbar";
@@ -31,7 +32,7 @@ export default function Login() {
 
   const [authMessage, setAuthMessage] = useState(EMPTY_MESSAGE);
   const [loading, setLoading] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const checkingAuth = useRedirectIfLoggedIn();
 
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState("");
@@ -40,52 +41,6 @@ export default function Login() {
   const [verificationError, setVerificationError] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const redirectIfLoggedIn = async () => {
-      try {
-        const storedUser = JSON.parse(
-          localStorage.getItem("user") ||
-            sessionStorage.getItem("user") ||
-            "null"
-        );
-
-        if (storedUser) {
-          navigate(storedUser.role === "admin" ? "/admin" : "/profile", {
-            replace: true,
-          });
-          return;
-        }
-
-        const res = await API.get("/auth/me", {
-          skipAuthRedirect: true,
-        });
-
-        const user = res.data?.user || res.data;
-
-        if (user) {
-          navigate(user.role === "admin" ? "/admin" : "/profile", {
-            replace: true,
-          });
-          return;
-        }
-      } catch {
-        // User is not logged in
-      } finally {
-        if (mounted) {
-          setCheckingAuth(false);
-        }
-      }
-    };
-
-    redirectIfLoggedIn();
-
-    return () => {
-      mounted = false;
-    };
-  }, [navigate]);
 
   const postWithFallback = async (requests) => {
     let lastError = null;
