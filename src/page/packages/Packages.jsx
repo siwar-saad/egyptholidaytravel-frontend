@@ -1,13 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
 import API from "../../api";
 import "./Packages.css";
-
-import turkeyPackage1 from "../../assets/image/turkey-package-1.webp";
-import turkeyPackage2 from "../../assets/image/turkey-package-2.webp";
-import turkeyPackage3 from "../../assets/image/turkey-package-3.webp";
 
 import {
   FaChevronDown,
@@ -134,433 +130,6 @@ const EGYPT_PACKAGE_KEYWORDS = [
 ];
 
 
-const TURKEY_OTHER_PACKAGES = [
-  {
-    id: "turkey-sharm-cairo-5n6d",
-    forceCategory: "others",
-    country: "Turkey",
-    destination: "Sharm El Sheikh + Cairo",
-    region: "others",
-    name: "Turkey Package: 5 Nights / 6 Days Sharm + Cairo",
-    backendName:
-      "5 GECE 6 GÜN SHARM + KAHİRE TURU - 4 GECE SHARM + 1 GECE KAHİRE",
-    route: "Turkey (SAW) → Sharm El Sheikh → Cairo",
-    duration: "5 Nights / 6 Days",
-    transfer: "Flight + Airport Transfers + Bus to Cairo",
-    transferReduction:
-      "Flight: 11:00 SAW → SSH Air Cairo with 20 KG baggage. Return flight will be confirmed.",
-    startPrice: "From 799 USD",
-    image: turkeyPackage1,
-    options: [
-      {
-        title: "Hotel Options / Price Per Person",
-        rows: [
-          {
-            city: "Sharm + Cairo",
-            nights: "4 + 1",
-            hotel: "Park Regency Resort 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+220 USD",
-            dbl: "949 USD",
-            tpl: "949 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "4 + 1",
-            hotel: "Marriott Renaissance Golden 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+200 USD",
-            dbl: "929 USD",
-            tpl: "929 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "4 + 1",
-            hotel: "Safir Waterfalls Resort 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+150 USD",
-            dbl: "869 USD",
-            tpl: "869 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "4 + 1",
-            hotel: "Safir Waterfalls Resort 5* + Amarante Pyramids 5*",
-            meal: "AI + BB",
-            sgl: "+140 USD",
-            dbl: "829 USD",
-            tpl: "829 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "4 + 1",
-            hotel: "Queen Sharm Resort 4* + Flamenco Cairo Hotel 4*",
-            meal: "AI + BB",
-            sgl: "+130 USD",
-            dbl: "799 USD",
-            tpl: "799 USD",
-          },
-        ],
-      },
-    ],
-    itinerary: [
-      {
-        day: "Day 1",
-        title: "Arrival to Sharm El Sheikh",
-        details: [
-          "Meeting at Istanbul Sabiha Gökçen Airport and flight to Sharm El Sheikh.",
-          "Airport welcome, hotel transfer and check-in.",
-          "Included city tour: Old Market, El Sahaba Mosque and Farsha Cafe.",
-        ],
-      },
-      {
-        day: "Day 2",
-        title: "Free Day in Sharm",
-        details: [
-          "Breakfast and free time to enjoy the beach, pool and all-inclusive hotel services.",
-          "Optional activities: ATV Safari, Bedouin Night, Ras Mohammed boat trip, diving, water sports or Dahab tour.",
-        ],
-      },
-      {
-        day: "Day 3",
-        title: "Relaxation in Sharm",
-        details: [
-          "Free day by the Red Sea with hotel activities and optional tours.",
-          "Evening visit can be arranged to Naama Bay or Soho Square.",
-        ],
-      },
-      {
-        day: "Day 4",
-        title: "Sharm Free Time / Bus to Cairo",
-        details: [
-          "Free day at the hotel.",
-          "Late-night departure to Cairo by bus at 00:15.",
-        ],
-      },
-      {
-        day: "Day 5",
-        title: "Cairo Tour",
-        details: [
-          "Arrival to Cairo in the morning.",
-          "Included tour: Giza Pyramids, Great Sphinx and Grand Egyptian Museum.",
-          "Hotel transfer and optional Nile dinner cruise in the evening.",
-        ],
-      },
-      {
-        day: "Day 6",
-        title: "Departure",
-        details: [
-          "Breakfast and check-out.",
-          "Transfer to the airport for the Istanbul flight.",
-        ],
-      },
-    ],
-    included: [
-      "Flight tickets and airport taxes",
-      "4 nights all-inclusive accommodation in Sharm, 1 night bed & breakfast accommodation in Cairo",
-      "Airport / hotel / airport transfers",
-      "Panoramic city tours",
-      "Turkish assistance service",
-      "Pyramids tour and Grand Egyptian Museum",
-    ],
-    programme:
-      "Extra Tours: ATV Safari + Bedouin Night (25$) | Ras Mohammed Boat Trip + Diving (40$) | Water Sports Package (70$) | Dahab Tour (25$) | Nile Dinner Cruise (25$)",
-  },
-  {
-    id: "turkey-sharm-cairo-7n8d-6-1",
-    forceCategory: "others",
-    country: "Turkey",
-    destination: "Sharm El Sheikh + Cairo",
-    region: "others",
-    name: "Turkey Package: 7 Nights / 8 Days Sharm + Cairo",
-    backendName:
-      "7 GECE 8 GÜN SHARM + KAHİRE TURU - 6 GECE SHARM + 1 GECE KAHİRE",
-    route: "Turkey (SAW) → Sharm El Sheikh → Cairo",
-    duration: "7 Nights / 8 Days",
-    transfer: "Flight + Airport Transfers + Bus to Cairo",
-    transferReduction:
-      "Flight: 11:00 SAW → SSH Air Cairo / Return 08:00 Cairo → SAW Air Cairo with 30 KG + 8 KG baggage.",
-    startPrice: "From 899 USD",
-    image: turkeyPackage2,
-    options: [
-      {
-        title: "Hotel Options / Price Per Person",
-        rows: [
-          {
-            city: "Sharm + Cairo",
-            nights: "6 + 1",
-            hotel: "Park Regency Resort 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+300 USD",
-            dbl: "1049 USD",
-            tpl: "1049 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "6 + 1",
-            hotel: "Marriott Renaissance Golden 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+250 USD",
-            dbl: "1029 USD",
-            tpl: "1029 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "6 + 1",
-            hotel: "Safir Waterfalls Resort 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+250 USD",
-            dbl: "969 USD",
-            tpl: "969 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "6 + 1",
-            hotel: "Safir Waterfalls Resort 5* + Amarante Pyramids 5*",
-            meal: "AI + BB",
-            sgl: "+200 USD",
-            dbl: "929 USD",
-            tpl: "929 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "6 + 1",
-            hotel: "Queen Sharm Resort 4* + Flamenco Cairo Hotel 4*",
-            meal: "AI + BB",
-            sgl: "+180 USD",
-            dbl: "899 USD",
-            tpl: "899 USD",
-          },
-        ],
-      },
-    ],
-    itinerary: [
-      {
-        day: "Day 1",
-        title: "Arrival to Sharm El Sheikh",
-        details: [
-          "Meeting at Istanbul Sabiha Gökçen Airport and flight to Sharm El Sheikh.",
-          "Airport welcome, hotel transfer, check-in and Sharm city tour.",
-          "Visits include Old Market, El Sahaba Mosque and Farsha Cafe.",
-        ],
-      },
-      {
-        day: "Day 2",
-        title: "Free Day in Sharm",
-        details: [
-          "Breakfast and free time at the hotel beach, pool and all-inclusive services.",
-          "Optional tours can be arranged during the day.",
-        ],
-      },
-      {
-        day: "Day 3",
-        title: "Sharm Activities",
-        details: [
-          "Free time to enjoy the Red Sea atmosphere.",
-          "Optional ATV Safari, Bedouin Night, Ras Mohammed, diving, water sports or Dahab tour.",
-        ],
-      },
-      {
-        day: "Day 4",
-        title: "Sharm Leisure",
-        details: [
-          "Relaxing day at the resort.",
-          "Optional evening visit to Naama Bay or Soho Square.",
-        ],
-      },
-      {
-        day: "Day 5",
-        title: "Sharm Free Day",
-        details: [
-          "Enjoy the beach, hotel facilities and optional tours.",
-          "Overnight at the Sharm hotel.",
-        ],
-      },
-      {
-        day: "Day 6",
-        title: "Night Transfer to Cairo",
-        details: [
-          "Free day at the hotel.",
-          "Late-night departure to Cairo by bus at 00:15.",
-        ],
-      },
-      {
-        day: "Day 7",
-        title: "Cairo Tour",
-        details: [
-          "Morning arrival to Cairo.",
-          "Included visit: Giza Pyramids, Great Sphinx and Grand Egyptian Museum.",
-          "Optional Nile dinner cruise in the evening.",
-        ],
-      },
-      {
-        day: "Day 8",
-        title: "Departure",
-        details: [
-          "Breakfast and check-out.",
-          "Airport transfer and flight back to Istanbul.",
-        ],
-      },
-    ],
-    included: [
-      "Flight tickets and airport taxes",
-      "6 nights all-inclusive accommodation in Sharm, 1 night bed & breakfast accommodation in Cairo",
-      "Airport / hotel / airport transfers",
-      "Panoramic city tours",
-      "Turkish assistance service",
-      "Pyramids tour and Grand Egyptian Museum",
-    ],
-    programme:
-      "Extra Tours: ATV Safari + Bedouin Night (25$) | Ras Mohammed Boat Trip + Diving (40$) | Water Sports Package (70$) | Dahab Tour (25$) | Nile Dinner Cruise (25$)",
-  },
-  {
-    id: "turkey-sharm-cairo-7n8d-5-2",
-    forceCategory: "others",
-    country: "Turkey",
-    destination: "Sharm El Sheikh + Cairo",
-    region: "others",
-    name: "Turkey Package: 7 Nights / 8 Days Sharm + Cairo Deluxe",
-    backendName:
-      "7 GECE 8 GÜN SHARM + KAHİRE TURU - 5 GECE SHARM + 2 GECE KAHİRE",
-    route: "Turkey (SAW) → Sharm El Sheikh → Cairo",
-    duration: "7 Nights / 8 Days",
-    transfer: "Flight + Airport Transfers + Cairo Stay",
-    transferReduction:
-      "Flight: 11:00 SAW → SSH Air Cairo / Return 08:00 Cairo → SAW Air Cairo with 30 KG + 8 KG baggage.",
-    startPrice: "From 899 USD",
-    image: turkeyPackage3,
-    options: [
-      {
-        title: "Hotel Options / Price Per Person",
-        rows: [
-          {
-            city: "Sharm + Cairo",
-            nights: "5 + 2",
-            hotel: "Park Regency Resort 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+300 USD",
-            dbl: "1049 USD",
-            tpl: "1049 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "5 + 2",
-            hotel: "Marriott Renaissance Golden 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+250 USD",
-            dbl: "1029 USD",
-            tpl: "1029 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "5 + 2",
-            hotel: "Safir Waterfalls Resort 5* + Hilton Cairo 5*",
-            meal: "AI + BB",
-            sgl: "+250 USD",
-            dbl: "969 USD",
-            tpl: "969 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "5 + 2",
-            hotel: "Safir Waterfalls Resort 5* + Amarante Pyramids 5*",
-            meal: "AI + BB",
-            sgl: "+200 USD",
-            dbl: "929 USD",
-            tpl: "929 USD",
-          },
-          {
-            city: "Sharm + Cairo",
-            nights: "5 + 2",
-            hotel: "Queen Sharm Resort 4* + Flamenco Cairo Hotel 4*",
-            meal: "AI + BB",
-            sgl: "+180 USD",
-            dbl: "899 USD",
-            tpl: "899 USD",
-          },
-        ],
-      },
-    ],
-    itinerary: [
-      {
-        day: "Day 1",
-        title: "Arrival to Sharm El Sheikh",
-        details: [
-          "Meeting at Istanbul Sabiha Gökçen Airport and flight to Sharm El Sheikh.",
-          "Airport welcome, hotel transfer and check-in.",
-          "Included Sharm city tour: Old Market, El Sahaba Mosque and Farsha Cafe.",
-        ],
-      },
-      {
-        day: "Day 2",
-        title: "Free Day in Sharm",
-        details: [
-          "Breakfast and free time at the beach, pool and all-inclusive hotel services.",
-          "Optional tours available during the day.",
-        ],
-      },
-      {
-        day: "Day 3",
-        title: "Sharm Optional Tours",
-        details: [
-          "Enjoy the Red Sea and hotel activities.",
-          "Optional ATV Safari, Bedouin Night, Ras Mohammed, diving, water sports or Dahab tour.",
-        ],
-      },
-      {
-        day: "Day 4",
-        title: "Sharm Leisure",
-        details: [
-          "Free day at the resort.",
-          "Optional evening visit to Naama Bay or Soho Square.",
-        ],
-      },
-      {
-        day: "Day 5",
-        title: "Last Day in Sharm",
-        details: [
-          "Free time to enjoy the resort facilities.",
-          "Overnight at the Sharm hotel.",
-        ],
-      },
-      {
-        day: "Day 6",
-        title: "Transfer to Cairo",
-        details: [
-          "Morning departure to Cairo.",
-          "Hotel transfer and check-in.",
-          "Included Old Cairo and El Hussein area visit.",
-        ],
-      },
-      {
-        day: "Day 7",
-        title: "Pyramids and Museum",
-        details: [
-          "Included tour: Pyramids, Sphinx and Egyptian Museum.",
-          "Overnight at the Cairo hotel.",
-        ],
-      },
-      {
-        day: "Day 8",
-        title: "Departure",
-        details: [
-          "Breakfast and check-out.",
-          "Transfer to the airport and return flight to Istanbul.",
-        ],
-      },
-    ],
-    included: [
-      "Flight tickets and airport taxes",
-      "5 nights all-inclusive accommodation in Sharm, 2 nights bed & breakfast accommodation in Cairo",
-      "Airport / hotel / airport transfers",
-      "Panoramic city tours",
-      "Turkish assistance service",
-      "Pyramids tour and Egyptian Museum",
-    ],
-    programme:
-      "Extra Tours: ATV Safari + Bedouin Night (25$) | Ras Mohammed Boat Trip + Diving (40$) | Water Sports Package (70$) | Dahab Tour (25$) | Nile Dinner Cruise (25$)",
-  },
-];
 
 
 
@@ -716,7 +285,7 @@ const isEgyptPackage = (item = {}) => {
     forcedCategory === "other" ||
     categoryText.includes("turkey") ||
     categoryText.includes("turkiye") ||
-    categoryText.includes("türkiye") ||
+    categoryText.includes("tÃ¼rkiye") ||
     categoryText.includes("others") ||
     categoryText.includes("international")
   ) {
@@ -758,7 +327,7 @@ const getPackageCategoryTitle = (category) => {
 
 const handlePackageImageError = (event) => {
   event.currentTarget.onerror = null;
-  event.currentTarget.src = turkeyPackage1;
+  event.currentTarget.style.display = "none";
 };
 
 export default function Packages() {
@@ -877,15 +446,12 @@ export default function Packages() {
         const res = await API.get("/packages");
         const loadedPackages = Array.isArray(res.data) ? res.data : [];
 
-        const mergedPackages = mergePackagesWithoutDuplicates([
-          ...loadedPackages.map(normalizePackage),
-          ...TURKEY_OTHER_PACKAGES.map(normalizePackage),
-        ]);
-
-        setPackagesData(mergedPackages);
+        setPackagesData(
+          mergePackagesWithoutDuplicates(loadedPackages.map(normalizePackage))
+        );
       } catch (err) {
         console.log("Public packages error:", err.response?.data || err.message);
-        setPackagesData(TURKEY_OTHER_PACKAGES.map(normalizePackage));
+        setPackagesData([]);
       } finally {
         setPackagesLoading(false);
       }
@@ -901,8 +467,13 @@ export default function Packages() {
 
 
   const turkeyToEgyptPackages = useMemo(
+<<<<<<< HEAD
     () => TURKEY_HOTEL_PACKAGES.map(normalizePackage),
     []
+=======
+    () => packagesData.filter((item) => !isEgyptPackage(item)),
+    [packagesData]
+>>>>>>> 85a06c6b5fb7cb0bde1e7ad8ece659439140bca9
   );
 
   const turkeyPackageGroups = useMemo(() => {
@@ -1404,6 +975,7 @@ export default function Packages() {
                 className="packages-category-back"
                 onClick={backToOtherRoutes}
               >
+<<<<<<< HEAD
                 ← Back to Other Destinations
               </button>
             </div>
@@ -1450,6 +1022,11 @@ export default function Packages() {
                 onClick={backToPackageCategories}
               >
                 ← Back to Egypt / Others
+=======
+                {selectedOtherRoute === "turkey-egypt"
+                  ? "â† Back to Other Destinations"
+                  : "â† Back to Egypt / Others"}
+>>>>>>> 85a06c6b5fb7cb0bde1e7ad8ece659439140bca9
               </button>
             </div>
 
@@ -1850,7 +1427,7 @@ function OtherRoutesChooser({ packageCount, loading, onChoose, onBack }) {
           className="packages-category-back"
           onClick={onBack}
         >
-          ← Back to Egypt / Others
+          â† Back to Egypt / Others
         </button>
       </div>
 
@@ -1871,7 +1448,7 @@ function OtherRoutesChooser({ packageCount, loading, onChoose, onBack }) {
             <h3>From Turkey to Egypt</h3>
 
             <p>
-              Istanbul SAW → Sharm El Sheikh → Cairo with hotels, transfers and
+              Istanbul SAW â†’ Sharm El Sheikh â†’ Cairo with hotels, transfers and
               organized tours.
             </p>
 
@@ -1980,9 +1557,9 @@ function PackageModal({ item, onClose, onBook }) {
                                   {row.meal}
                                 </span>
                               </td>
-                              <td>{row.sgl || "—"}</td>
-                              <td>{row.dbl || "—"}</td>
-                              <td>{row.tpl || "—"}</td>
+                              <td>{row.sgl || "â€”"}</td>
+                              <td>{row.dbl || "â€”"}</td>
+                              <td>{row.tpl || "â€”"}</td>
                             </tr>
                           ))}
                       </tbody>
@@ -2307,7 +1884,7 @@ function PackageProAlert({ alert, onClose, onLogin, onSignup }) {
         </button>
 
         <div className="package-pro-alert-icon">
-          {alert.type === "success" ? "✓" : isLoginAlert ? "🔐" : "!"}
+          {alert.type === "success" ? "âœ“" : isLoginAlert ? "ðŸ”" : "!"}
         </div>
 
         <h3>{alert.title}</h3>
@@ -2389,3 +1966,4 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     </div>
   );
 }
+
