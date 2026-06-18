@@ -562,6 +562,97 @@ const TURKEY_OTHER_PACKAGES = [
   },
 ];
 
+
+
+const addUsdAmount = (value, amount = 200) => {
+  if (!value) return "";
+
+  const cleanValue = String(value).trim();
+  const match = cleanValue.match(/^([+]?)(\d+(?:\.\d+)?)\s*USD$/i);
+
+  if (!match) return cleanValue;
+
+  const sign = match[1] || "";
+  const number = Number(match[2]);
+
+  if (Number.isNaN(number)) return cleanValue;
+
+  return `${sign}${number + amount} USD`;
+};
+
+const TURKEY_PACKAGE_GROUPS_INFO = {
+  "turkey-sharm-cairo-5n6d": {
+    title: "Turkey Package: 5 Nights / 6 Days",
+    subtitle: "4 Nights in Sharm + 1 Night in Cairo",
+    shortTitle: "5 Nights / 6 Days",
+  },
+  "turkey-sharm-cairo-7n8d-6-1": {
+    title: "Turkey Package: 7 Nights / 8 Days",
+    subtitle: "6 Nights in Sharm + 1 Night in Cairo",
+    shortTitle: "7 Nights / 8 Days",
+  },
+  "turkey-sharm-cairo-7n8d-5-2": {
+    title: "Turkey Package: 7 Nights / 8 Days Deluxe",
+    subtitle: "5 Nights in Sharm + 2 Nights in Cairo",
+    shortTitle: "7 Nights / 8 Days Deluxe",
+  },
+};
+
+const getHotelPackageName = (groupInfo, row) => {
+  const hotelText = String(row.hotel || "")
+    .replace(/\s*\+\s*/g, " + ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return `${groupInfo.title}: ${hotelText}`;
+};
+
+const TURKEY_HOTEL_PACKAGES = TURKEY_OTHER_PACKAGES.flatMap((basePackage) => {
+  const groupInfo = TURKEY_PACKAGE_GROUPS_INFO[basePackage.id] || {
+    title: basePackage.name,
+    subtitle: basePackage.duration,
+    shortTitle: basePackage.duration,
+  };
+
+  const hotelRows = basePackage.options?.flatMap((option) => option.rows || []) || [];
+
+  return hotelRows.map((row, index) => ({
+    ...basePackage,
+    id: `${basePackage.id}-hotel-${index + 1}`,
+    name: getHotelPackageName(groupInfo, row),
+    backendName: `${basePackage.backendName} - ${row.hotel}`,
+    startPrice: row.dbl ? `From ${addUsdAmount(row.dbl)}` : basePackage.startPrice,
+    cardTitle: groupInfo.title,
+    cardSubtitle: groupInfo.subtitle,
+    hotelName: row.hotel,
+    hotelMeal: row.meal,
+    hotelNights: row.nights,
+    sglPrice: addUsdAmount(row.sgl) || "—",
+    dblPrice: addUsdAmount(row.dbl) || "—",
+    tplPrice: addUsdAmount(row.tpl) || "—",
+    packageGroupId: basePackage.id,
+    packageGroupTitle: groupInfo.title,
+    packageGroupSubtitle: groupInfo.subtitle,
+    packageGroupShortTitle: groupInfo.shortTitle,
+    route: "Turkey (SAW) → Sharm El Sheikh → Cairo",
+    transfer: "Flight + Airport Transfers + Bus to Cairo",
+    options: [
+      {
+        title: "Selected Hotel / Price Per Person",
+        rows: [
+          {
+            ...row,
+            sgl: addUsdAmount(row.sgl) || row.sgl,
+            dbl: addUsdAmount(row.dbl) || row.dbl,
+            tpl: addUsdAmount(row.tpl) || row.tpl,
+          },
+        ],
+      },
+    ],
+  }));
+});
+
+
 const getPackageUniqueKey = (item = {}) =>
   [
     item.id,
@@ -637,6 +728,23 @@ const isEgyptPackage = (item = {}) => {
   const text = getPackageTextForCategory(item);
 
   return EGYPT_PACKAGE_KEYWORDS.some((keyword) => text.includes(keyword));
+};
+
+const isTurkeyToEgyptPackage = (item = {}) => {
+  const text = getPackageTextForCategory(item);
+
+  const fromTurkey =
+    text.includes("turkey") ||
+    text.includes("turkiye") ||
+    text.includes("türkiye") ||
+    text.includes("saw");
+
+  const toEgypt =
+    text.includes("egypt") ||
+    text.includes("sharm") ||
+    text.includes("cairo");
+
+  return fromTurkey && toEgypt;
 };
 
 
@@ -743,6 +851,18 @@ export default function Packages() {
       item.categoryType ||
       item.category_type ||
       "",
+    cardTitle: item.cardTitle || item.card_title || "",
+    cardSubtitle: item.cardSubtitle || item.card_subtitle || "",    hotelName: item.hotelName || item.hotel_name || "",
+    hotelMeal: item.hotelMeal || item.hotel_meal || "",
+    hotelNights: item.hotelNights || item.hotel_nights || "",
+    sglPrice: item.sglPrice || item.sgl_price || "",
+    dblPrice: item.dblPrice || item.dbl_price || "",
+    tplPrice: item.tplPrice || item.tpl_price || "",
+    packageGroupId: item.packageGroupId || item.package_group_id || "",
+    packageGroupTitle: item.packageGroupTitle || item.package_group_title || "",
+    packageGroupSubtitle: item.packageGroupSubtitle || item.package_group_subtitle || "",
+    packageGroupShortTitle:
+      item.packageGroupShortTitle || item.package_group_short_title || "",
     options: Array.isArray(item.options) ? item.options : [],
     itinerary: Array.isArray(item.itinerary) ? item.itinerary : [],
     programme: item.programme || "",
@@ -781,9 +901,31 @@ export default function Packages() {
 
 
   const turkeyToEgyptPackages = useMemo(
-    () => TURKEY_OTHER_PACKAGES.map(normalizePackage),
+    () => TURKEY_HOTEL_PACKAGES.map(normalizePackage),
     []
   );
+
+  const turkeyPackageGroups = useMemo(() => {
+    const groupsMap = new Map();
+
+    turkeyToEgyptPackages.forEach((item) => {
+      const groupId = item.packageGroupId || "turkey-egypt";
+
+      if (!groupsMap.has(groupId)) {
+        groupsMap.set(groupId, {
+          id: groupId,
+          title: item.packageGroupTitle || "Turkey Package",
+          subtitle: item.packageGroupSubtitle || item.duration,
+          shortTitle: item.packageGroupShortTitle || item.duration,
+          packages: [],
+        });
+      }
+
+      groupsMap.get(groupId).packages.push(item);
+    });
+
+    return Array.from(groupsMap.values());
+  }, [turkeyToEgyptPackages]);
 
   const categoryPackages = useMemo(() => {
     if (selectedPackageCategory === "egypt") return egyptPackages;
@@ -1142,8 +1284,7 @@ export default function Packages() {
         transfer: bookingPackage.transfer,
         roomType: packageBookingData.roomType,
         travelDate: packageBookingData.travelDate,
-        startPrice: bookingPackage.startPrice,
-      },
+        startPrice: bookingPackage.startPrice,      },
       customer_info: {
         fullName: packageBookingData.fullName.trim(),
         email: packageBookingData.email.trim(),
@@ -1240,42 +1381,75 @@ export default function Packages() {
           />
         ) : selectedPackageCategory === "others" && !selectedOtherRoute ? (
           <OtherRoutesChooser
-            packageCount={turkeyToEgyptPackages.length}
+            packageCount={turkeyPackageGroups.length}
             loading={packagesLoading}
             onChoose={chooseOtherRoute}
             onBack={backToPackageCategories}
           />
-        ) : (
-          <section className="packages-list-section">
+        ) : selectedPackageCategory === "others" &&
+          selectedOtherRoute === "turkey-egypt" ? (
+          <section className="packages-list-section turkey-hotel-packages-section">
             <div className="packages-section-head">
-              <span>
-                {selectedOtherRoute === "turkey-egypt" ? "International Route" : "Our Offers"}
-              </span>
+              <span>International Route</span>
 
-              <h2>
-                {selectedOtherRoute === "turkey-egypt"
-                  ? "From Turkey to Egypt Packages"
-                  : getPackageCategoryTitle(selectedPackageCategory)}
-              </h2>
+              <h2>From Turkey to Egypt Packages</h2>
 
               <p>
-                {selectedOtherRoute === "turkey-egypt"
-                  ? "Explore the available packages from Istanbul SAW to Sharm El Sheikh and Cairo."
-                  : "Filter packages by name, duration and starting price."}
+                Choose one of the three package types. Inside each type, every
+                hotel option is displayed as a separate package.
               </p>
 
               <button
                 type="button"
                 className="packages-category-back"
-                onClick={
-                  selectedOtherRoute === "turkey-egypt"
-                    ? backToOtherRoutes
-                    : backToPackageCategories
-                }
+                onClick={backToOtherRoutes}
               >
-                {selectedOtherRoute === "turkey-egypt"
-                  ? "← Back to Other Destinations"
-                  : "← Back to Egypt / Others"}
+                ← Back to Other Destinations
+              </button>
+            </div>
+
+            <div className="turkey-package-groups">
+              {turkeyPackageGroups.map((group) => (
+                <section className="turkey-package-group-card" key={group.id}>
+                  <div className="turkey-package-group-head">
+                    <div>
+                      <span>{group.shortTitle}</span>
+                      <h3>{group.title}</h3>
+                      <p>{group.subtitle}</p>
+                    </div>
+
+                    <strong>{group.packages.length} hotel packages</strong>
+                  </div>
+
+                  <div className="packages-grid-pro turkey-hotels-grid">
+                    {group.packages.map((item) => (
+                      <TurkeyHotelPackageCard
+                        key={item.id}
+                        item={item}
+                        onOpen={openPackage}
+                        onBook={openPackageBooking}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="packages-list-section">
+            <div className="packages-section-head">
+              <span>Our Offers</span>
+
+              <h2>{getPackageCategoryTitle(selectedPackageCategory)}</h2>
+
+              <p>Filter packages by name, duration and starting price.</p>
+
+              <button
+                type="button"
+                className="packages-category-back"
+                onClick={backToPackageCategories}
+              >
+                ← Back to Egypt / Others
               </button>
             </div>
 
@@ -1592,6 +1766,74 @@ function PackageCategoryChooser({ egyptCount, othersCount, loading, onChoose }) 
 
 
 
+
+function TurkeyHotelPackageCard({ item, onOpen, onBook }) {
+  const displayTitle = item.cardTitle || item.packageGroupTitle || item.name;
+  const displaySubtitle =
+    item.cardSubtitle || item.packageGroupSubtitle || item.duration;
+
+  return (
+    <article className="package-card-pro turkey-hotel-package-card">
+      <div className="package-img-box">
+        <img
+          src={item.image}
+          alt={displayTitle}
+          loading="lazy"
+          onError={handlePackageImageError}
+        />
+
+        <div className="package-img-overlay">
+          <span>{item.packageGroupShortTitle || item.duration}</span>
+        </div>
+      </div>
+
+      <div className="package-card-body">
+        <span className="turkey-hotel-label">Turkey Package</span>
+
+        <h3>{displayTitle}</h3>
+
+        <div className="package-info-row">
+          <FaCalendarAlt />
+          <span>{displaySubtitle}</span>
+        </div>
+
+        <div className="package-info-row">
+          <FaMapMarkedAlt />
+          <span>Turkey → Sharm → Cairo</span>
+        </div>
+
+        <div className="package-info-row">
+          <FaBus />
+          <span>Flight + Airport + Bus</span>
+        </div>
+
+        <div className="package-info-row turkey-hotel-name">
+          <FaHotel />
+          <span>{item.hotelName}</span>
+        </div>
+        <div className="package-price-box">
+          <small>Starting Price</small>
+          <strong>{item.startPrice}</strong>
+        </div>
+
+        <div className="package-card-actions">
+          <button type="button" onClick={() => onOpen(item)}>
+            View Details
+          </button>
+
+          <button
+            type="button"
+            className="package-book-btn"
+            onClick={() => onBook(item)}
+          >
+            Book Now
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function OtherRoutesChooser({ packageCount, loading, onChoose, onBack }) {
   return (
     <section className="packages-other-routes-section">
@@ -1690,6 +1932,18 @@ function PackageModal({ item, onClose, onBook }) {
           {item.transferReduction && (
             <div className="transfer-reduction-box">
               {item.transferReduction}
+            </div>
+          )}
+
+          {item.hotelName && (
+            <div className="turkey-selected-hotel-box">
+              <h3>Selected Hotel Package</h3>
+              <p>{item.hotelName}</p>
+
+              <div>
+                <span>SGL: {item.sglPrice || "—"}</span>
+                <span>DBL: {item.dblPrice || "—"}</span>
+                <span>TPL: {item.tplPrice || "—"}</span>              </div>
             </div>
           )}
 
