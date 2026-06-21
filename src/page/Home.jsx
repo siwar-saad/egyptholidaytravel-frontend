@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Home.css";
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
@@ -186,6 +186,11 @@ const getFlagCode = (value = "") => {
   return REVIEW_META[0].code;
 };
 
+const getFlagUrl = (code) => {
+  const cleanCode = getFlagCode(code);
+  return `https://flagcdn.com/w80/${cleanCode}.png`;
+};
+
 const renderStars = (rating) => {
   const value = Math.max(1, Math.min(5, Number(rating) || 5));
 
@@ -196,8 +201,227 @@ const renderStars = (rating) => {
   ));
 };
 
+
+const isMobileAutoSlider = () => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 1024px)").matches;
+};
+
+const useAutoDragSlider = (speed = 0.85, refreshKey = 0) => {
+  const sliderRef = useRef(null);
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return undefined;
+
+    const state = {
+      isPointerDown: false,
+      isHovering: false,
+      startX: 0,
+      startScrollLeft: 0,
+      dragged: false,
+      initialized: false,
+      manualPauseUntil: 0,
+      intervalId: null,
+    };
+
+    const getLoopWidth = () => slider.scrollWidth / 3;
+
+    const canSlide = () =>
+      isMobileAutoSlider() && slider.scrollWidth > slider.clientWidth + 20;
+
+    const centerSlider = () => {
+      if (!canSlide()) {
+        state.initialized = false;
+        return;
+      }
+
+      if (state.initialized) return;
+
+      slider.scrollLeft = getLoopWidth();
+      state.initialized = true;
+    };
+
+    const keepInfinitePosition = () => {
+      if (!canSlide()) return;
+
+      const loopWidth = getLoopWidth();
+
+      if (slider.scrollLeft <= 4) {
+        slider.scrollLeft += loopWidth;
+      }
+
+      if (slider.scrollLeft >= loopWidth * 2) {
+        slider.scrollLeft -= loopWidth;
+      }
+    };
+
+    const pauseManualControl = (duration = 900) => {
+      state.manualPauseUntil = Date.now() + duration;
+    };
+
+    const autoMove = () => {
+      centerSlider();
+      keepInfinitePosition();
+
+      if (
+        canSlide() &&
+        !state.isPointerDown &&
+        !state.isHovering &&
+        Date.now() > state.manualPauseUntil
+      ) {
+        slider.scrollLeft += speed;
+      }
+    };
+
+    const handlePointerDown = (event) => {
+      if (!canSlide()) return;
+      if (event.button !== undefined && event.button !== 0) return;
+
+      centerSlider();
+      keepInfinitePosition();
+      pauseManualControl(1500);
+
+      state.isPointerDown = true;
+      state.startX = event.clientX;
+      state.startScrollLeft = slider.scrollLeft;
+      state.dragged = false;
+
+      slider.classList.add("is-dragging");
+      slider.setPointerCapture?.(event.pointerId);
+    };
+
+    const handlePointerMove = (event) => {
+      if (!state.isPointerDown) return;
+
+      const distance = event.clientX - state.startX;
+
+      if (Math.abs(distance) > 3) {
+        state.dragged = true;
+        event.preventDefault();
+      }
+
+      slider.scrollLeft = state.startScrollLeft - distance;
+      pauseManualControl(1200);
+      keepInfinitePosition();
+    };
+
+    const stopDragging = (event) => {
+      if (!state.isPointerDown) return;
+
+      state.isPointerDown = false;
+      slider.classList.remove("is-dragging");
+
+      if (!state.isHovering) {
+        slider.classList.remove("is-paused-by-user");
+      }
+
+      try {
+        slider.releasePointerCapture?.(event.pointerId);
+      } catch {
+        // Ignore release errors when pointer capture is not active.
+      }
+
+      pauseManualControl(1000);
+      keepInfinitePosition();
+
+      window.setTimeout(() => {
+        state.dragged = false;
+      }, 120);
+    };
+
+    const stopClickAfterDrag = (event) => {
+      if (!state.dragged) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const handleWheel = (event) => {
+      if (!canSlide()) return;
+
+      const movement = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY;
+
+      event.preventDefault();
+      slider.scrollLeft += movement;
+      pauseManualControl(1000);
+      keepInfinitePosition();
+    };
+
+    const handleResize = () => {
+      state.initialized = false;
+      centerSlider();
+    };
+
+    const handleImagesLoaded = () => {
+      state.initialized = false;
+      centerSlider();
+    };
+    const handlePointerEnter = () => {
+      if (!canSlide()) return;
+      state.isHovering = true;
+      slider.classList.add("is-paused-by-user");
+    };
+
+    const handlePointerLeave = () => {
+      if (!canSlide()) return;
+      state.isHovering = false;
+
+      if (!state.isPointerDown) {
+        slider.classList.remove("is-paused-by-user");
+      }
+    };
+
+
+    slider.addEventListener("pointerenter", handlePointerEnter);
+    slider.addEventListener("pointerleave", handlePointerLeave);
+    slider.addEventListener("pointerdown", handlePointerDown);
+    slider.addEventListener("pointermove", handlePointerMove);
+    slider.addEventListener("pointerup", stopDragging);
+    slider.addEventListener("pointercancel", stopDragging);
+    slider.addEventListener("click", stopClickAfterDrag, true);
+    slider.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("pointerup", stopDragging);
+    window.addEventListener("resize", handleResize);
+
+    slider.querySelectorAll("img").forEach((img) => {
+      img.addEventListener("load", handleImagesLoaded);
+    });
+
+    state.intervalId = window.setInterval(autoMove, 16);
+    window.setTimeout(handleResize, 80);
+    window.setTimeout(handleResize, 500);
+
+    return () => {
+      slider.removeEventListener("pointerenter", handlePointerEnter);
+      slider.removeEventListener("pointerleave", handlePointerLeave);
+      slider.removeEventListener("pointerdown", handlePointerDown);
+      slider.removeEventListener("pointermove", handlePointerMove);
+      slider.removeEventListener("pointerup", stopDragging);
+      slider.removeEventListener("pointercancel", stopDragging);
+      slider.removeEventListener("click", stopClickAfterDrag, true);
+      slider.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("pointerup", stopDragging);
+      window.removeEventListener("resize", handleResize);
+
+      slider.querySelectorAll("img").forEach((img) => {
+        img.removeEventListener("load", handleImagesLoaded);
+      });
+
+      if (state.intervalId) {
+        window.clearInterval(state.intervalId);
+      }
+    };
+  }, [speed, refreshKey]);
+
+  return sliderRef;
+};
+
 export default function Home() {
   const navigate = useNavigate();
+
 
   const [showButton, setShowButton] = useState(false);
   const [subscriberEmail, setSubscriberEmail] = useState("");
@@ -206,6 +430,11 @@ export default function Home() {
 
   const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
   const [topHotels, setTopHotels] = useState([]);
+
+  const destinationsSliderRef = useAutoDragSlider(0.92);
+  const packagesSliderRef = useAutoDragSlider(0.82);
+  const topHotelsSliderRef = useAutoDragSlider(0.9, topHotels.length);
+  const featuresSliderRef = useAutoDragSlider(0.7);
 
   const [reviewForm, setReviewForm] = useState({
     name: "",
@@ -247,6 +476,34 @@ export default function Home() {
       packageId: "cairo-luxor-6",
     },
   ];
+
+  const featureCards = [
+    {
+      icon: "🛡️",
+      title: "Trust",
+      text: "Trusted Global Brand",
+    },
+    {
+      icon: "⏱️",
+      title: "Speed",
+      text: "Fast & Efficient Booking",
+    },
+    {
+      icon: "📍",
+      title: "Experience",
+      text: "Expert Local Guides",
+    },
+    {
+      icon: "🎧",
+      title: "Support",
+      text: "24/7 Customer Support",
+    },
+  ];
+
+  const destinationSliderItems = [...destinations, ...destinations, ...destinations];
+  const packageSliderItems = [...packages, ...packages, ...packages];
+  const topHotelSliderItems = [...topHotels, ...topHotels, ...topHotels];
+  const featureSliderItems = [...featureCards, ...featureCards, ...featureCards];
 
   useEffect(() => {
     document.title = SITE_NAME;
@@ -495,9 +752,18 @@ export default function Home() {
       <section className="destinations-section" id="destinations">
         <h2 className="section-title">Top Destinations</h2>
 
-        <div className="destinations-grid">
-          {destinations.map((item, index) => (
-            <div key={index} className="destination-card-new">
+        <div
+          ref={destinationsSliderRef}
+          className="destinations-grid destinations-auto-slider"
+        >
+          {destinationSliderItems.map((item, index) => (
+            <div
+              key={`${item.name}-${index}`}
+              className={`destination-card-new ${
+                index >= destinations.length ? "mobile-clone" : ""
+              }`}
+              aria-hidden={index >= destinations.length}
+            >
               <img src={item.img} alt={item.name} loading="lazy" />
               <div className="card-overlay"></div>
 
@@ -518,16 +784,22 @@ export default function Home() {
       <section className="featured-packages-section">
         <h2>Top Packages</h2>
 
-        <div className="featured-packages-grid">
-          {packages.map((item, index) => (
+        <div
+          ref={packagesSliderRef}
+          className="featured-packages-grid packages-auto-slider"
+        >
+          {packageSliderItems.map((item, index) => (
             <div
-              className="featured-package-card"
-              key={index}
+              className={`featured-package-card ${
+                index >= packages.length ? "mobile-clone" : ""
+              }`}
+              key={`${item.packageId}-${index}`}
+              aria-hidden={index >= packages.length}
               onClick={() => openPackageFromHome(item.packageId)}
             >
               <img src={item.img} loading="lazy" alt={item.name} />
 
-              <h3>Package {index + 1}</h3>
+              <h3>Package {(index % packages.length) + 1}</h3>
               <h4>{item.name} Trip</h4>
               <p>{item.desc}</p>
 
@@ -549,11 +821,17 @@ export default function Home() {
         <h2 className="section-title">Top Hotels</h2>
 
         {topHotels.length > 0 ? (
-          <div className="destinations-grid top-hotels-grid">
-            {topHotels.map((hotel, index) => (
+          <div
+            ref={topHotelsSliderRef}
+            className="destinations-grid top-hotels-grid top-hotels-auto-slider"
+          >
+            {topHotelSliderItems.map((hotel, index) => (
               <div
-                key={hotel.id || hotel._id || `${hotel.name}-${index}`}
-                className="destination-card-new top-hotel-card"
+                key={`${hotel.id || hotel._id || hotel.name || "hotel"}-${index}`}
+                className={`destination-card-new top-hotel-card ${
+                  index >= topHotels.length ? "mobile-clone" : ""
+                }`}
+                aria-hidden={index >= topHotels.length}
                 onClick={() => openHotelFromHome(hotel)}
                 role="button"
                 tabIndex={0}
@@ -589,36 +867,23 @@ export default function Home() {
         )}
       </section>
 
-      <section className="features-strip">
-        <div className="feature-item">
-          <div className="feature-icon">🛡️</div>
-          <h3>Trust</h3>
-          <p>Trusted Global Brand</p>
-        </div>
-
-        <div className="feature-divider"></div>
-
-        <div className="feature-item">
-          <div className="feature-icon">⏱️</div>
-          <h3>Speed</h3>
-          <p>Fast & Efficient Booking</p>
-        </div>
-
-        <div className="feature-divider"></div>
-
-        <div className="feature-item">
-          <div className="feature-icon">📍</div>
-          <h3>Experience</h3>
-          <p>Expert Local Guides</p>
-        </div>
-
-        <div className="feature-divider"></div>
-
-        <div className="feature-item">
-          <div className="feature-icon">🎧</div>
-          <h3>Support</h3>
-          <p>24/7 Customer Support</p>
-        </div>
+      <section
+        ref={featuresSliderRef}
+        className="features-strip features-auto-slider"
+      >
+        {featureSliderItems.map((item, index) => (
+          <div
+            className={`feature-item ${
+              index >= featureCards.length ? "mobile-clone" : ""
+            }`}
+            key={`${item.title}-${index}`}
+            aria-hidden={index >= featureCards.length}
+          >
+            <div className="feature-icon">{item.icon}</div>
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+          </div>
+        ))}
       </section>
 
       <section className="why-section">
@@ -704,11 +969,13 @@ export default function Home() {
                   <div className="testimonial-user-info improved-user-info">
                     <h4>
                       {item.name}
-                      <span
-                        className={`review-flag review-flag-${item.code}`}
+                      <img
+                        className="review-flag-img"
+                        src={getFlagUrl(item.code)}
+                        alt={`${item.country} flag`}
                         title={item.country}
-                        aria-label={`${item.country} flag`}
-                      ></span>
+                        loading="lazy"
+                      />
                     </h4>
 
                     <p className="review-country">{item.country} traveler</p>

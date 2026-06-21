@@ -2407,3 +2407,429 @@
 }
 
 
+
+
+/* ================= INTERNATIONAL ROUTE CARDS ================= */
+
+.other-routes-grid {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.package-category-bg-img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  transition: 0.55s ease;
+}
+
+.package-category-card.from-turkey-egypt,
+.package-category-card.europe-tour-route {
+  isolation: isolate;
+  background-color: #2a2117 !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.from-turkey-egypt {
+  background-image: url("./turkey-egypt-bg.webp") !important;
+}
+
+.package-category-card.europe-tour-route {
+  background-image: url("./europe-tour-bg.webp") !important;
+}
+
+.package-category-card.from-turkey-egypt:hover .package-category-bg-img,
+.package-category-card.europe-tour-route:hover .package-category-bg-img {
+  transform: scale(1.06);
+}
+
+.package-category-card.from-turkey-egypt .package-category-overlay,
+.package-category-card.europe-tour-route .package-category-overlay {
+  z-index: 1 !important;
+  background:
+    linear-gradient(90deg, rgba(20, 12, 6, 0.68) 0%, rgba(20, 12, 6, 0.32) 55%, rgba(20, 12, 6, 0.12) 100%),
+    linear-gradient(0deg, rgba(20, 12, 6, 0.35), rgba(20, 12, 6, 0.08)) !important;
+}
+
+.package-category-card.from-turkey-egypt .package-category-content,
+.package-category-card.europe-tour-route .package-category-content {
+  position: relative !important;
+  z-index: 2 !important;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+}
+
+.package-category-card.from-turkey-egypt .package-category-content strong,
+.package-category-card.europe-tour-route .package-category-content strong {
+  text-shadow: none;
+}
+
+.package-card-pro .package-back-name {
+  width: fit-content;
+  display: inline-flex;
+  margin-bottom: 10px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(240, 189, 119, 0.18);
+  color: #f0bd77;
+  font-size: 11px;
+  font-weight: 900;
+  backdrop-filter: blur(8px);
+}
+
+.package-excluded-card li svg {
+  color: #b34832 !important;
+}
+
+.package-flight-card li svg {
+  color: #935426 !important;
+}
+
+.package-category-card.europe-tour-route .package-category-bg-img {
+  object-position: center top;
+  filter: brightness(1.05) contrast(1.05) saturate(1.08);
+}
+
+@media (max-width: 900px) {
+  .other-routes-grid {
+    grid-template-columns: 1fr;
+    width: calc(100% - 24px);
+    gap: 18px;
+  }
+}
+.package-category-card.europe-tour {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.28), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+/* ===== INTERNATIONAL TRIPS BLOCS ===== */
+
+.other-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.package-category-card.from-turkey-egypt {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.europe-tour {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.from-turkey-egypt .package-category-overlay,
+.package-category-card.europe-tour .package-category-overlay {
+  background:
+    radial-gradient(circle at top right, rgba(240, 189, 119, 0.22), transparent 45%),
+    linear-gradient(to top, rgba(22, 14, 8, 0.82), rgba(22, 14, 8, 0.12)) !important;
+}
+
+@media (max-width: 760px) {
+  .other-routes-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+/* ===== INTERNATIONAL TRIPS BLOCS ===== */
+
+.other-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.package-category-card.from-turkey-egypt {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.europe-tour {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.france-belgium-holland {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.morocco-spain {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.from-turkey-egypt .package-category-overlay,
+.package-category-card.europe-tour .package-category-overlay,
+.package-category-card.france-belgium-holland .package-category-overlay,
+.package-category-card.morocco-spain .package-category-overlay {
+  background:
+    radial-gradient(circle at top right, rgba(240, 189, 119, 0.22), transparent 45%),
+    linear-gradient(to top, rgba(22, 14, 8, 0.82), rgba(22, 14, 8, 0.12)) !important;
+}
+
+@media (max-width: 1150px) {
+  .other-routes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .other-routes-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* ===== INTERNATIONAL TRIPS BLOCS ===== */
+
+.other-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.package-category-card.from-turkey-egypt {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.europe-tour {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.france-belgium-holland {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.morocco-spain {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.italy-switzerland-france-spain {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.from-turkey-egypt .package-category-overlay,
+.package-category-card.europe-tour .package-category-overlay,
+.package-category-card.france-belgium-holland .package-category-overlay,
+.package-category-card.morocco-spain .package-category-overlay,
+.package-category-card.italy-switzerland-france-spain .package-category-overlay {
+  background:
+    radial-gradient(circle at top right, rgba(240, 189, 119, 0.22), transparent 45%),
+    linear-gradient(to top, rgba(22, 14, 8, 0.82), rgba(22, 14, 8, 0.12)) !important;
+}
+
+.package-category-card.italy-switzerland-france-spain h3 {
+  font-size: clamp(24px, 2vw, 34px);
+}
+
+/* ===== INTERNATIONAL TRIPS BLOCS - 3 PER ROW ===== */
+
+.other-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 22px;
+}
+
+/* tablette */
+@media (max-width: 980px) {
+  .other-routes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* mobile */
+@media (max-width: 760px) {
+  .other-routes-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+}
+/* ===== INTERNATIONAL TRIPS BLOCS - 3 PER ROW ===== */
+
+.other-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 22px;
+}
+
+.package-category-card.from-turkey-egypt {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.europe-tour {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.france-belgium-holland {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.morocco-spain {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.italy-switzerland-france-spain {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.francia-paris {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.from-turkey-egypt .package-category-overlay,
+.package-category-card.europe-tour .package-category-overlay,
+.package-category-card.france-belgium-holland .package-category-overlay,
+.package-category-card.morocco-spain .package-category-overlay,
+.package-category-card.italy-switzerland-france-spain .package-category-overlay,
+.package-category-card.francia-paris .package-category-overlay {
+  background:
+    radial-gradient(circle at top right, rgba(240, 189, 119, 0.22), transparent 45%),
+    linear-gradient(to top, rgba(22, 14, 8, 0.82), rgba(22, 14, 8, 0.12)) !important;
+}
+
+.package-category-card.italy-switzerland-france-spain h3 {
+  font-size: clamp(24px, 2vw, 34px);
+}
+
+@media (max-width: 980px) {
+  .other-routes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .other-routes-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+}
+/* Turkey Istanbul bloc */
+.package-category-card.turkey-istanbul-summer {
+  background-image:
+    linear-gradient(rgba(22, 14, 8, 0.25), rgba(22, 14, 8, 0.78)),
+    url("https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=1600&q=85") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.package-category-card.turkey-istanbul-summer .package-category-overlay {
+  background:
+    radial-gradient(circle at top right, rgba(240, 189, 119, 0.22), transparent 45%),
+    linear-gradient(to top, rgba(22, 14, 8, 0.82), rgba(22, 14, 8, 0.12)) !important;
+}
+
+/* 3 blocs per row */
+.other-routes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 22px;
+}
+
+@media (max-width: 980px) {
+  .other-routes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .other-routes-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+}
