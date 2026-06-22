@@ -15,210 +15,249 @@ import {
   FaHotel,
   FaBars,
   FaTimes,
-  FaPlane,
 } from "react-icons/fa";
 
-import API from "../../api";
 import Navbar from "../../components/Navbar";
 import "./Admin.css";
-import { getStoredUser, hasPermission } from "./adminPermissions";
 
 export default function AdminLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const currentUser = getStoredUser();
-
-    if (!currentUser || currentUser.role !== "admin") {
-      navigate("/login");
-      return;
-    }
-
-    setUser(currentUser);
-  }, [navigate]);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth <= 1100 : false
+  );
 
   const menu = [
-    {
-      name: "Dashboard",
-      path: "/admin",
-      icon: <FaHome />,
-      permission: "dashboard",
-    },
-    {
-      name: "Packages",
-      path: "/admin/packages",
-      icon: <FaBoxOpen />,
-      permission: "packages",
-    },
-    {
-      name: "Hotels",
-      path: "/admin/hotels",
-      icon: <FaHotel />,
-      permission: "hotels",
-    },
+    { name: "Dashboard", path: "/admin", icon: <FaHome /> },
+    { name: "Packages", path: "/admin/packages", icon: <FaBoxOpen /> },
+    { name: "Hotels", path: "/admin/hotels", icon: <FaHotel /> },
     {
       name: "Reservations",
       path: "/admin/reservations",
       icon: <FaClipboardList />,
-      permission: "reservations",
     },
     {
       name: "Create Reservation",
       path: "/admin/create-reservation",
       icon: <FaCalendarPlus />,
-      permission: "create_reservation",
     },
-    {
-      name: "Users",
-      path: "/admin/clients",
-      icon: <FaUsers />,
-      permission: "users",
-    },
-    {
-      name: "Payments",
-      path: "/admin/payments",
-      icon: <FaCreditCard />,
-      permission: "payments",
-    },
-    {
-      name: "Messages",
-      path: "/admin/messages",
-      icon: <FaEnvelope />,
-      permission: "messages",
-    },
-    {
-      name: "Reviews",
-      path: "/admin/reviews",
-      icon: <FaStar />,
-      permission: "reviews",
-    },
-    {
-      name: "Profile",
-      path: "/admin/profile",
-      icon: <FaUserCircle />,
-      permission: "settings",
-    },
-    {
-      name: "Settings",
-      path: "/admin/settings",
-      icon: <FaCog />,
-      permission: "settings",
-    },
+    { name: "Users", path: "/admin/users", icon: <FaUsers /> },
+    { name: "Payments", path: "/admin/payments", icon: <FaCreditCard /> },
+    { name: "Messages", path: "/admin/messages", icon: <FaEnvelope /> },
+    { name: "Reviews", path: "/admin/reviews", icon: <FaStar /> },
+    { name: "Profile", path: "/admin/profile", icon: <FaUserCircle /> },
+    { name: "Settings", path: "/admin/settings", icon: <FaCog /> },
   ];
 
-  const allowedMenu = menu.filter((item) =>
-    hasPermission(user, item.permission)
-  );
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 1100;
+      setIsMobile(mobile);
 
-  const handleNavigate = (path) => {
+      if (!mobile) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (mobileMenuOpen && isMobile) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen, isMobile]);
+
+  const isActive = (path) => {
+    if (path === "/admin") {
+      return location.pathname === "/admin";
+    }
+
+    return location.pathname.startsWith(path);
+  };
+
+  const goToPage = (path) => {
     navigate(path);
     setMobileMenuOpen(false);
   };
 
-  const clearStoredAuth = () => {
+  const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    window.dispatchEvent(new Event("authChanged"));
-  };
+    localStorage.removeItem("role");
+    localStorage.removeItem("admin");
 
-  const handleLogout = async () => {
-    try {
-      await API.post("/auth/logout", null, { skipAuthRedirect: true });
-    } catch (err) {
-      console.log("Admin logout error:", err.response?.data || err.message);
-    }
-
-    clearStoredAuth();
+    setMobileMenuOpen(false);
     navigate("/login");
   };
 
-  if (!user) return null;
+  const mobileButtonStyle = {
+    position: "fixed",
+    left: "18px",
+    bottom: "22px",
+    width: "54px",
+    height: "54px",
+    border: "none",
+    borderRadius: "50%",
+    background: "#935426",
+    color: "#fff",
+    display: isMobile ? "flex" : "none",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "22px",
+    cursor: "pointer",
+    zIndex: 2147483647,
+    boxShadow: "0 14px 32px rgba(61, 35, 20, 0.45)",
+  };
+
+  const mobileOverlayStyle = {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0, 0, 0, 0.5)",
+    backdropFilter: "blur(3px)",
+    zIndex: 2147483645,
+  };
+
+  const mobileSidebarStyle = isMobile
+    ? {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "290px",
+        maxWidth: "86vw",
+        minWidth: "0",
+        height: "100vh",
+        minHeight: "100vh",
+        background: "#fffaf5",
+        zIndex: 2147483646,
+        transform: mobileMenuOpen ? "translateX(0)" : "translateX(-115%)",
+        transition: "transform 0.28s ease",
+        overflowY: "auto",
+        overflowX: "hidden",
+        padding: "76px 17px 26px",
+        boxShadow: "18px 0 48px rgba(0, 0, 0, 0.26)",
+        borderRadius: "0 24px 24px 0",
+      }
+    : undefined;
+
+  const closeButtonStyle = {
+    position: "absolute",
+    top: "18px",
+    right: "18px",
+    width: "40px",
+    height: "40px",
+    border: "none",
+    borderRadius: "50%",
+    background: "#f3ebe4",
+    color: "#935426",
+    fontSize: "21px",
+    display: isMobile ? "flex" : "none",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+  };
 
   return (
     <>
       <Navbar />
 
-      <div className="admin-layout">
+      {isMobile && (
         <button
           type="button"
-          className="admin-mobile-toggle"
-          onClick={() => setMobileMenuOpen(true)}
+          style={mobileButtonStyle}
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
+          aria-label="Open admin menu"
         >
-          <FaBars />
+          {mobileMenuOpen ? <FaTimes /> : <FaBars />}
         </button>
+      )}
 
-        <aside className={`admin-sidebar ${mobileMenuOpen ? "open" : ""}`}>
-          <div className="admin-sidebar-head">
-            <div className="admin-sidebar-brand-icon">
-              <FaPlane />
-            </div>
+      {isMobile && mobileMenuOpen && (
+        <div
+          style={mobileOverlayStyle}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-            <div>
-              <h2>Egypt Holiday</h2>
-              <span>Admin Panel</span>
-            </div>
+      <div
+        className="admin-layout"
+        style={
+          isMobile
+            ? {
+                display: "block",
+                width: "100%",
+                minHeight: "calc(100vh - 80px)",
+                background: "#f3ede6",
+              }
+            : undefined
+        }
+      >
+        <aside
+          className={`admin-sidebar ${mobileMenuOpen ? "mobile-open" : ""}`}
+          style={mobileSidebarStyle}
+        >
+          <button
+            type="button"
+            style={closeButtonStyle}
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close admin menu"
+          >
+            <FaTimes />
+          </button>
+
+          <div className="admin-sidebar-menu">
+            {menu.map((item) => (
+              <button
+                key={item.path}
+                type="button"
+                className={`admin-menu-link ${
+                  isActive(item.path) ? "active" : ""
+                }`}
+                onClick={() => goToPage(item.path)}
+              >
+                <span className="admin-menu-icon">{item.icon}</span>
+                <span>{item.name}</span>
+              </button>
+            ))}
 
             <button
               type="button"
-              className="admin-sidebar-close"
-              onClick={() => setMobileMenuOpen(false)}
+              className="admin-menu-link logout-link"
+              onClick={handleLogout}
             >
-              <FaTimes />
+              <span className="admin-menu-icon">
+                <FaSignOutAlt />
+              </span>
+              <span>Logout</span>
             </button>
           </div>
-
-          <div className="admin-user-mini">
-            <FaUserCircle />
-
-            <div>
-              <strong>
-                {user.firstName || user.name || "Admin"} {user.lastName || ""}
-              </strong>
-              <span>{user.email}</span>
-            </div>
-          </div>
-
-          <nav className="admin-menu">
-            {allowedMenu.length > 0 ? (
-              allowedMenu.map((item) => (
-                <button
-                  key={item.path}
-                  type="button"
-                  className={location.pathname === item.path ? "active" : ""}
-                  onClick={() => handleNavigate(item.path)}
-                >
-                  {item.icon}
-                  <span>{item.name}</span>
-                </button>
-              ))
-            ) : (
-              <p className="admin-no-permission">
-                No permissions assigned.
-              </p>
-            )}
-          </nav>
-
-          <button type="button" className="admin-logout" onClick={handleLogout}>
-            <FaSignOutAlt />
-            <span>Logout</span>
-          </button>
         </aside>
 
-        {mobileMenuOpen && (
-          <button
-            type="button"
-            className="admin-sidebar-overlay"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        )}
-
-        <main className="admin-main">{children}</main>
+        <main
+          className="admin-main-content"
+          style={
+            isMobile
+              ? {
+                  width: "100%",
+                  padding: "16px 12px 90px",
+                  minWidth: 0,
+                }
+              : undefined
+          }
+        >
+          {children}
+        </main>
       </div>
     </>
   );
