@@ -15,6 +15,7 @@ import {
   FaHotel,
   FaBars,
   FaTimes,
+  FaPlane,
 } from "react-icons/fa";
 
 import API from "../../api";
@@ -73,7 +74,7 @@ export default function AdminLayout({ children }) {
     },
     {
       name: "Users",
-      path: "/admin/users",
+      path: "/admin/clients",
       icon: <FaUsers />,
       permission: "users",
     },
@@ -154,7 +155,14 @@ export default function AdminLayout({ children }) {
 
         <aside className={`admin-sidebar ${mobileMenuOpen ? "open" : ""}`}>
           <div className="admin-sidebar-head">
-            <h2>Admin EgyptHoliday</h2>
+            <div className="admin-sidebar-brand-icon">
+              <FaPlane />
+            </div>
+
+            <div>
+              <h2>Egypt Holiday</h2>
+              <span>Admin Panel</span>
+            </div>
 
             <button
               type="button"

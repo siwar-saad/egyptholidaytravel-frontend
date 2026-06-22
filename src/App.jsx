@@ -126,6 +126,17 @@ function App() {
 
         {/* ADMIN USERS */}
         <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout>
+                <Users />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/admin/clients"
           element={
             <ProtectedRoute requiredRole="admin">
