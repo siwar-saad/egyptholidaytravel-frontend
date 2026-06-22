@@ -256,13 +256,21 @@ export default function Login() {
       );
 
       if (verificationError) {
-        setVerificationEmail(form.email.trim());
+        const emailToVerify = form.email.trim();
+
+        setVerificationEmail(emailToVerify);
+        setVerificationCode("");
+        setVerificationMessage("");
+        setVerificationError("");
+        setShowVerifyPopup(true);
 
         setAuthMessage({
           message: "Please verify your email before login.",
           type: "warning",
           isVerification: true,
         });
+
+        await resendVerificationCode(emailToVerify);
       } else {
         setAuthMessage({
           message,

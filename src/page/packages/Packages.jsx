@@ -5,221 +5,54 @@ import Footer from "../../components/footer";
 import API from "../../api";
 import "./Packages.css";
 
+import turkeyPackage1 from "../../assets/image/turkey-package-1.webp";
+
 import {
-  FaChevronDown,
   FaArrowLeft,
-  FaBus,
-  FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
   FaFilter,
-  FaHotel,
-  FaMapMarkedAlt,
   FaPhoneAlt,
-  FaPlaneDeparture,
-  FaTimes,
-  FaTrain,
-  FaUtensils,
 } from "react-icons/fa";
 
-const ITEMS_PER_PAGE = 14;
+import PackageCategoryChooser from "./PackageCategoryChooser";
+import OtherRoutesChooser from "./OtherRoutesChooser";
+import TurkeyHotelPackageCard from "./TurkeyHotelPackageCard";
+import PackageCard from "./PackageCard";
+import PackageModal from "./PackageModal";
+import PackageBookingForm from "./PackageBookingForm";
+import PackageProAlert from "./PackageProAlert";
+import Pagination from "./Pagination";
+import { FRANCE_BELGIUM_HOLLAND_PACKAGES } from "./franceBelgiumHollandPackages";
+import { MOROCCO_SPAIN_PACKAGES } from "./moroccoSpainPackages";
+import { ITALY_SWITZERLAND_FRANCE_SPAIN_PACKAGES } from "./italySwitzerlandFranceSpainPackages";
+import { FRANCIA_PARIS_PACKAGES } from "./franciaParisPackages";
+import { TURKEY_EGYPT_ISTANBUL_SHARM_PACKAGES } from "./turkeyEgyptIstanbulSharmPackages";
+import { TURKEY_ISTANBUL_SUMMER_PACKAGES } from "./turkeyIstanbulSummerPackages";
 
-const EMPTY_PACKAGE_BOOKING = {
-  fullName: "",
-  email: "",
-  phone: "",
-  travelers: "",
-  travelDate: "",
-  roomType: "DBL",
-  notes: "",
-};
-
-const EMPTY_LOCKED_FIELDS = {
-  fullName: false,
-  email: false,
-  phone: false,
-};
-
-const PACKAGE_COUNTRIES = [
-  {
-    flag: "https://flagcdn.com/fr.svg",
-    name: "Paris / France",
-    dialCode: "+33",
-  },
-  { flag: "https://flagcdn.com/de.svg", name: "Germany", dialCode: "+49" },
-  { flag: "https://flagcdn.com/lu.svg", name: "Luxembourg", dialCode: "+352" },
-  { flag: "https://flagcdn.com/tr.svg", name: "Turkey", dialCode: "+90" },
-  { flag: "https://flagcdn.com/tn.svg", name: "Tunisia", dialCode: "+216" },
-  { flag: "https://flagcdn.com/ma.svg", name: "Morocco", dialCode: "+212" },
-  { flag: "https://flagcdn.com/ba.svg", name: "Bosnia", dialCode: "+387" },
-  { flag: "https://flagcdn.com/eg.svg", name: "Egypt", dialCode: "+20" },
-];
-
-const splitStoredPhone = (phone = "") => {
-  const cleanPhone = phone.trim();
-
-  const country =
-    PACKAGE_COUNTRIES.find((item) => cleanPhone.startsWith(item.dialCode)) ||
-    PACKAGE_COUNTRIES[0];
-
-  return {
-    country,
-    phone: cleanPhone.replace(country.dialCode, "").trim(),
-  };
-};
-
-const getTodayDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const isPastDate = (dateValue) => {
-  if (!dateValue) return false;
-
-  const selectedDate = new Date(`${dateValue}T00:00:00`);
-  const today = new Date(`${getTodayDate()}T00:00:00`);
-
-  return selectedDate < today;
-};
-
-const cleanPackageTitle = (value) =>
-  String(value || "")
-    .replace(/[()]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const getPackagePriceValue = (price = "") => {
-  const cleanPrice = String(price || "").replace(/,/g, "");
-  const match = cleanPrice.match(/\d+(?:\.\d+)?/);
-
-  return match ? Number(match[0]) : null;
-};
-
-const matchPriceFilter = (price, filter) => {
-  if (filter === "all") return true;
-  if (price === null || Number.isNaN(price)) return false;
-
-  if (filter === "under-500") return price < 500;
-  if (filter === "500-1000") return price >= 500 && price <= 1000;
-  if (filter === "1000-2000") return price > 1000 && price <= 2000;
-  if (filter === "over-2000") return price > 2000;
-
-  return true;
-};
-
-const EGYPT_PACKAGE_KEYWORDS = [
-  "egypt",
-  "cairo",
-  "giza",
-  "alexandria",
-  "luxor",
-  "aswan",
-  "hurghada",
-  "sharm",
-  "dahab",
-  "marsa alam",
-  "nile",
-  "sokhna",
-  "sinai",
-  "pyramids",
-  "pyramid",
-];
-
-
-
-const getPackageUniqueKey = (item = {}) =>
-  [
-    item.id,
-    item.name,
-    item.duration,
-    item.route,
-    item.backendName,
-  ]
-    .filter(Boolean)
-    .join("::")
-    .toLowerCase();
-
-const mergePackagesWithoutDuplicates = (items = []) => {
-  const seen = new Set();
-
-  return items.filter((item) => {
-    const key = getPackageUniqueKey(item);
-
-    if (!key) return true;
-    if (seen.has(key)) return false;
-
-    seen.add(key);
-    return true;
-  });
-};
-
-
-const getPackageTextForCategory = (item = {}) =>
-  [
-    item.name,
-    item.backendName,
-    item.route,
-    item.country,
-    item.destination,
-    item.city,
-    item.location,
-    item.region,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-const isEgyptPackage = (item = {}) => {
-  const forcedCategory = String(item.forceCategory || "")
-    .toLowerCase()
-    .trim();
-
-  const categoryText = [
-    item.forceCategory,
-    item.country,
-    item.region,
-    item.category,
-    item.packageCategory,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-
-  if (
-    forcedCategory === "others" ||
-    forcedCategory === "other" ||
-    categoryText.includes("turkey") ||
-    categoryText.includes("turkiye") ||
-    categoryText.includes("tÃ¼rkiye") ||
-    categoryText.includes("others") ||
-    categoryText.includes("international")
-  ) {
-    return false;
-  }
-
-  if (forcedCategory === "egypt") return true;
-
-  const text = getPackageTextForCategory(item);
-
-  return EGYPT_PACKAGE_KEYWORDS.some((keyword) => text.includes(keyword));
-};
-
-
-
-const getPackageCategoryTitle = (category) => {
-  if (category === "egypt") return "Egypt Packages";
-  if (category === "others") return "Other Destinations";
-
-  return "Available Packages";
-};
+import {
+  EMPTY_LOCKED_FIELDS,
+  EMPTY_PACKAGE_BOOKING,
+  ITEMS_PER_PAGE,
+  PACKAGE_COUNTRIES,
+} from "./packageConstants";
+import { TURKEY_HOTEL_PACKAGES, TURKEY_OTHER_PACKAGES } from "./turkeyPackages";
+import { EUROPE_TOUR_PACKAGES } from "./europeTourPackages";
+import {
+  cleanPackageTitle,
+  getPackageCategoryTitle,
+  getPackagePriceValue,
+  isEgyptPackage,
+  isPastDate,
+  isTurkeyToEgyptPackage,
+  matchPriceFilter,
+  mergePackagesWithoutDuplicates,
+  splitStoredPhone,
+} from "./packageUtils";
 
 const handlePackageImageError = (event) => {
   event.currentTarget.onerror = null;
-  event.currentTarget.style.display = "none";
+  event.currentTarget.src = turkeyPackage1;
 };
 
 export default function Packages() {
@@ -291,10 +124,11 @@ export default function Packages() {
       item.backendName || item.backend_name || item.title || item.name || "",
     route: item.route || "",
     duration: item.duration || "",
+    travelDateText: item.travelDateText || item.travel_date_text || "",
     transfer: item.transfer || "",
     transferReduction: item.transferReduction || item.transfer_reduction || "",
-    startPrice:
-      item.startPrice || item.start_price || item.price || "Contact us",
+    startPrice: item.startPrice || item.start_price || item.price || "Contact us",
+    hidePrice: Boolean(item.hidePrice || item.hide_price),
     image: getImageUrl(item.image),
     country: item.country || item.destinationCountry || item.destination_country || "",
     destination: item.destination || item.destinationName || item.destination_name || "",
@@ -312,10 +146,26 @@ export default function Packages() {
       item.categoryType ||
       item.category_type ||
       "",
+    cardTitle: item.cardTitle || item.card_title || "",
+    cardSubtitle: item.cardSubtitle || item.card_subtitle || "",
+    badgeText: item.badgeText || item.badge_text || "",
+    hotelName: item.hotelName || item.hotel_name || "",
+    hotelMeal: item.hotelMeal || item.hotel_meal || "",
+    hotelNights: item.hotelNights || item.hotel_nights || "",
+    sglPrice: item.sglPrice || item.sgl_price || "",
+    dblPrice: item.dblPrice || item.dbl_price || "",
+    tplPrice: item.tplPrice || item.tpl_price || "",
+    packageGroupId: item.packageGroupId || item.package_group_id || "",
+    packageGroupTitle: item.packageGroupTitle || item.package_group_title || "",
+    packageGroupSubtitle: item.packageGroupSubtitle || item.package_group_subtitle || "",
+    packageGroupShortTitle:
+      item.packageGroupShortTitle || item.package_group_short_title || "",
     options: Array.isArray(item.options) ? item.options : [],
     itinerary: Array.isArray(item.itinerary) ? item.itinerary : [],
     programme: item.programme || "",
     included: Array.isArray(item.included) ? item.included : [],
+    excluded: Array.isArray(item.excluded) ? item.excluded : [],
+    flightDetails: Array.isArray(item.flightDetails) ? item.flightDetails : [],
   });
 
   useEffect(() => {
@@ -326,12 +176,19 @@ export default function Packages() {
         const res = await API.get("/packages");
         const loadedPackages = Array.isArray(res.data) ? res.data : [];
 
-        setPackagesData(
-          mergePackagesWithoutDuplicates(loadedPackages.map(normalizePackage))
-        );
+        const mergedPackages = mergePackagesWithoutDuplicates([
+          ...loadedPackages.map(normalizePackage),
+          ...TURKEY_OTHER_PACKAGES.map(normalizePackage),
+          ...EUROPE_TOUR_PACKAGES.map(normalizePackage),
+        ]);
+
+        setPackagesData(mergedPackages);
       } catch (err) {
         console.log("Public packages error:", err.response?.data || err.message);
-        setPackagesData([]);
+        setPackagesData([
+          ...TURKEY_OTHER_PACKAGES.map(normalizePackage),
+          ...EUROPE_TOUR_PACKAGES.map(normalizePackage),
+        ]);
       } finally {
         setPackagesLoading(false);
       }
@@ -345,27 +202,108 @@ export default function Packages() {
     [packagesData]
   );
 
+  const turkeyIstanbulSummerPackages = useMemo(
+  () => TURKEY_ISTANBUL_SUMMER_PACKAGES.map(normalizePackage),
+  []
+); 
 
   const turkeyToEgyptPackages = useMemo(
-    () => packagesData.filter((item) => !isEgyptPackage(item)),
-    [packagesData]
+    () => TURKEY_HOTEL_PACKAGES.map(normalizePackage),
+    []
   );
 
-  const categoryPackages = useMemo(() => {
-    if (selectedPackageCategory === "egypt") return egyptPackages;
+  const turkeyEgyptIstanbulSharmPackages = useMemo(
+  () => TURKEY_EGYPT_ISTANBUL_SHARM_PACKAGES.map(normalizePackage),
+  []
+);
 
-    if (selectedPackageCategory === "others") {
-      if (selectedOtherRoute === "turkey-egypt") return turkeyToEgyptPackages;
-      return [];
+  const europeTourPackages = useMemo(
+    () => EUROPE_TOUR_PACKAGES.map(normalizePackage),
+    []
+  );
+
+  const franceBelgiumHollandPackages = useMemo(
+  () => FRANCE_BELGIUM_HOLLAND_PACKAGES.map(normalizePackage),
+  []
+);
+
+const moroccoSpainPackages = useMemo(
+  () => MOROCCO_SPAIN_PACKAGES.map(normalizePackage),
+  []
+);
+
+const italySwitzerlandFranceSpainPackages = useMemo(
+  () => ITALY_SWITZERLAND_FRANCE_SPAIN_PACKAGES.map(normalizePackage),
+  []
+);
+
+const franciaParisPackages = useMemo(
+  () => FRANCIA_PARIS_PACKAGES.map(normalizePackage),
+  []
+);
+
+  const turkeyPackageGroups = useMemo(() => {
+    const groupsMap = new Map();
+
+    turkeyToEgyptPackages.forEach((item) => {
+      const groupId = item.packageGroupId || "turkey-egypt";
+
+      if (!groupsMap.has(groupId)) {
+        groupsMap.set(groupId, {
+          id: groupId,
+          title: item.packageGroupTitle || "Turkey Package",
+          subtitle: item.packageGroupSubtitle || item.duration,
+          shortTitle: item.packageGroupShortTitle || item.duration,
+          packages: [],
+        });
+      }
+
+      groupsMap.get(groupId).packages.push(item);
+    });
+
+    return Array.from(groupsMap.values());
+  }, [turkeyToEgyptPackages]);
+
+const categoryPackages = useMemo(() => {
+  if (selectedPackageCategory === "egypt") return egyptPackages;
+
+  if (selectedPackageCategory === "others") {
+    if (selectedOtherRoute === "turkey-egypt") return turkeyToEgyptPackages;
+    if (selectedOtherRoute === "turkey-egypt-istanbul-sharm") {
+      return turkeyEgyptIstanbulSharmPackages;
     }
+    if (selectedOtherRoute === "europe-tour") return europeTourPackages;
+    if (selectedOtherRoute === "france-belgium-holland") {
+      return franceBelgiumHollandPackages;
+    }
+    if (selectedOtherRoute === "morocco-spain") return moroccoSpainPackages;
+    if (selectedOtherRoute === "italy-switzerland-france-spain") {
+      return italySwitzerlandFranceSpainPackages;
+    }
+    if (selectedOtherRoute === "francia-paris") return franciaParisPackages;
+    if (selectedOtherRoute === "turkey-istanbul-summer") {
+  return turkeyIstanbulSummerPackages;
+}
 
     return [];
-  }, [
-    egyptPackages,
-    turkeyToEgyptPackages,
-    selectedPackageCategory,
-    selectedOtherRoute,
-  ]);
+  }
+
+  return [];
+}, [
+  egyptPackages,
+  turkeyToEgyptPackages,
+  turkeyEgyptIstanbulSharmPackages,
+  europeTourPackages,
+  franceBelgiumHollandPackages,
+  moroccoSpainPackages,
+  italySwitzerlandFranceSpainPackages,
+  franciaParisPackages,
+  selectedPackageCategory,
+  selectedOtherRoute,
+  turkeyIstanbulSummerPackages,
+]);
+
+  const showPriceFilter = categoryPackages.some((item) => !item.hidePrice);
 
   const packageNameOptions = useMemo(() => {
     const names = categoryPackages
@@ -396,7 +334,9 @@ export default function Packages() {
         String(item.duration || "") === selectedDurationFilter;
 
       const itemPrice = getPackagePriceValue(item.startPrice);
-      const matchesPrice = matchPriceFilter(itemPrice, selectedPriceFilter);
+      const matchesPrice = item.hidePrice
+        ? true
+        : matchPriceFilter(itemPrice, selectedPriceFilter);
 
       return matchesName && matchesDuration && matchesPrice;
     });
@@ -410,7 +350,7 @@ export default function Packages() {
   const hasActivePackageFilters =
     selectedPackageNameFilter !== "all" ||
     selectedDurationFilter !== "all" ||
-    selectedPriceFilter !== "all";
+    (showPriceFilter && selectedPriceFilter !== "all");
 
   const totalPackagePages = Math.max(
     1,
@@ -474,8 +414,6 @@ export default function Packages() {
     }, 80);
   };
 
-
-
   const backToPackageCategories = () => {
     setSelectedPackageCategory(null);
     setSelectedOtherRoute(null);
@@ -523,7 +461,13 @@ export default function Packages() {
     if (!openPackageId) return;
     if (packagesLoading) return;
 
-    const packageToOpen = packagesData.find(
+    const allPackagesToOpen = [
+      ...packagesData,
+      ...turkeyToEgyptPackages,
+      ...europeTourPackages,
+    ];
+
+    const packageToOpen = allPackagesToOpen.find(
       (item) => String(item.id) === String(openPackageId)
     );
 
@@ -533,16 +477,26 @@ export default function Packages() {
         setSelectedOtherRoute(null);
       } else {
         setSelectedPackageCategory("others");
-        setSelectedOtherRoute(
-          isTurkeyToEgyptPackage(packageToOpen) ? "turkey-egypt" : null
-        );
+        if (isTurkeyToEgyptPackage(packageToOpen)) {
+          setSelectedOtherRoute("turkey-egypt");
+        } else if (String(packageToOpen.region || "").toLowerCase().includes("europe")) {
+          setSelectedOtherRoute("europe-tour");
+        }
       }
 
       setSelectedPackage(packageToOpen);
     }
 
     navigate(location.pathname, { replace: true, state: null });
-  }, [location.state, location.pathname, navigate, packagesData, packagesLoading]);
+  }, [
+    location.state,
+    location.pathname,
+    navigate,
+    packagesData,
+    turkeyToEgyptPackages,
+    europeTourPackages,
+    packagesLoading,
+  ]);
 
   useEffect(() => {
     window.scrollTo({
@@ -705,10 +659,11 @@ export default function Packages() {
         backendName: bookingPackage.backendName,
         route: bookingPackage.route,
         duration: bookingPackage.duration,
+        travelDateText: bookingPackage.travelDateText,
         transfer: bookingPackage.transfer,
         roomType: packageBookingData.roomType,
         travelDate: packageBookingData.travelDate,
-        startPrice: bookingPackage.startPrice,
+        startPrice: bookingPackage.hidePrice ? "" : bookingPackage.startPrice,
       },
       customer_info: {
         fullName: packageBookingData.fullName.trim(),
@@ -762,6 +717,18 @@ export default function Packages() {
     }
   };
 
+  const listTitle = getPackageCategoryTitle(selectedPackageCategory, selectedOtherRoute);
+  const listDescription =
+    selectedOtherRoute === "europe-tour"
+      ? "Europe programme without prices. Contact our team to receive the offer details."
+      : "Filter packages by name, duration and starting price.";
+  const backButtonText = selectedPackageCategory === "others"
+    ? "← Back to International Trips"
+    : "← Back to Egypt Trips / International Trips";
+  const backAction = selectedPackageCategory === "others"
+    ? backToOtherRoutes
+    : backToPackageCategories;
+
   return (
     <div className="packages-page">
       <Navbar />
@@ -775,7 +742,7 @@ export default function Packages() {
 
             <p>
               Discover organized Egypt packages with clear hotels, meal plans,
-              transfers, and prices per person per room.
+              transfers, and international travel programmes.
             </p>
 
             <div className="packages-hero-stats">
@@ -800,48 +767,83 @@ export default function Packages() {
         {!selectedPackageCategory ? (
           <PackageCategoryChooser
             egyptCount={egyptPackages.length}
-            othersCount={1}
+            othersCount={8}
             loading={packagesLoading}
             onChoose={choosePackageCategory}
           />
         ) : selectedPackageCategory === "others" && !selectedOtherRoute ? (
           <OtherRoutesChooser
-            packageCount={turkeyToEgyptPackages.length}
+            turkeyCount={turkeyPackageGroups.length}
+            europeCount={europeTourPackages.length}
             loading={packagesLoading}
             onChoose={chooseOtherRoute}
             onBack={backToPackageCategories}
           />
-        ) : (
-          <section className="packages-list-section">
+        ) : selectedPackageCategory === "others" &&
+          selectedOtherRoute === "turkey-egypt" ? (
+          <section className="packages-list-section turkey-hotel-packages-section">
             <div className="packages-section-head">
-              <span>
-                {selectedOtherRoute === "turkey-egypt" ? "International Route" : "Our Offers"}
-              </span>
+              <span>International Route</span>
 
-              <h2>
-                {selectedOtherRoute === "turkey-egypt"
-                  ? "From Turkey to Egypt Packages"
-                  : getPackageCategoryTitle(selectedPackageCategory)}
-              </h2>
+              <h2>From Turkey to Egypt Packages</h2>
 
               <p>
-                {selectedOtherRoute === "turkey-egypt"
-                  ? "Explore the available packages from Istanbul SAW to Sharm El Sheikh and Cairo."
-                  : "Filter packages by name, duration and starting price."}
+                Choose one of the three package types. Inside each type, every
+                hotel option is displayed as a separate package.
               </p>
 
               <button
                 type="button"
                 className="packages-category-back"
-                onClick={
-                  selectedOtherRoute === "turkey-egypt"
-                    ? backToOtherRoutes
-                    : backToPackageCategories
-                }
+                onClick={backToOtherRoutes}
               >
-                {selectedOtherRoute === "turkey-egypt"
-                  ? "â† Back to Other Destinations"
-                  : "â† Back to Egypt / Others"}
+                ← Back to International Trips
+              </button>
+            </div>
+
+            <div className="turkey-package-groups">
+              {turkeyPackageGroups.map((group) => (
+                <section className="turkey-package-group-card" key={group.id}>
+                  <div className="turkey-package-group-head">
+                    <div>
+                      <span>{group.shortTitle}</span>
+                      <h3>{group.title}</h3>
+                      <p>{group.subtitle}</p>
+                    </div>
+
+                    <strong>{group.packages.length} hotel packages</strong>
+                  </div>
+
+                  <div className="packages-grid-pro turkey-hotels-grid">
+                    {group.packages.map((item) => (
+                      <TurkeyHotelPackageCard
+                        key={item.id}
+                        item={item}
+                        onOpen={openPackage}
+                        onBook={openPackageBooking}
+                        onImageError={handlePackageImageError}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="packages-list-section">
+            <div className="packages-section-head">
+              <span>Our Offers</span>
+
+              <h2>{listTitle}</h2>
+
+              <p>{listDescription}</p>
+
+              <button
+                type="button"
+                className="packages-category-back"
+                onClick={backAction}
+              >
+                {backButtonText}
               </button>
             </div>
 
@@ -880,21 +882,23 @@ export default function Packages() {
                 </select>
               </div>
 
-              <div className="packages-filter-field">
-                <label htmlFor="package-price-filter">Price</label>
+              {showPriceFilter && (
+                <div className="packages-filter-field">
+                  <label htmlFor="package-price-filter">Price</label>
 
-                <select
-                  id="package-price-filter"
-                  value={selectedPriceFilter}
-                  onChange={(e) => setSelectedPriceFilter(e.target.value)}
-                >
-                  <option value="all">All prices</option>
-                  <option value="under-500">Under 500</option>
-                  <option value="500-1000">500 - 1000</option>
-                  <option value="1000-2000">1000 - 2000</option>
-                  <option value="over-2000">Over 2000</option>
-                </select>
-              </div>
+                  <select
+                    id="package-price-filter"
+                    value={selectedPriceFilter}
+                    onChange={(e) => setSelectedPriceFilter(e.target.value)}
+                  >
+                    <option value="all">All prices</option>
+                    <option value="under-500">Under 500</option>
+                    <option value="500-1000">500 - 1000</option>
+                    <option value="1000-2000">1000 - 2000</option>
+                    <option value="over-2000">Over 2000</option>
+                  </select>
+                </div>
+              )}
 
               <button
                 type="button"
@@ -929,58 +933,13 @@ export default function Packages() {
                 </p>
               ) : (
                 paginatedPackages.map((item) => (
-                  <article className="package-card-pro" key={item.id}>
-                    <div className="package-img-box">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        loading="lazy"
-                        onError={handlePackageImageError}
-                      />
-
-                      <div className="package-img-overlay">
-                        <span>{item.duration}</span>
-                      </div>
-                    </div>
-
-                    <div className="package-card-body">
-                      <h3>{item.name}</h3>
-
-                      <div className="package-info-row">
-                        <FaMapMarkedAlt />
-                        <span>{item.route}</span>
-                      </div>
-
-                      <div className="package-info-row">
-                        <FaCalendarAlt />
-                        <span>{item.duration}</span>
-                      </div>
-
-                      <div className="package-info-row">
-                        {item.route.includes("Luxor") ? <FaTrain /> : <FaBus />}
-                        <span>{item.transfer}</span>
-                      </div>
-
-                      <div className="package-price-box">
-                        <small>Starting Price</small>
-                        <strong>{item.startPrice}</strong>
-                      </div>
-
-                      <div className="package-card-actions">
-                        <button type="button" onClick={() => openPackage(item)}>
-                          View Details
-                        </button>
-
-                        <button
-                          type="button"
-                          className="package-book-btn"
-                          onClick={() => openPackageBooking(item)}
-                        >
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  </article>
+                  <PackageCard
+                    key={item.id}
+                    item={item}
+                    onOpen={openPackage}
+                    onBook={openPackageBooking}
+                    onImageError={handlePackageImageError}
+                  />
                 ))
               )}
             </div>
@@ -1046,6 +1005,7 @@ export default function Packages() {
           item={selectedPackage}
           onClose={closePackage}
           onBook={openPackageBooking}
+          onImageError={handlePackageImageError}
         />
       )}
 
@@ -1089,616 +1049,3 @@ export default function Packages() {
     </div>
   );
 }
-
-function PackageCategoryChooser({ egyptCount, othersCount, loading, onChoose }) {
-  return (
-    <section className="packages-category-section">
-      <div className="packages-section-head">
-        <span>Choose Destination</span>
-        <h2>Select Your Package Type</h2>
-        <p>
-          Choose Egypt packages or explore other international destinations.
-        </p>
-      </div>
-
-      <div className="packages-category-grid">
-        <button
-          type="button"
-          className="package-category-card egypt"
-          onClick={() => onChoose("egypt")}
-          disabled={loading}
-        >
-          <div className="package-category-overlay"></div>
-
-          <div className="package-category-content">
-            <span className="package-category-icon">
-              <FaMapMarkedAlt />
-            </span>
-
-            <h3>Egypt</h3>
-            <p>
-              Discover Cairo, Nile cruises, Red Sea stays, Luxor, Aswan and top
-              Egypt holiday packages.
-            </p>
-
-            <strong>{loading ? "Loading..." : `${egyptCount} packages`}</strong>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className="package-category-card others"
-          onClick={() => onChoose("others")}
-          disabled={loading}
-        >
-          <div className="package-category-overlay"></div>
-
-          <div className="package-category-content">
-            <span className="package-category-icon">
-              <FaPlaneDeparture />
-            </span>
-
-            <h3>Others</h3>
-            <p>
-              Explore Turkey packages and international offers inside the
-              Others destination block.
-            </p>
-
-            <strong>
-              {loading
-                ? "Loading..."
-                : `${othersCount} destination${othersCount === 1 ? "" : "s"}`}
-            </strong>
-          </div>
-        </button>
-      </div>
-    </section>
-  );
-}
-
-
-
-function OtherRoutesChooser({ packageCount, loading, onChoose, onBack }) {
-  return (
-    <section className="packages-other-routes-section">
-      <div className="packages-section-head">
-        <span>Other Destinations</span>
-        <h2>Choose Your Route</h2>
-        <p>
-          Select the international route first. After clicking it, the packages
-          for this route will appear.
-        </p>
-
-        <button
-          type="button"
-          className="packages-category-back"
-          onClick={onBack}
-        >
-          â† Back to Egypt / Others
-        </button>
-      </div>
-
-      <div className="other-routes-grid">
-        <button
-          type="button"
-          className="package-category-card from-turkey-egypt"
-          onClick={() => onChoose("turkey-egypt")}
-          disabled={loading}
-        >
-          <div className="package-category-overlay"></div>
-
-          <div className="package-category-content">
-            <span className="package-category-icon">
-              <FaPlaneDeparture />
-            </span>
-
-            <h3>From Turkey to Egypt</h3>
-
-            <p>
-              Istanbul SAW â†’ Sharm El Sheikh â†’ Cairo with hotels, transfers and
-              organized tours.
-            </p>
-
-            <strong>
-              {loading
-                ? "Loading..."
-                : `${packageCount} package${packageCount === 1 ? "" : "s"}`}
-            </strong>
-          </div>
-        </button>
-      </div>
-    </section>
-  );
-}
-
-function PackageModal({ item, onClose, onBook }) {
-  const hasItinerary = Array.isArray(item.itinerary) && item.itinerary.length > 0;
-  const hasOptions = Array.isArray(item.options) && item.options.length > 0;
-
-  return (
-    <div className="package-modal-overlay">
-      <div className="package-modal-box">
-        <button type="button" className="package-modal-close" onClick={onClose}>
-          <FaTimes />
-        </button>
-
-        <div className="package-modal-image">
-          <img src={item.image} alt={item.name} onError={handlePackageImageError} />
-
-          <div>
-            <span>{item.duration}</span>
-            <h2>{item.name}</h2>
-          </div>
-        </div>
-
-        <div className="package-modal-content">
-          <span className="package-back-name modal-back-name">
-            Back Name: {item.backendName}
-          </span>
-
-          <div className="package-modal-meta">
-            <div>
-              <FaMapMarkedAlt />
-              <span>{item.route}</span>
-            </div>
-
-            <div>
-              <FaCalendarAlt />
-              <span>{item.duration}</span>
-            </div>
-
-            <div>
-              {item.route.includes("Luxor") ? <FaTrain /> : <FaBus />}
-              <span>{item.transfer}</span>
-            </div>
-          </div>
-
-          {item.transferReduction && (
-            <div className="transfer-reduction-box">
-              {item.transferReduction}
-            </div>
-          )}
-
-          {hasOptions && (
-            <div className="package-options">
-              {item.options.map((option) => (
-                <div className="package-option-card" key={option.title}>
-                  <h3>{option.title}</h3>
-
-                  <div className="package-table-wrapper">
-                    <table className="package-table">
-                      <thead>
-                        <tr>
-                          <th>City</th>
-                          <th>Nights</th>
-                          <th>Hotel</th>
-                          <th>Meal Plan</th>
-                          <th>SGL</th>
-                          <th>DBL</th>
-                          <th>TPL</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {Array.isArray(option.rows) &&
-                          option.rows.map((row, index) => (
-                            <tr key={`${option.title}-${row.city}-${index}`}>
-                              <td>{row.city}</td>
-                              <td>{row.nights}</td>
-                              <td>{row.hotel}</td>
-                              <td>
-                                <span className="meal-badge">
-                                  <FaUtensils />
-                                  {row.meal}
-                                </span>
-                              </td>
-                              <td>{row.sgl || "â€”"}</td>
-                              <td>{row.dbl || "â€”"}</td>
-                              <td>{row.tpl || "â€”"}</td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {hasItinerary && (
-            <div className="package-itinerary">
-              {item.itinerary.map((day) => (
-                <div className="package-day-card" key={day.day}>
-                  <div className="package-day-number">{day.day}</div>
-
-                  <div className="package-day-content">
-                    <h3>{day.title}</h3>
-
-                    <ul>
-                      {Array.isArray(day.details) &&
-                        day.details.map((detail, index) => (
-                          <li key={`${day.day}-${index}`}>
-                            <FaCheckCircle />
-                            <span>{detail}</span>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!hasOptions && !hasItinerary && (
-            <div className="package-option-card">
-              <h3>Programme</h3>
-              <p className="package-programme-text">
-                {item.programme ||
-                  "Package details will be confirmed by our team."}
-              </p>
-            </div>
-          )}
-
-          {item.programme && (hasOptions || hasItinerary) && (
-            <div className="package-option-card package-extra-programme">
-              <h3>Extra Tours</h3>
-              <p className="package-programme-text">{item.programme}</p>
-            </div>
-          )}
-
-          {Array.isArray(item.included) && item.included.length > 0 && (
-            <div className="package-included-card">
-              <h3>Price Included</h3>
-
-              <ul>
-                {item.included.map((text, index) => (
-                  <li key={`${item.id}-included-${index}`}>
-                    <FaCheckCircle />
-                    <span>{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="package-note-box">
-            <FaHotel />
-
-            <p>
-              Above rates are per person per room, including the meals mentioned
-              above and the transfer stated in this package.
-            </p>
-          </div>
-
-          <div className="package-programme-contact">
-            <h4>Need the complete package programme?</h4>
-
-            <p>
-              If you would like the full package programme, please contact us by
-              email or phone and our team will send you all details.
-            </p>
-
-            <div className="package-programme-contact-links">
-              <a href="mailto:amr@egyptholiday-travel.com">
-                <FaEnvelope />
-                amr@egyptholiday-travel.com
-              </a>
-
-              <a href="tel:01099959949">
-                <FaPhoneAlt />
-                01099959949
-              </a>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="package-modal-book"
-            onClick={() => onBook(item)}
-          >
-            <FaPlaneDeparture />
-            Book This Package
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PackageBookingForm({
-  item,
-  bookingData,
-  setBookingData,
-  selectedCountry,
-  setSelectedCountry,
-  openCountry,
-  setOpenCountry,
-  countries,
-  onClose,
-  onSubmit,
-  loading,
-  lockedClientFields,
-}) {
-  const todayDate = getTodayDate();
-
-  const isClientDataLocked =
-    lockedClientFields?.fullName ||
-    lockedClientFields?.email ||
-    lockedClientFields?.phone;
-
-  const updateBooking = (field, value) => {
-    if (lockedClientFields?.[field]) return;
-
-    setBookingData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const chooseCountry = (country) => {
-    if (lockedClientFields?.phone) return;
-
-    setSelectedCountry(country);
-    setOpenCountry(false);
-  };
-
-  return (
-    <div className="package-booking-popup">
-      <div className="package-booking-box">
-        <button
-          type="button"
-          className="package-booking-close"
-          onClick={onClose}
-        >
-          <FaTimes />
-        </button>
-
-        <h2>Book This Package</h2>
-
-        <p>
-          Complete the form below and our travel team will contact you with the
-          best offer.
-        </p>
-
-        <div className="package-booking-summary">
-          <strong>{item.name}</strong>
-          <span>{item.route}</span>
-          <span>{item.duration}</span>
-          <span>{item.startPrice}</span>
-        </div>
-
-        {isClientDataLocked && (
-          <div className="booking-locked-note">
-            Your name, email and phone are taken from your account and cannot be
-            changed here.
-          </div>
-        )}
-
-        <div className="package-booking-form">
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={bookingData.fullName}
-            readOnly={lockedClientFields?.fullName}
-            className={lockedClientFields?.fullName ? "booking-locked-input" : ""}
-            onChange={(e) => updateBooking("fullName", e.target.value)}
-          />
-
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={bookingData.email}
-            readOnly={lockedClientFields?.email}
-            className={lockedClientFields?.email ? "booking-locked-input" : ""}
-            onChange={(e) => updateBooking("email", e.target.value)}
-          />
-
-          <div className="package-booking-phone">
-            <div
-              className={`package-booking-country ${
-                openCountry ? "active" : ""
-              } ${lockedClientFields?.phone ? "booking-locked-country" : ""}`}
-            >
-              <button
-                type="button"
-                className="package-booking-country-btn"
-                disabled={lockedClientFields?.phone}
-                onClick={() => {
-                  if (lockedClientFields?.phone) return;
-                  setOpenCountry((prev) => !prev);
-                }}
-              >
-                <div className="package-booking-country-left">
-                  <img src={selectedCountry.flag} alt={selectedCountry.name} />
-
-                  <div>
-                    <small>Country</small>
-                    <strong>{selectedCountry.name}</strong>
-                  </div>
-                </div>
-
-                <FaChevronDown />
-              </button>
-
-              {openCountry && !lockedClientFields?.phone && (
-                <div className="package-booking-country-menu">
-                  {countries.map((country) => (
-                    <button
-                      type="button"
-                      key={country.dialCode}
-                      className={
-                        selectedCountry.dialCode === country.dialCode
-                          ? "package-booking-country-option selected"
-                          : "package-booking-country-option"
-                      }
-                      onClick={() => chooseCountry(country)}
-                    >
-                      <img src={country.flag} alt={country.name} />
-                      <span>{country.name}</span>
-                      <strong>{country.dialCode}</strong>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="package-booking-phone-input">
-              <span>{selectedCountry.dialCode}</span>
-
-              <input
-                type="tel"
-                placeholder="Phone Number / WhatsApp"
-                value={bookingData.phone}
-                readOnly={lockedClientFields?.phone}
-                className={lockedClientFields?.phone ? "booking-locked-input" : ""}
-                onChange={(e) => updateBooking("phone", e.target.value)}
-              />
-            </div>
-          </div>
-
-          <input
-            type="number"
-            min="1"
-            placeholder="Number of Travelers"
-            value={bookingData.travelers}
-            onChange={(e) => updateBooking("travelers", e.target.value)}
-          />
-
-          <div className="package-date-field">
-            <label>Travel Date</label>
-
-            <input
-              type="date"
-              min={todayDate}
-              value={bookingData.travelDate}
-              onChange={(e) => updateBooking("travelDate", e.target.value)}
-            />
-          </div>
-
-          <select
-            value={bookingData.roomType}
-            onChange={(e) => updateBooking("roomType", e.target.value)}
-          >
-            <option value="SGL">Single Room</option>
-            <option value="DBL">Double Room</option>
-            <option value="TPL">Triple Room</option>
-          </select>
-
-          <textarea
-            placeholder="Special requests or notes"
-            value={bookingData.notes}
-            onChange={(e) => updateBooking("notes", e.target.value)}
-          />
-
-          <button
-            type="button"
-            className="submit-package-booking"
-            onClick={onSubmit}
-            disabled={loading}
-          >
-            {loading ? "Sending..." : "Send Booking Request"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PackageProAlert({ alert, onClose, onLogin, onSignup }) {
-  const isLoginAlert = alert.type === "login";
-
-  return (
-    <div className="package-pro-alert-overlay">
-      <div className={`package-pro-alert ${alert.type}`}>
-        <button
-          type="button"
-          className="package-pro-alert-close"
-          onClick={onClose}
-        >
-          <FaTimes />
-        </button>
-
-        <div className="package-pro-alert-icon">
-          {alert.type === "success" ? "âœ“" : isLoginAlert ? "ðŸ”" : "!"}
-        </div>
-
-        <h3>{alert.title}</h3>
-        <p>{alert.message}</p>
-
-        {isLoginAlert ? (
-          <div className="package-pro-alert-actions">
-            <button
-              type="button"
-              className="package-pro-alert-btn"
-              onClick={onLogin}
-            >
-              Login
-            </button>
-
-            <button
-              type="button"
-              className="package-pro-alert-secondary"
-              onClick={onSignup}
-            >
-              Create Account
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            className="package-pro-alert-btn"
-            onClick={onClose}
-          >
-            OK
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Pagination({ currentPage, totalPages, onPageChange }) {
-  if (totalPages <= 1) return null;
-
-  return (
-    <div className="pagination-wrap">
-      <button
-        type="button"
-        className="pagination-arrow"
-        disabled={currentPage === 1}
-        onClick={() => onPageChange(currentPage - 1)}
-      >
-        Prev
-      </button>
-
-      <div className="pagination-pages">
-        {Array.from({ length: totalPages }, (_, index) => {
-          const page = index + 1;
-
-          return (
-            <button
-              type="button"
-              key={page}
-              className={`page-number-btn ${
-                currentPage === page ? "active" : ""
-              }`}
-              onClick={() => onPageChange(page)}
-            >
-              {page}
-            </button>
-          );
-        })}
-      </div>
-
-      <button
-        type="button"
-        className="pagination-arrow"
-        disabled={currentPage === totalPages}
-        onClick={() => onPageChange(currentPage + 1)}
-      >
-        Next
-      </button>
-    </div>
-  );
-}
-
