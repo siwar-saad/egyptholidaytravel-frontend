@@ -13,7 +13,7 @@ export const ADMIN_PERMISSIONS = [
 
 export function getStoredUser() {
   try {
-    const user = localStorage.getItem("user");
+    const user = localStorage.getItem("user") || sessionStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   } catch {
     return null;

@@ -16,6 +16,13 @@ const getImageUrl = (src) => {
   return src;
 };
 
+const clearStoredAuth = () => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+  sessionStorage.removeItem("token");
+};
+
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,26 +32,27 @@ export default function Navbar() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const res = await API.get("/auth/me");
+        const res = await API.get("/auth/me", { skipAuthRedirect: true });
         setUser(res.data?.user || null);
-      } catch {
-        try {
-          const storedUser =
-            localStorage.getItem("user") || sessionStorage.getItem("user");
-
-          setUser(storedUser ? JSON.parse(storedUser) : null);
-        } catch {
-          setUser(null);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          clearStoredAuth();
         }
+
+        setUser(null);
       }
     };
 
     loadUser();
 
     window.addEventListener("storage", loadUser);
+    window.addEventListener("authChanged", loadUser);
 
-    return () => window.removeEventListener("storage", loadUser);
-  }, []);
+    return () => {
+      window.removeEventListener("storage", loadUser);
+      window.removeEventListener("authChanged", loadUser);
+    };
+  }, [location.pathname]);
 
   const getUserName = () => {
   if (!user) return "";

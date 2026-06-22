@@ -21,6 +21,13 @@ import {
 import API from "../api";
 import "./HomeChatbot.css";
 
+const clearStoredAuth = () => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+  sessionStorage.removeItem("token");
+};
+
 export default function HomeChatbot() {
   const navigate = useNavigate();
   const endRef = useRef(null);
@@ -114,22 +121,14 @@ export default function HomeChatbot() {
     };
 
     const loadUser = async () => {
-      const savedUser =
-        localStorage.getItem("user") || sessionStorage.getItem("user");
-
-      if (savedUser) {
-        try {
-          setUser(JSON.parse(savedUser));
-          return;
-        } catch {
-          setUser(null);
-        }
-      }
-
       try {
         const res = await API.get("/auth/me", { skipAuthRedirect: true });
-        if (res.data?.user) setUser(res.data.user);
-      } catch {
+        setUser(res.data?.user || null);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          clearStoredAuth();
+        }
+
         setUser(null);
       }
     };
@@ -155,6 +154,12 @@ export default function HomeChatbot() {
 
     loadUser();
     loadBotData();
+
+    window.addEventListener("authChanged", loadUser);
+
+    return () => {
+      window.removeEventListener("authChanged", loadUser);
+    };
   }, []);
 
   useEffect(() => {

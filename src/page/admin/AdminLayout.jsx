@@ -17,6 +17,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
+import API from "../../api";
 import Navbar from "../../components/Navbar";
 import "./Admin.css";
 import { getStoredUser, hasPermission } from "./adminPermissions";
@@ -117,9 +118,22 @@ export default function AdminLayout({ children }) {
     setMobileMenuOpen(false);
   };
 
-  const handleLogout = () => {
+  const clearStoredAuth = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    window.dispatchEvent(new Event("authChanged"));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await API.post("/auth/logout", null, { skipAuthRedirect: true });
+    } catch (err) {
+      console.log("Admin logout error:", err.response?.data || err.message);
+    }
+
+    clearStoredAuth();
     navigate("/login");
   };
 
