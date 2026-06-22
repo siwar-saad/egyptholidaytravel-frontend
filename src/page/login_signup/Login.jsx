@@ -239,10 +239,6 @@ export default function Login() {
 
       storage.setItem("user", JSON.stringify(user));
 
-      if (res.data?.token) {
-        storage.setItem("token", res.data.token);
-      }
-
       navigate(user.role === "admin" ? "/admin" : "/profile", {
         replace: true,
       });

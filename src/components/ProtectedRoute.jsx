@@ -37,9 +37,7 @@ const clearStoredAuth = () => {
 function ProtectedRoute({ children, requiredRole }) {
   const location = useLocation();
   const initialUser = getStoredUser();
-  const [status, setStatus] = useState(
-    initialUser ? "authenticated" : "checking"
-  );
+  const [status, setStatus] = useState("checking");
   const [user, setUser] = useState(initialUser);
 
   useEffect(() => {
@@ -50,7 +48,6 @@ function ProtectedRoute({ children, requiredRole }) {
 
       if (storedUser) {
         setUser(storedUser);
-        setStatus("authenticated");
       } else {
         setStatus("checking");
       }
@@ -86,6 +83,7 @@ function ProtectedRoute({ children, requiredRole }) {
     };
 
     const handleUnauthorized = () => {
+      clearStoredAuth();
       setUser(null);
       setStatus("guest");
     };

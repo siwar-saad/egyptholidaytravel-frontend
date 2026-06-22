@@ -174,10 +174,6 @@ export default function Signup() {
 
       if (response.data?.user) {
         sessionStorage.setItem("user", JSON.stringify(response.data.user));
-
-        if (response.data?.token) {
-          sessionStorage.setItem("token", response.data.token);
-        }
       }
 
       setShowCodePopup(false);
