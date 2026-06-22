@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaHome,
@@ -13,108 +13,134 @@ import {
   FaCalendarPlus,
   FaUserCircle,
   FaHotel,
-  FaUserPlus,
   FaBars,
   FaTimes,
-  FaPlaneDeparture,
 } from "react-icons/fa";
 
-import API from "../../api";
-import Navbar from "../../components/navbar";
+import Navbar from "../../components/Navbar";
 import "./Admin.css";
+import { getStoredUser, hasPermission } from "./adminPermissions";
 
 export default function AdminLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  useEffect(() => {
+    const currentUser = getStoredUser();
+
+    if (!currentUser || currentUser.role !== "admin") {
+      navigate("/login");
+      return;
+    }
+
+    setUser(currentUser);
+  }, [navigate]);
+
   const menu = [
-    { name: "Dashboard", path: "/admin", icon: <FaHome /> },
-    { name: "Packages", path: "/admin/packages", icon: <FaBoxOpen /> },
-    { name: "Hotels", path: "/admin/hotels", icon: <FaHotel /> },
+    {
+      name: "Dashboard",
+      path: "/admin",
+      icon: <FaHome />,
+      permission: "dashboard",
+    },
+    {
+      name: "Packages",
+      path: "/admin/packages",
+      icon: <FaBoxOpen />,
+      permission: "packages",
+    },
+    {
+      name: "Hotels",
+      path: "/admin/hotels",
+      icon: <FaHotel />,
+      permission: "hotels",
+    },
     {
       name: "Reservations",
       path: "/admin/reservations",
       icon: <FaClipboardList />,
+      permission: "reservations",
     },
     {
       name: "Create Reservation",
       path: "/admin/create-reservation",
       icon: <FaCalendarPlus />,
+      permission: "create_reservation",
     },
-    { name: "Users", path: "/admin/clients", icon: <FaUsers /> },
-    { name: "Payments", path: "/admin/payments", icon: <FaCreditCard /> },
-    { name: "Messages", path: "/admin/messages", icon: <FaEnvelope /> },
-    { name: "Subscribers", path: "/admin/subscribers", icon: <FaUserPlus /> },
-    { name: "Reviews", path: "/admin/reviews", icon: <FaStar /> },
-    { name: "Profile", path: "/admin/profile", icon: <FaUserCircle /> },
-    { name: "Settings", path: "/admin/settings", icon: <FaCog /> },
+    {
+      name: "Users",
+      path: "/admin/users",
+      icon: <FaUsers />,
+      permission: "users",
+    },
+    {
+      name: "Payments",
+      path: "/admin/payments",
+      icon: <FaCreditCard />,
+      permission: "payments",
+    },
+    {
+      name: "Messages",
+      path: "/admin/messages",
+      icon: <FaEnvelope />,
+      permission: "messages",
+    },
+    {
+      name: "Reviews",
+      path: "/admin/reviews",
+      icon: <FaStar />,
+      permission: "reviews",
+    },
+    {
+      name: "Profile",
+      path: "/admin/profile",
+      icon: <FaUserCircle />,
+      permission: "settings",
+    },
+    {
+      name: "Settings",
+      path: "/admin/settings",
+      icon: <FaCog />,
+      permission: "settings",
+    },
   ];
 
-  const isActive = (path) => {
-    if (path === "/admin") {
-      return location.pathname === "/admin";
-    }
+  const allowedMenu = menu.filter((item) =>
+    hasPermission(user, item.permission)
+  );
 
-    return location.pathname.startsWith(path);
-  };
-
-  const goTo = (path) => {
+  const handleNavigate = (path) => {
     navigate(path);
     setMobileMenuOpen(false);
   };
 
-  const logout = async () => {
-    try {
-      await API.post("/auth/logout");
-    } catch (err) {
-      console.log("Admin logout error:", err.response?.data || err.message);
-    }
-
-    localStorage.removeItem("user");
+  const handleLogout = () => {
     localStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-
-    window.dispatchEvent(new Event("authChanged"));
-    window.location.replace("/login");
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
+  if (!user) return null;
+
   return (
-    <div className="admin-wrapper">
+    <>
       <Navbar />
 
-      <button
-        type="button"
-        className="admin-mobile-menu-btn"
-        onClick={() => setMobileMenuOpen(true)}
-      >
-        <FaBars />
-      </button>
-
-      {mobileMenuOpen && (
+      <div className="admin-layout">
         <button
           type="button"
-          className="admin-mobile-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      <div className="admin-page">
-        <aside
-          className={
-            mobileMenuOpen ? "admin-sidebar mobile-open" : "admin-sidebar"
-          }
+          className="admin-mobile-toggle"
+          onClick={() => setMobileMenuOpen(true)}
         >
-          <div className="admin-brand">
-            <div className="brand-icon">
-              <FaPlaneDeparture />
-            </div>
+          <FaBars />
+        </button>
 
-            <div>
-              <h2>Egypt Holiday</h2>
-              <span>Admin Panel</span>
-            </div>
+        <aside className={`admin-sidebar ${mobileMenuOpen ? "open" : ""}`}>
+          <div className="admin-sidebar-head">
+            <h2>Admin EgyptHoliday</h2>
 
             <button
               type="button"
@@ -125,28 +151,53 @@ export default function AdminLayout({ children }) {
             </button>
           </div>
 
-          <nav className="admin-nav">
-            {menu.map((item) => (
-              <button
-                key={item.path}
-                type="button"
-                className={isActive(item.path) ? "active" : ""}
-                onClick={() => goTo(item.path)}
-              >
-                {item.icon}
-                <span>{item.name}</span>
-              </button>
-            ))}
+          <div className="admin-user-mini">
+            <FaUserCircle />
+
+            <div>
+              <strong>
+                {user.firstName || user.name || "Admin"} {user.lastName || ""}
+              </strong>
+              <span>{user.email}</span>
+            </div>
+          </div>
+
+          <nav className="admin-menu">
+            {allowedMenu.length > 0 ? (
+              allowedMenu.map((item) => (
+                <button
+                  key={item.path}
+                  type="button"
+                  className={location.pathname === item.path ? "active" : ""}
+                  onClick={() => handleNavigate(item.path)}
+                >
+                  {item.icon}
+                  <span>{item.name}</span>
+                </button>
+              ))
+            ) : (
+              <p className="admin-no-permission">
+                No permissions assigned.
+              </p>
+            )}
           </nav>
 
-          <button type="button" className="admin-logout" onClick={logout}>
+          <button type="button" className="admin-logout" onClick={handleLogout}>
             <FaSignOutAlt />
             <span>Logout</span>
           </button>
         </aside>
 
+        {mobileMenuOpen && (
+          <button
+            type="button"
+            className="admin-sidebar-overlay"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
         <main className="admin-main">{children}</main>
       </div>
-    </div>
+    </>
   );
 }
