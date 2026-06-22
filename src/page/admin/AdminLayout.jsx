@@ -17,7 +17,8 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
-import Navbar from "../../components/Navbar";
+import Navbar from "../../components/navbar";
+import { logoutClient } from "../../api";
 import "./Admin.css";
 
 export default function AdminLayout({ children }) {
@@ -30,25 +31,77 @@ export default function AdminLayout({ children }) {
   );
 
   const menu = [
-    { name: "Dashboard", path: "/admin", icon: <FaHome /> },
-    { name: "Packages", path: "/admin/packages", icon: <FaBoxOpen /> },
-    { name: "Hotels", path: "/admin/hotels", icon: <FaHotel /> },
+    { key: "dashboard", name: "Dashboard", path: "/admin", icon: <FaHome /> },
+
     {
+      key: "packages",
+      name: "Packages",
+      path: "/admin/packages",
+      icon: <FaBoxOpen />,
+    },
+
+    {
+      key: "hotels",
+      name: "Hotels",
+      path: "/admin/hotels",
+      icon: <FaHotel />,
+    },
+
+    {
+      key: "reservations",
       name: "Reservations",
       path: "/admin/reservations",
       icon: <FaClipboardList />,
     },
+
     {
+      key: "create-reservation",
       name: "Create Reservation",
       path: "/admin/create-reservation",
       icon: <FaCalendarPlus />,
     },
-    { name: "Users", path: "/admin/users", icon: <FaUsers /> },
-    { name: "Payments", path: "/admin/payments", icon: <FaCreditCard /> },
-    { name: "Messages", path: "/admin/messages", icon: <FaEnvelope /> },
-    { name: "Reviews", path: "/admin/reviews", icon: <FaStar /> },
-    { name: "Profile", path: "/admin/profile", icon: <FaUserCircle /> },
-    { name: "Settings", path: "/admin/settings", icon: <FaCog /> },
+
+    {
+      key: "users",
+      name: "Users",
+      path: "/admin/users",
+      icon: <FaUsers />,
+    },
+
+    {
+      key: "payments",
+      name: "Payments",
+      path: "/admin/payments",
+      icon: <FaCreditCard />,
+    },
+
+    {
+      key: "messages",
+      name: "Messages",
+      path: "/admin/messages",
+      icon: <FaEnvelope />,
+    },
+
+    {
+      key: "reviews",
+      name: "Reviews",
+      path: "/admin/reviews",
+      icon: <FaStar />,
+    },
+
+    {
+      key: "profile",
+      name: "Profile",
+      path: "/admin/profile",
+      icon: <FaUserCircle />,
+    },
+
+    {
+      key: "settings",
+      name: "Settings",
+      path: "/admin/settings",
+      icon: <FaCog />,
+    },
   ];
 
   useEffect(() => {
@@ -92,14 +145,11 @@ export default function AdminLayout({ children }) {
     setMobileMenuOpen(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("role");
-    localStorage.removeItem("admin");
-
+  const handleLogout = async () => {
     setMobileMenuOpen(false);
-    navigate("/login");
+    document.body.style.overflow = "";
+
+    await logoutClient();
   };
 
   const mobileButtonStyle = {

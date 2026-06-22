@@ -1,44 +1,77 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaChevronDown, FaPlus, FaUserShield, FaUsers } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaPlus,
+  FaUserShield,
+  FaUsers,
+  FaCheckCircle,
+} from "react-icons/fa";
 import API from "../../api";
 
 const COUNTRIES = [
+  { flag: "https://flagcdn.com/fr.svg", name: "France", dialCode: "+33" },
+  { flag: "https://flagcdn.com/de.svg", name: "Germany", dialCode: "+49" },
+  { flag: "https://flagcdn.com/lu.svg", name: "Luxembourg", dialCode: "+352" },
+  { flag: "https://flagcdn.com/tr.svg", name: "Turkey", dialCode: "+90" },
+  { flag: "https://flagcdn.com/tn.svg", name: "Tunisia", dialCode: "+216" },
+  { flag: "https://flagcdn.com/ma.svg", name: "Morocco", dialCode: "+212" },
+  { flag: "https://flagcdn.com/ba.svg", name: "Bosnia", dialCode: "+387" },
+];
+
+const ADMIN_TASKS = [
   {
-    flag: "https://flagcdn.com/fr.svg",
-    name: "France",
-    dialCode: "+33",
+    key: "dashboard",
+    label: "Dashboard",
+    description: "View dashboard statistics and overview.",
   },
   {
-    flag: "https://flagcdn.com/de.svg",
-    name: "Germany",
-    dialCode: "+49",
+    key: "packages",
+    label: "Packages",
+    description: "Add, edit and delete travel packages.",
   },
   {
-    flag: "https://flagcdn.com/lu.svg",
-    name: "Luxembourg",
-    dialCode: "+352",
+    key: "hotels",
+    label: "Hotels",
+    description: "Manage hotels and hotel information.",
   },
   {
-    flag: "https://flagcdn.com/tr.svg",
-    name: "Turkey",
-    dialCode: "+90",
+    key: "reservations",
+    label: "Reservations",
+    description: "View and manage client reservations.",
   },
   {
-    flag: "https://flagcdn.com/tn.svg",
-    name: "Tunisia",
-    dialCode: "+216",
+    key: "create_reservation",
+    label: "Create Reservation",
+    description: "Create reservations for clients.",
   },
   {
-    flag: "https://flagcdn.com/ma.svg",
-    name: "Morocco",
-    dialCode: "+212",
+    key: "users",
+    label: "Users",
+    description: "Manage clients and admin accounts.",
   },
   {
-    flag: "https://flagcdn.com/ba.svg",
-    name: "Bosnia",
-    dialCode: "+387",
+    key: "payments",
+    label: "Payments",
+    description: "View and manage payments.",
+  },
+  {
+    key: "messages",
+    label: "Messages",
+    description: "Read and reply to client messages.",
+  },
+  {
+    key: "reviews",
+    label: "Reviews",
+    description: "Approve, hide or delete reviews.",
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    description: "Access website and account settings.",
   },
 ];
+
+const DEFAULT_ADMIN_PERMISSIONS = ADMIN_TASKS.map((task) => task.key);
 
 const EMPTY_USER_FORM = {
   firstName: "",
@@ -61,6 +94,28 @@ const EMPTY_NOTICE = {
   message: "",
 };
 
+const normalizePermissions = (value) => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch {
+      return value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+};
+
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [activeUserTab, setActiveUserTab] = useState("clients");
@@ -72,16 +127,72 @@ export default function Users() {
   const [userForm, setUserForm] = useState(EMPTY_USER_FORM);
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
   const [openCountry, setOpenCountry] = useState(false);
-  const [loading, setLoading] = useState(false);
 
+  const [adminTypeChoice, setAdminTypeChoice] = useState("general_admin");
+  const [adminPermissions, setAdminPermissions] = useState([]);
+
+  const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(EMPTY_DELETE_CONFIRM);
   const [notice, setNotice] = useState(EMPTY_NOTICE);
+
+  const storedAdmin = useMemo(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const currentAdmin = useMemo(() => {
+    if (!storedAdmin) return null;
+
+    const storedId = storedAdmin.id || storedAdmin._id;
+    const storedEmail = storedAdmin.email;
+
+    const adminFromList = users.find((user) => {
+      const userId = user.id || user._id;
+
+      return (
+        (storedId && String(userId) === String(storedId)) ||
+        (storedEmail &&
+          user.email &&
+          user.email.toLowerCase() === storedEmail.toLowerCase())
+      );
+    });
+
+    return {
+      ...storedAdmin,
+      ...(adminFromList || {}),
+    };
+  }, [storedAdmin, users]);
+
+  const currentAdminPermissions = useMemo(() => {
+    return normalizePermissions(
+      currentAdmin?.permissions ||
+        currentAdmin?.tasks ||
+        currentAdmin?.adminPermissions
+    );
+  }, [currentAdmin]);
+
+  const currentAdminType = String(
+    currentAdmin?.admin_type || currentAdmin?.adminType || ""
+  ).toLowerCase();
+
+  const isCurrentGeneralAdmin =
+    String(currentAdmin?.role || "").toLowerCase() === "admin" &&
+    (currentAdminType === "general_admin" ||
+      currentAdmin?.email === "admin@gmail.com" ||
+      (!currentAdminType && currentAdminPermissions.length === 0) ||
+      DEFAULT_ADMIN_PERMISSIONS.every((permission) =>
+        currentAdminPermissions.includes(permission)
+      ));
 
   const notify = (message, type = "success") => {
     setNotice({
       show: true,
       type,
-      title: type === "success" ? "Success" : "Notice",
+      title: type === "success" ? "Success" : "Action Required",
       message,
     });
   };
@@ -99,6 +210,74 @@ export default function Users() {
     return role === "admin" ? "admin" : "user";
   };
 
+  const getUserPermissions = (user) => {
+    const role = (user?.role || user?.type || "user").toLowerCase();
+
+    const adminType = String(
+      user?.admin_type || user?.adminType || ""
+    ).toLowerCase();
+
+    const permissions = normalizePermissions(
+      user?.permissions || user?.tasks || user?.adminPermissions
+    );
+
+    if (role === "admin" && user?.email === "admin@gmail.com") {
+      return DEFAULT_ADMIN_PERMISSIONS;
+    }
+
+    if (role === "admin" && adminType === "general_admin") {
+      return DEFAULT_ADMIN_PERMISSIONS;
+    }
+
+    if (role === "admin" && !adminType && permissions.length === 0) {
+      return DEFAULT_ADMIN_PERMISSIONS;
+    }
+
+    return permissions;
+  };
+
+  const getTaskLabel = (key) => {
+    return ADMIN_TASKS.find((task) => task.key === key)?.label || key;
+  };
+
+  const isGeneralAdminByPermissions = (permissions = []) => {
+    return DEFAULT_ADMIN_PERMISSIONS.every((permission) =>
+      permissions.includes(permission)
+    );
+  };
+
+  const getAdminTypeLabel = (user) => {
+    const role = (user?.role || user?.type || "user").toLowerCase();
+
+    const adminType = String(
+      user?.admin_type || user?.adminType || ""
+    ).toLowerCase();
+
+    const rawPermissions = normalizePermissions(
+      user?.permissions || user?.tasks || user?.adminPermissions
+    );
+
+    if (role === "admin" && user?.email === "admin@gmail.com") {
+      return "General Admin";
+    }
+
+    if (role === "admin" && adminType === "general_admin") {
+      return "General Admin";
+    }
+
+    if (role === "admin" && adminType === "sub_admin") {
+      return "Sub Admin";
+    }
+
+    if (role === "admin" && !adminType && rawPermissions.length === 0) {
+      return "General Admin";
+    }
+
+    return isGeneralAdminByPermissions(rawPermissions)
+      ? "General Admin"
+      : "Sub Admin";
+  };
+
   const isEmailVerified = (user) => {
     return Boolean(
       user?.emailVerified ||
@@ -114,7 +293,6 @@ export default function Users() {
 
   const getUserName = (user) => {
     if (!user) return "";
-
     if (user.name) return user.name;
 
     const firstName = user.firstName || user.first_name || "";
@@ -201,6 +379,11 @@ export default function Users() {
   }, [activeUserTab, admins, clients, userSearch]);
 
   const openAddUser = (role = "user") => {
+    if (role === "admin" && !isCurrentGeneralAdmin) {
+      notify("Only a general admin can add another admin.", "error");
+      return;
+    }
+
     setEditingUser(null);
 
     setUserForm({
@@ -209,13 +392,40 @@ export default function Users() {
     });
 
     setSelectedCountry(COUNTRIES[0]);
+    setAdminTypeChoice(role === "admin" ? "general_admin" : "");
+    setAdminPermissions(role === "admin" ? DEFAULT_ADMIN_PERMISSIONS : []);
     setOpenCountry(false);
     setShowUserForm(true);
   };
 
   const openEditUser = (user) => {
+    const role = getUserRole(user);
+
+    if (role === "admin" && !isCurrentGeneralAdmin) {
+      notify("Only a general admin can edit admin accounts.", "error");
+      return;
+    }
+
     const phoneData = splitPhone(user?.phone || "");
     const userCountry = getCountryFromUser(user, phoneData.country);
+
+    const permissions = role === "admin" ? getUserPermissions(user) : [];
+    const savedAdminType = String(
+      user?.admin_type || user?.adminType || ""
+    ).toLowerCase();
+
+    const currentAdminTypeForEdit =
+      user?.email === "admin@gmail.com"
+        ? "general_admin"
+        : savedAdminType === "general_admin"
+        ? "general_admin"
+        : savedAdminType === "sub_admin"
+        ? "sub_admin"
+        : permissions.length === 0
+        ? "general_admin"
+        : isGeneralAdminByPermissions(permissions)
+        ? "general_admin"
+        : "sub_admin";
 
     setEditingUser(user);
 
@@ -224,10 +434,18 @@ export default function Users() {
       lastName: user?.lastName || user?.last_name || "",
       email: user?.email || "",
       phone: phoneData.phone,
-      role: getUserRole(user),
+      role,
     });
 
     setSelectedCountry(userCountry);
+    setAdminTypeChoice(role === "admin" ? currentAdminTypeForEdit : "");
+    setAdminPermissions(
+      role === "admin"
+        ? currentAdminTypeForEdit === "general_admin"
+          ? DEFAULT_ADMIN_PERMISSIONS
+          : permissions
+        : []
+    );
     setOpenCountry(false);
     setShowUserForm(true);
   };
@@ -237,6 +455,8 @@ export default function Users() {
     setEditingUser(null);
     setUserForm(EMPTY_USER_FORM);
     setSelectedCountry(COUNTRIES[0]);
+    setAdminTypeChoice("general_admin");
+    setAdminPermissions([]);
     setOpenCountry(false);
     setLoading(false);
   };
@@ -253,6 +473,37 @@ export default function Users() {
     setOpenCountry(false);
   };
 
+  const handleAdminTypeChange = (value) => {
+    setAdminTypeChoice(value);
+
+    if (value === "general_admin") {
+      setAdminPermissions(DEFAULT_ADMIN_PERMISSIONS);
+    } else {
+      setAdminPermissions([]);
+    }
+  };
+
+  const toggleAdminPermission = (permissionKey) => {
+    setAdminPermissions((prev) => {
+      if (prev.includes(permissionKey)) {
+        return prev.filter((item) => item !== permissionKey);
+      }
+
+      return [...prev, permissionKey];
+    });
+  };
+
+  const selectAllAdminPermissions = () => {
+    setAdminPermissions(DEFAULT_ADMIN_PERMISSIONS);
+  };
+
+  const clearAdminPermissions = () => {
+    setAdminPermissions([]);
+  };
+
+  const isGeneralAdminAccount =
+    userForm.role === "admin" && adminTypeChoice === "general_admin";
+
   const saveUser = async () => {
     const firstName = userForm.firstName.trim();
     const lastName = userForm.lastName.trim();
@@ -260,8 +511,34 @@ export default function Users() {
     const phone = userForm.phone.trim();
     const role = userForm.role === "admin" ? "admin" : "user";
 
+    if (role === "admin" && !isCurrentGeneralAdmin) {
+      notify("Only a general admin can create or edit admin tasks.", "error");
+      return;
+    }
+
+    const adminType =
+      role === "admin" && adminTypeChoice === "general_admin"
+        ? "general_admin"
+        : "sub_admin";
+
+    const finalAdminPermissions =
+      role === "admin"
+        ? adminType === "general_admin"
+          ? DEFAULT_ADMIN_PERMISSIONS
+          : adminPermissions
+        : [];
+
     if (!firstName || !lastName || !email || !phone) {
       notify("Please fill first name, last name, email and phone.", "error");
+      return;
+    }
+
+    if (
+      role === "admin" &&
+      adminType === "sub_admin" &&
+      finalAdminPermissions.length === 0
+    ) {
+      notify("Please select at least one admin task for this sub admin.", "error");
       return;
     }
 
@@ -277,6 +554,10 @@ export default function Users() {
       phone: fullPhone,
       country: selectedCountry.name,
       role,
+      admin_type: role === "admin" ? adminType : null,
+      adminType: role === "admin" ? adminType : null,
+      permissions: finalAdminPermissions,
+      tasks: finalAdminPermissions,
     };
 
     try {
@@ -344,9 +625,15 @@ export default function Users() {
 
   const openDeleteConfirm = (user) => {
     const userId = getUserId(user);
+    const role = getUserRole(user);
 
     if (!userId) {
       notify("User id not found.", "error");
+      return;
+    }
+
+    if (role === "admin" && !isCurrentGeneralAdmin) {
+      notify("Only a general admin can delete admin accounts.", "error");
       return;
     }
 
@@ -418,13 +705,15 @@ export default function Users() {
               <FaPlus /> Add Client
             </button>
 
-            <button
-              type="button"
-              className="add-admin-btn"
-              onClick={() => openAddUser("admin")}
-            >
-              <FaUserShield /> Add Admin
-            </button>
+            {isCurrentGeneralAdmin && (
+              <button
+                type="button"
+                className="add-admin-btn"
+                onClick={() => openAddUser("admin")}
+              >
+                <FaUserShield /> Add Admin
+              </button>
+            )}
           </div>
         </div>
 
@@ -472,6 +761,7 @@ export default function Users() {
             {filteredUsers.map((user, index) => {
               const role = getUserRole(user);
               const emailVerified = isEmailVerified(user);
+              const permissions = getUserPermissions(user);
 
               return (
                 <div className="client-card" key={getUserId(user) || index}>
@@ -489,6 +779,12 @@ export default function Users() {
                         {role === "admin" ? "Admin" : "Client"}
                       </span>
                     </div>
+
+                    {role === "admin" && (
+                      <span className="admin-type-badge">
+                        {getAdminTypeLabel(user)}
+                      </span>
+                    )}
 
                     <div className="user-email-line">
                       <p>{user?.email || "No email"}</p>
@@ -508,22 +804,46 @@ export default function Users() {
 
                     <span>{user?.phone || "No phone"}</span>
                     <span>{user?.country || "No country"}</span>
+
+                    {role === "admin" && (
+                      <div className="admin-card-permissions">
+                        <strong>Tasks:</strong>
+
+                        {permissions.length > 0 ? (
+                          <div className="admin-card-permission-list">
+                            {permissions.slice(0, 5).map((permission) => (
+                              <span key={permission}>
+                                {getTaskLabel(permission)}
+                              </span>
+                            ))}
+
+                            {permissions.length > 5 && (
+                              <span>+{permissions.length - 5} more</span>
+                            )}
+                          </div>
+                        ) : (
+                          <p>No tasks selected</p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="client-actions">
-                    {role !== "admin" && (
+                    {(role !== "admin" || isCurrentGeneralAdmin) && (
                       <button type="button" onClick={() => openEditUser(user)}>
                         Edit
                       </button>
                     )}
 
-                    <button
-                      type="button"
-                      className="delete-client-btn"
-                      onClick={() => openDeleteConfirm(user)}
-                    >
-                      Delete
-                    </button>
+                    {(role !== "admin" || isCurrentGeneralAdmin) && (
+                      <button
+                        type="button"
+                        className="delete-client-btn"
+                        onClick={() => openDeleteConfirm(user)}
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -549,8 +869,8 @@ export default function Users() {
 
                 <p>
                   {userForm.role === "admin"
-                    ? "Create or edit an admin account."
-                    : "Create or edit a client account."}
+                    ? "Create an admin account and choose exactly what this admin can manage."
+                    : "Create a client account for your agency customers."}
                 </p>
               </div>
 
@@ -564,16 +884,47 @@ export default function Users() {
             </div>
 
             <div className="package-popup-form client-signup-form">
-              <div className="form-role-box">
-                <label>User Type</label>
+              <div
+                className={
+                  userForm.role === "admin"
+                    ? "selected-user-type-card admin"
+                    : "selected-user-type-card client"
+                }
+              >
+                {userForm.role === "admin" ? <FaUserShield /> : <FaUsers />}
 
-                <select
-                  value={userForm.role}
-                  onChange={(e) => handleChange("role", e.target.value)}
-                >
-                  <option value="user">Client</option>
-                  <option value="admin">Admin</option>
-                </select>
+                <div className="account-type-content">
+                  <span>Account Type</span>
+
+                  {userForm.role === "admin" ? (
+                    isCurrentGeneralAdmin ? (
+                      <select
+                        className="admin-type-select"
+                        value={adminTypeChoice}
+                        onChange={(e) => handleAdminTypeChange(e.target.value)}
+                      >
+                        <option value="general_admin">General Admin</option>
+                        <option value="sub_admin">Sub Admin</option>
+                      </select>
+                    ) : (
+                      <strong>
+                        {adminTypeChoice === "general_admin"
+                          ? "General Admin"
+                          : "Sub Admin"}
+                      </strong>
+                    )
+                  ) : (
+                    <strong>Client Account</strong>
+                  )}
+
+                  {userForm.role === "admin" && (
+                    <p className="account-type-note">
+                      {isGeneralAdminAccount
+                        ? "Full access to all admin panel tasks."
+                        : "Limited access based on selected tasks."}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="client-signup-row">
@@ -658,6 +1009,76 @@ export default function Users() {
                   />
                 </div>
               </div>
+
+              {userForm.role === "admin" && isCurrentGeneralAdmin && (
+                <div className="admin-permissions-box">
+                  <div className="admin-permissions-head">
+                    <div>
+                      <h3>
+                        {adminTypeChoice === "general_admin"
+                          ? "General Admin Tasks"
+                          : "Sub Admin Tasks"}
+                      </h3>
+
+                      <p>
+                        {adminTypeChoice === "general_admin"
+                          ? "This admin has access to all admin panel tasks."
+                          : "Select exactly what this sub admin can manage."}
+                      </p>
+                    </div>
+
+                    {adminTypeChoice === "sub_admin" && (
+                      <div className="admin-permissions-actions">
+                        <button
+                          type="button"
+                          onClick={selectAllAdminPermissions}
+                        >
+                          Select all
+                        </button>
+
+                        <button type="button" onClick={clearAdminPermissions}>
+                          Clear
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-permissions-grid">
+                    {ADMIN_TASKS.map((task) => {
+                      const checked =
+                        adminTypeChoice === "general_admin"
+                          ? true
+                          : adminPermissions.includes(task.key);
+
+                      return (
+                        <button
+                          type="button"
+                          key={task.key}
+                          className={
+                            checked
+                              ? "admin-permission-item active"
+                              : "admin-permission-item"
+                          }
+                          onClick={() => {
+                            if (adminTypeChoice === "sub_admin") {
+                              toggleAdminPermission(task.key);
+                            }
+                          }}
+                        >
+                          <span className="admin-permission-check">
+                            {checked && <FaCheckCircle />}
+                          </span>
+
+                          <div>
+                            <strong>{task.label}</strong>
+                            <p>{task.description}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="package-popup-actions">
                 <button type="button" onClick={saveUser} disabled={loading}>
@@ -759,17 +1180,26 @@ function UserNoticePopup({ notice, onClose }) {
   const isSuccess = notice.type === "success";
 
   return (
-    <div className="user-notice-overlay">
-      <div className={`user-notice-popup ${notice.type}`}>
+    <div className="user-notice-overlay" onClick={onClose}>
+      <div
+        className={`user-notice-popup ${notice.type}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button type="button" className="user-notice-close" onClick={onClose}>
           ×
         </button>
 
-        <div className="user-notice-icon">{isSuccess ? "✓" : "!"}</div>
+        <div className={`user-notice-icon ${notice.type}`}>
+          {isSuccess ? "✓" : "!"}
+        </div>
 
-        <h2>{notice.title}</h2>
+        <div className="user-notice-content">
+          <span>{isSuccess ? "Completed" : "Please Check"}</span>
 
-        <p>{notice.message}</p>
+          <h2>{notice.title}</h2>
+
+          <p>{notice.message}</p>
+        </div>
 
         <button type="button" className="user-notice-btn" onClick={onClose}>
           OK
