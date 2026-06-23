@@ -2195,7 +2195,57 @@
   gap: 34px;
 }
 
+.turkey-group-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 24px;
+}
+
+.turkey-group-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 18px;
+  border: 1px solid rgba(147, 84, 38, 0.18);
+  border-radius: 18px;
+  background: #fff7ef;
+  color: #5f351b;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(55, 35, 18, 0.08);
+}
+
+.turkey-group-nav span {
+  display: grid;
+  gap: 4px;
+  font-weight: 900;
+}
+
+.turkey-group-nav small {
+  color: #935426;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.turkey-group-nav b {
+  color: #2b1d15;
+  font-size: 16px;
+}
+
+.turkey-group-nav strong {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #935426;
+  font-size: 12px;
+}
+
 .turkey-package-group-card {
+  scroll-margin-top: 110px;
   padding: 26px;
   border-radius: 34px;
   background:
@@ -2339,6 +2389,10 @@
 }
 
 @media (max-width: 1100px) {
+  .turkey-group-nav {
+    grid-template-columns: 1fr;
+  }
+
   .turkey-hotels-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

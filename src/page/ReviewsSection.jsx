@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../api";
+import { debugLog } from "../utils/debugLog";
 import "./ReviewsSection.css";
 
 export default function ReviewsSection() {
@@ -16,7 +17,7 @@ export default function ReviewsSection() {
       const res = await API.get("/reviews");
       setReviews(res.data || []);
     } catch (err) {
-      console.log("Load reviews error:", err.response?.data || err.message);
+      debugLog("Load reviews error:", err.response?.data || err.message);
     }
   };
 

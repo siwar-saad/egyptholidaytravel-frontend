@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 
 export default function OtherRoutesChooser({
-  packageCount,
+  turkeyCount = 0,
   loading,
   onChoose,
   onBack,
@@ -59,7 +59,7 @@ export default function OtherRoutesChooser({
             <strong>
               {loading
                 ? "Loading..."
-                : `${packageCount} package${packageCount === 1 ? "" : "s"}`}
+                : `${turkeyCount} package${turkeyCount === 1 ? "" : "s"}`}
             </strong>
           </div>
         </button>

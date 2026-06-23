@@ -17,6 +17,7 @@ import {
 
 import Navbar from "../../components/navbar";
 import API from "../../api";
+import { clearStoredAuth } from "../../utils/authStorage";
 import "./Admin.css";
 
 import Dashboard from "./Dashboard";
@@ -51,11 +52,7 @@ export default function Admin() {
       console.log("Admin logout error:", err.response?.data || err.message);
     }
 
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    window.dispatchEvent(new Event("authChanged"));
+    clearStoredAuth();
 
     window.location.replace("/login");
   };
