@@ -534,3 +534,71 @@
   margin-top: 0 !important;
   padding-top: 25px !important;
 }
+/* Admin type in profile */
+.admin-profile-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.admin-profile-badges > span:first-child {
+  margin-bottom: 0;
+}
+
+.admin-profile-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-profile-type-badge.general {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.admin-profile-type-badge.sub {
+  background: #fff0dc;
+  color: #9f5a24;
+}
+
+.admin-profile-access-box {
+  width: fit-content;
+  margin-top: 14px;
+  padding: 13px 16px;
+  border-radius: 18px;
+  background: rgba(159, 90, 36, 0.08);
+  border: 1px solid rgba(159, 90, 36, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-profile-access-box strong {
+  color: #2d1d14;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.admin-profile-access-box small {
+  color: #7a6759;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+@media (max-width: 800px) {
+  .admin-profile-badges {
+    justify-content: center;
+  }
+
+  .admin-profile-access-box {
+    width: 100%;
+    text-align: center;
+  }
+}
