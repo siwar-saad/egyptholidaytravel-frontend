@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
@@ -23,12 +23,6 @@ import PackageModal from "./PackageModal";
 import PackageBookingForm from "./PackageBookingForm";
 import PackageProAlert from "./PackageProAlert";
 import Pagination from "./Pagination";
-import { FRANCE_BELGIUM_HOLLAND_PACKAGES } from "./franceBelgiumHollandPackages";
-import { MOROCCO_SPAIN_PACKAGES } from "./moroccoSpainPackages";
-import { ITALY_SWITZERLAND_FRANCE_SPAIN_PACKAGES } from "./italySwitzerlandFranceSpainPackages";
-import { FRANCIA_PARIS_PACKAGES } from "./franciaParisPackages";
-import { TURKEY_EGYPT_ISTANBUL_SHARM_PACKAGES } from "./turkeyEgyptIstanbulSharmPackages";
-import { TURKEY_ISTANBUL_SUMMER_PACKAGES } from "./turkeyIstanbulSummerPackages";
 
 import {
   EMPTY_LOCKED_FIELDS,
@@ -36,8 +30,6 @@ import {
   ITEMS_PER_PAGE,
   PACKAGE_COUNTRIES,
 } from "./packageConstants";
-import { TURKEY_HOTEL_PACKAGES, TURKEY_OTHER_PACKAGES } from "./turkeyPackages";
-import { EUROPE_TOUR_PACKAGES } from "./europeTourPackages";
 import {
   cleanPackageTitle,
   getPackageCategoryTitle,
@@ -46,7 +38,6 @@ import {
   isPastDate,
   isTurkeyToEgyptPackage,
   matchPriceFilter,
-  mergePackagesWithoutDuplicates,
   splitStoredPhone,
 } from "./packageUtils";
 
@@ -174,21 +165,16 @@ export default function Packages() {
         setPackagesLoading(true);
 
         const res = await API.get("/packages");
-        const loadedPackages = Array.isArray(res.data) ? res.data : [];
+        const loadedPackages = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.value)
+          ? res.data.value
+          : [];
 
-        const mergedPackages = mergePackagesWithoutDuplicates([
-          ...loadedPackages.map(normalizePackage),
-          ...TURKEY_OTHER_PACKAGES.map(normalizePackage),
-          ...EUROPE_TOUR_PACKAGES.map(normalizePackage),
-        ]);
-
-        setPackagesData(mergedPackages);
+        setPackagesData(loadedPackages.map(normalizePackage));
       } catch (err) {
         console.log("Public packages error:", err.response?.data || err.message);
-        setPackagesData([
-          ...TURKEY_OTHER_PACKAGES.map(normalizePackage),
-          ...EUROPE_TOUR_PACKAGES.map(normalizePackage),
-        ]);
+        setPackagesData([]);
       } finally {
         setPackagesLoading(false);
       }
@@ -202,64 +188,160 @@ export default function Packages() {
     [packagesData]
   );
 
+  const getRouteText = (item = {}) =>
+    [
+      item.name,
+      item.backendName,
+      item.route,
+      item.country,
+      item.destination,
+      item.region,
+      item.packageGroupId,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+  const routePackages = (matcher) =>
+    packagesData.filter((item) => {
+      if (isEgyptPackage(item)) return false;
+      return matcher(getRouteText(item), item);
+    });
+
   const turkeyIstanbulSummerPackages = useMemo(
-  () => TURKEY_ISTANBUL_SUMMER_PACKAGES.map(normalizePackage),
-  []
-); 
+    () =>
+      routePackages((text) =>
+        text.includes("istanbul summer") ||
+        text.includes("turkey istanbul") ||
+        text.includes("istanbul 8")
+      ),
+    [packagesData]
+  );
 
   const turkeyToEgyptPackages = useMemo(
-    () => TURKEY_HOTEL_PACKAGES.map(normalizePackage),
-    []
+    () =>
+      routePackages((text, item) =>
+        Boolean(item.packageGroupId) ||
+        Boolean(item.package_group_id) ||
+        (isTurkeyToEgyptPackage(item) &&
+          !text.includes("turkey istanbul") &&
+          !text.includes("istanbul - 8") &&
+          !text.includes("8 days / 7 nights") &&
+          !text.includes("turkey & egypt") &&
+          !text.includes("istanbul - sharm") &&
+          !text.includes("istanbul / sharm"))
+      ),
+    [packagesData]
   );
 
   const turkeyEgyptIstanbulSharmPackages = useMemo(
-  () => TURKEY_EGYPT_ISTANBUL_SHARM_PACKAGES.map(normalizePackage),
-  []
-);
+    () =>
+      routePackages((text) =>
+        text.includes("turkey & egypt") ||
+        text.includes("istanbul - sharm") ||
+        text.includes("istanbul / sharm") ||
+        text.includes("istanbul sharm el-sheikh")
+      ),
+    [packagesData]
+  );
 
   const europeTourPackages = useMemo(
-    () => EUROPE_TOUR_PACKAGES.map(normalizePackage),
-    []
+    () =>
+      routePackages((text) =>
+        text.includes("europe tour") ||
+        text.includes("prague") ||
+        text.includes("budapest")
+      ),
+    [packagesData]
   );
 
   const franceBelgiumHollandPackages = useMemo(
-  () => FRANCE_BELGIUM_HOLLAND_PACKAGES.map(normalizePackage),
-  []
-);
+    () =>
+      routePackages((text) =>
+        text.includes("france") &&
+        text.includes("belgium") &&
+        text.includes("holland")
+      ),
+    [packagesData]
+  );
 
-const moroccoSpainPackages = useMemo(
-  () => MOROCCO_SPAIN_PACKAGES.map(normalizePackage),
-  []
-);
+  const moroccoSpainPackages = useMemo(
+    () =>
+      routePackages((text) =>
+        text.includes("morocco") ||
+        text.includes("marrakech") ||
+        (text.includes("spain") &&
+          !text.includes("italy") &&
+          !text.includes("switzerland") &&
+          !text.includes("milan") &&
+          !text.includes("barcelona"))
+      ),
+    [packagesData]
+  );
 
-const italySwitzerlandFranceSpainPackages = useMemo(
-  () => ITALY_SWITZERLAND_FRANCE_SPAIN_PACKAGES.map(normalizePackage),
-  []
-);
+  const italySwitzerlandFranceSpainPackages = useMemo(
+    () =>
+      routePackages((text) =>
+        text.includes("italy") ||
+        text.includes("switzerland") ||
+        text.includes("milan") ||
+        text.includes("barcelona")
+      ),
+    [packagesData]
+  );
 
-const franciaParisPackages = useMemo(
-  () => FRANCIA_PARIS_PACKAGES.map(normalizePackage),
-  []
-);
+  const franciaParisPackages = useMemo(
+    () =>
+      routePackages((text) =>
+        text.includes("francia paris") ||
+        text.includes("paris city") ||
+        text.includes("seine")
+      ),
+    [packagesData]
+  );
 
   const turkeyPackageGroups = useMemo(() => {
     const groupsMap = new Map();
 
-    turkeyToEgyptPackages.forEach((item) => {
-      const groupId = item.packageGroupId || "turkey-egypt";
+    turkeyToEgyptPackages
+      .filter((item) => item.packageGroupId || item.package_group_id)
+      .forEach((item) => {
+        const groupId = item.packageGroupId || item.package_group_id;
 
-      if (!groupsMap.has(groupId)) {
-        groupsMap.set(groupId, {
-          id: groupId,
-          title: item.packageGroupTitle || "Turkey Package",
-          subtitle: item.packageGroupSubtitle || item.duration,
-          shortTitle: item.packageGroupShortTitle || item.duration,
-          packages: [],
+        if (!groupsMap.has(groupId)) {
+          groupsMap.set(groupId, {
+            id: groupId,
+            title: item.packageGroupTitle || "Turkey Package",
+            subtitle: item.packageGroupSubtitle || item.duration,
+            shortTitle: item.packageGroupShortTitle || item.duration,
+            packages: [],
+          });
+        }
+
+        groupsMap.get(groupId).packages.push(item);
+      });
+
+    turkeyToEgyptPackages
+      .filter((item) => !item.packageGroupId && !item.package_group_id)
+      .forEach((item) => {
+        const text = getRouteText(item);
+        let groupId = "";
+
+        if (text.includes("5 nights") || text.includes("5nights")) {
+          groupId = "turkey-sharm-cairo-5n6d";
+        } else if (text.includes("deluxe")) {
+          groupId = "turkey-sharm-cairo-7n8d-5-2";
+        } else if (text.includes("7 nights") || text.includes("7nights")) {
+          groupId = "turkey-sharm-cairo-7n8d-6-1";
+        }
+
+        if (!groupId || !groupsMap.has(groupId)) return;
+
+        groupsMap.get(groupId).packages.unshift({
+          ...item,
+          isGroupMainPackage: true,
         });
-      }
-
-      groupsMap.get(groupId).packages.push(item);
-    });
+      });
 
     return Array.from(groupsMap.values());
   }, [turkeyToEgyptPackages]);
@@ -464,7 +546,13 @@ const categoryPackages = useMemo(() => {
     const allPackagesToOpen = [
       ...packagesData,
       ...turkeyToEgyptPackages,
+      ...turkeyEgyptIstanbulSharmPackages,
       ...europeTourPackages,
+      ...franceBelgiumHollandPackages,
+      ...moroccoSpainPackages,
+      ...italySwitzerlandFranceSpainPackages,
+      ...franciaParisPackages,
+      ...turkeyIstanbulSummerPackages,
     ];
 
     const packageToOpen = allPackagesToOpen.find(
@@ -494,7 +582,13 @@ const categoryPackages = useMemo(() => {
     navigate,
     packagesData,
     turkeyToEgyptPackages,
+    turkeyEgyptIstanbulSharmPackages,
     europeTourPackages,
+    franceBelgiumHollandPackages,
+    moroccoSpainPackages,
+    italySwitzerlandFranceSpainPackages,
+    franciaParisPackages,
+    turkeyIstanbulSummerPackages,
     packagesLoading,
   ]);
 
@@ -775,6 +869,14 @@ const categoryPackages = useMemo(() => {
           <OtherRoutesChooser
             turkeyCount={turkeyPackageGroups.length}
             europeCount={europeTourPackages.length}
+            turkeyEgyptCount={turkeyEgyptIstanbulSharmPackages.length}
+            turkeyIstanbulCount={turkeyIstanbulSummerPackages.length}
+            franceBelgiumHollandCount={franceBelgiumHollandPackages.length}
+            franciaParisCount={franciaParisPackages.length}
+            moroccoSpainCount={moroccoSpainPackages.length}
+            italySwitzerlandFranceSpainCount={
+              italySwitzerlandFranceSpainPackages.length
+            }
             loading={packagesLoading}
             onChoose={chooseOtherRoute}
             onBack={backToPackageCategories}
@@ -801,9 +903,25 @@ const categoryPackages = useMemo(() => {
               </button>
             </div>
 
+            <div className="turkey-group-nav">
+              {turkeyPackageGroups.map((group) => (
+                <a href={`#${group.id}`} key={`${group.id}-nav`}>
+                  <span>
+                    <small>{group.title}</small>
+                    <b>{group.shortTitle}</b>
+                  </span>
+                  <strong>{group.packages.length} packages</strong>
+                </a>
+              ))}
+            </div>
+
             <div className="turkey-package-groups">
               {turkeyPackageGroups.map((group) => (
-                <section className="turkey-package-group-card" key={group.id}>
+                <section
+                  className="turkey-package-group-card"
+                  id={group.id}
+                  key={group.id}
+                >
                   <div className="turkey-package-group-head">
                     <div>
                       <span>{group.shortTitle}</span>
@@ -811,19 +929,29 @@ const categoryPackages = useMemo(() => {
                       <p>{group.subtitle}</p>
                     </div>
 
-                    <strong>{group.packages.length} hotel packages</strong>
+                    <strong>{group.packages.length} packages</strong>
                   </div>
 
                   <div className="packages-grid-pro turkey-hotels-grid">
-                    {group.packages.map((item) => (
-                      <TurkeyHotelPackageCard
-                        key={item.id}
-                        item={item}
-                        onOpen={openPackage}
-                        onBook={openPackageBooking}
-                        onImageError={handlePackageImageError}
-                      />
-                    ))}
+                    {group.packages.map((item) =>
+                      item.isGroupMainPackage ? (
+                        <PackageCard
+                          key={item.id}
+                          item={item}
+                          onOpen={openPackage}
+                          onBook={openPackageBooking}
+                          onImageError={handlePackageImageError}
+                        />
+                      ) : (
+                        <TurkeyHotelPackageCard
+                          key={item.id}
+                          item={item}
+                          onOpen={openPackage}
+                          onBook={openPackageBooking}
+                          onImageError={handlePackageImageError}
+                        />
+                      )
+                    )}
                   </div>
                 </section>
               ))}

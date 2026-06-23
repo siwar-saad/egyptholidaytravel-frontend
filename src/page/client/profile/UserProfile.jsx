@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import API from "../../../api";
+import { clearStoredAuth } from "../../../utils/authStorage";
 import "./UserProfile.css";
 import Navbar from "../../../components/navbar";
 import Footer from "../../../components/footer";
@@ -638,12 +639,7 @@ export default function UserProfile() {
       console.log("Logout error:", err.response?.data || err.message);
     }
 
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-
-    window.dispatchEvent(new Event("authChanged"));
+    clearStoredAuth();
 
     window.location.href = "/login";
   };

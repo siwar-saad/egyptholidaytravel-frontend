@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import API from "../api";
 import Navbar from "./navbar";
+import { clearStoredAuth } from "../utils/authStorage";
 
 const safeParse = (value) => {
   try {
@@ -23,14 +24,6 @@ const saveStoredUser = (user) => {
     sessionStorage.setItem("user", JSON.stringify(user));
   }
 
-  window.dispatchEvent(new Event("authChanged"));
-};
-
-const clearStoredAuth = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("user");
-  sessionStorage.removeItem("token");
   window.dispatchEvent(new Event("authChanged"));
 };
 

@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import API from "../api";
-
-const clearStoredAuth = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("user");
-  sessionStorage.removeItem("token");
-  window.dispatchEvent(new Event("authChanged"));
-};
+import { clearStoredAuth } from "../utils/authStorage";
 
 /* ================= AUTH REDIRECT ================= */
 export default function useRedirectIfLoggedIn() {

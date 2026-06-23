@@ -25,7 +25,7 @@ export default function Footer() {
             <a
               href="https://www.facebook.com/share/18deN5D3jr/"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               <FaFacebookF />
             </a>
@@ -33,7 +33,7 @@ export default function Footer() {
             <a
               href="https://www.instagram.com/egyptholidaytravel0?igsh=OXVtdjM4YWF0N3Fz"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               <FaInstagram />
             </a>
@@ -41,7 +41,7 @@ export default function Footer() {
             <a
               href="https://wa.me/201099999234"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               <FaWhatsapp />
             </a>
@@ -50,7 +50,7 @@ export default function Footer() {
               className="tiktok-link"
               href="https://www.tiktok.com/@egyptholiday.travel"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               aria-label="TikTok"
             >
               <FaTiktok />

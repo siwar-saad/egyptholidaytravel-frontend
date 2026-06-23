@@ -5,6 +5,7 @@ import { FaUser } from "react-icons/fa";
 
 import API from "../../api";
 import agency from "../../assets/image/agency.png";
+import { clearStoredAuth } from "../../utils/authStorage";
 
 const apiOrigin =
   (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
@@ -14,13 +15,6 @@ const getImageUrl = (src) => {
   if (/^(https?:|data:|blob:)/i.test(src)) return src;
   if (src.startsWith("/images/")) return `${apiOrigin}${src}`;
   return src;
-};
-
-const clearStoredAuth = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("user");
-  sessionStorage.removeItem("token");
 };
 
 export default function Navbar() {

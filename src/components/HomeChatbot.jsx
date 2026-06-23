@@ -20,13 +20,8 @@ import {
 
 import API from "../api";
 import "./HomeChatbot.css";
-
-const clearStoredAuth = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("user");
-  sessionStorage.removeItem("token");
-};
+import { clearStoredAuth } from "../utils/authStorage";
+import { debugLog } from "../utils/debugLog";
 
 export default function HomeChatbot() {
   const navigate = useNavigate();
@@ -138,7 +133,7 @@ export default function HomeChatbot() {
         const res = await API.get("/packages");
         setPackagesData(makeArray(res.data));
       } catch (err) {
-        console.log(
+        debugLog(
           "Chatbot packages error:",
           err.response?.data || err.message
         );
@@ -148,7 +143,7 @@ export default function HomeChatbot() {
         const res = await API.get("/hotels");
         setHotelsData(makeArray(res.data));
       } catch (err) {
-        console.log("Chatbot hotels error:", err.response?.data || err.message);
+        debugLog("Chatbot hotels error:", err.response?.data || err.message);
       }
     };
 

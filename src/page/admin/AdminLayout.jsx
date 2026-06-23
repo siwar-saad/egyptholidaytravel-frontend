@@ -20,6 +20,7 @@ import {
 
 import API from "../../api";
 import Navbar from "../../components/Navbar";
+import { clearStoredAuth } from "../../utils/authStorage";
 import "./Admin.css";
 import { getStoredUser, hasPermission } from "./adminPermissions";
 
@@ -117,14 +118,6 @@ export default function AdminLayout({ children }) {
   const handleNavigate = (path) => {
     navigate(path);
     setMobileMenuOpen(false);
-  };
-
-  const clearStoredAuth = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    window.dispatchEvent(new Event("authChanged"));
   };
 
   const handleLogout = async () => {

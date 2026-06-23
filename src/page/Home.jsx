@@ -4,6 +4,7 @@ import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
 import { FaSuitcaseRolling } from "react-icons/fa";
 import API from "../api";
+import { debugLog } from "../utils/debugLog";
 import Footer from "../components/footer";
 
 import HomeInfoSection from "./homeInfo/HomeInfoSection";
@@ -595,7 +596,7 @@ export default function Home() {
 
         setReviews([...formattedDatabaseReviews, ...DEFAULT_REVIEWS]);
       } catch (error) {
-        console.log("Reviews load error:", error.response?.data || error.message);
+        debugLog("Reviews load error:", error.response?.data || error.message);
         setReviews(DEFAULT_REVIEWS);
       }
     };
@@ -611,7 +612,7 @@ export default function Home() {
 
         setTopHotels(selectTopHotelsByDestination(hotelsData));
       } catch (error) {
-        console.log(
+        debugLog(
           "Top hotels load error:",
           error.response?.data || error.message
         );
