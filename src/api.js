@@ -6,26 +6,6 @@ const API = axios.create({
   withCredentials: true,
 });
 
-export const clearStoredAuth = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-  localStorage.removeItem("admin");
-  localStorage.removeItem("adminToken");
-  localStorage.removeItem("currentUser");
-  localStorage.removeItem("isLoggedIn");
-  localStorage.removeItem("auth");
-
-  sessionStorage.removeItem("user");
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("role");
-  sessionStorage.removeItem("admin");
-  sessionStorage.removeItem("adminToken");
-  sessionStorage.removeItem("currentUser");
-  sessionStorage.removeItem("isLoggedIn");
-  sessionStorage.removeItem("auth");
-};
-
 /* REQUEST INTERCEPTOR */
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
