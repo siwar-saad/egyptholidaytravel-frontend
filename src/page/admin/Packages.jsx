@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCloudUploadAlt,
+  FaImage,
+} from "react-icons/fa";
 import API from "../../api";
+
+const PACKAGES_PER_PAGE = 12;
 
 const DEFAULT_COVER =
   "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
@@ -16,18 +24,28 @@ const EMPTY_PACKAGE = {
   programme: "",
   price: "",
   visibility: "Private",
+  tripType: "egypt",
   image: "",
+  images: [],
   displayOrder: 0,
 };
+
+const getEmptyPackage = () => ({
+  ...EMPTY_PACKAGE,
+  images: [],
+});
 
 export default function Packages() {
   const [packages, setPackages] = useState([]);
   const [packageSearch, setPackageSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [showPackageForm, setShowPackageForm] = useState(false);
-  const [newPackage, setNewPackage] = useState(EMPTY_PACKAGE);
+  const [newPackage, setNewPackage] = useState(getEmptyPackage());
   const [editingPackage, setEditingPackage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [packagePopup, setPackagePopup] = useState({
     open: false,
@@ -74,7 +92,6 @@ export default function Packages() {
     if (Array.isArray(data?.rows)) return data.rows;
     if (Array.isArray(data?.result)) return data.result;
     if (Array.isArray(data?.results)) return data.results;
-
     return [];
   };
 
@@ -82,8 +99,91 @@ export default function Packages() {
     if (data?.package) return data.package;
     if (data?.data) return data.data;
     if (data?.item) return data.item;
-
     return data || fallback;
+  };
+
+  const normalizeTripType = (value) => {
+    const clean = String(value || "").toLowerCase().trim();
+
+    if (
+      clean === "international" ||
+      clean === "international trips" ||
+      clean === "other" ||
+      clean === "others"
+    ) {
+      return "international";
+    }
+
+    return "egypt";
+  };
+
+  const getTripTypeLabel = (value) => {
+    return normalizeTripType(value) === "international"
+      ? "International Trips"
+      : "Egypt Trips";
+  };
+
+  const normalizeImagesValue = (value) => {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+      return value.filter(Boolean);
+    }
+
+    if (typeof value === "string") {
+      const clean = value.trim();
+
+      if (!clean) return [];
+
+      try {
+        const parsed = JSON.parse(clean);
+        return Array.isArray(parsed) ? parsed.filter(Boolean) : [clean];
+      } catch {
+        return [clean];
+      }
+    }
+
+    if (typeof value === "object") {
+      return [value];
+    }
+
+    return [];
+  };
+
+  const uniqueImages = (images) => {
+    const seen = new Set();
+
+    return images.filter((image) => {
+      const key =
+        typeof image === "object"
+          ? image.url ||
+            image.src ||
+            image.image ||
+            image.path ||
+            JSON.stringify(image)
+          : String(image);
+
+      if (!key || seen.has(key)) return false;
+
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const getPackageImages = (item) => {
+    const galleryImages = normalizeImagesValue(
+      item?.images ||
+        item?.gallery ||
+        item?.photos ||
+        item?.imageUrls ||
+        item?.image_urls
+    );
+
+    const mainImages = normalizeImagesValue(
+      item?.image || item?.image_url || item?.cover
+    );
+
+    return uniqueImages([...galleryImages, ...mainImages]);
   };
 
   const getImageUrl = (image) => {
@@ -91,9 +191,7 @@ export default function Packages() {
 
     let cleanImage = image;
 
-    if (Array.isArray(cleanImage)) {
-      cleanImage = cleanImage[0];
-    }
+    if (Array.isArray(cleanImage)) cleanImage = cleanImage[0];
 
     if (typeof cleanImage === "object") {
       cleanImage =
@@ -119,9 +217,7 @@ export default function Packages() {
     const apiBase = API.defaults.baseURL || "/api";
     const origin = apiBase.replace(/\/api\/?$/, "");
 
-    if (cleanImage.startsWith("/")) {
-      return `${origin}${cleanImage}`;
-    }
+    if (cleanImage.startsWith("/")) return `${origin}${cleanImage}`;
 
     return cleanImage;
   };
@@ -197,19 +293,47 @@ export default function Packages() {
   const filteredPackages = packages.filter((item) =>
     `${item?.name || ""} ${item?.title || ""} ${item?.programme || ""} ${
       item?.price || ""
-    } ${item?.visibility || ""}`
+    } ${item?.visibility || ""} ${
+      item?.tripType || item?.trip_type || item?.category || ""
+    }`
       .toLowerCase()
       .includes(packageSearch.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredPackages.length / PACKAGES_PER_PAGE);
+
+  const paginatedPackages = filteredPackages.slice(
+    (currentPage - 1) * PACKAGES_PER_PAGE,
+    currentPage * PACKAGES_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [packageSearch]);
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const openPackageForm = () => {
     setEditingPackage(null);
-    setNewPackage(EMPTY_PACKAGE);
+    setNewPackage(getEmptyPackage());
     setShowPackageForm(true);
   };
 
   const openEditPackage = (item) => {
     setEditingPackage(item);
+
+    const packageImages = getPackageImages(item);
 
     setNewPackage({
       name: item?.name || item?.title || "",
@@ -223,7 +347,11 @@ export default function Packages() {
       programme: item?.programme || "",
       price: item?.price || item?.startPrice || item?.start_price || "",
       visibility: item?.visibility || "Private",
-      image: item?.image || item?.image_url || item?.cover || "",
+      tripType: normalizeTripType(
+        item?.tripType || item?.trip_type || item?.category || item?.type
+      ),
+      image: packageImages[0] || "",
+      images: packageImages,
       displayOrder: item?.displayOrder || item?.display_order || 0,
     });
 
@@ -232,9 +360,10 @@ export default function Packages() {
 
   const closePackageForm = () => {
     setShowPackageForm(false);
-    setNewPackage(EMPTY_PACKAGE);
+    setNewPackage(getEmptyPackage());
     setEditingPackage(null);
     setSaving(false);
+    setUploadingImage(false);
   };
 
   const updatePackageField = (field, value) => {
@@ -244,47 +373,97 @@ export default function Packages() {
     }));
   };
 
-  const handlePackageImage = async (e) => {
-    const file = e.target.files?.[0];
+  const uploadSinglePackageImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
 
-    if (!file) return;
+      reader.onerror = () => {
+        reject(new Error("Unable to read image file."));
+      };
 
-    const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const res = await API.post("/admin/packages/upload-image", {
+            image: reader.result,
+          });
 
-    reader.onloadend = async () => {
-      try {
-        const res = await API.post("/admin/packages/upload-image", {
-          image: reader.result,
-        });
+          resolve(
+            res.data?.image ||
+              res.data?.url ||
+              res.data?.path ||
+              reader.result
+          );
+        } catch (err) {
+          reject(err);
+        }
+      };
 
-        setNewPackage((prevPackage) => ({
-          ...prevPackage,
-          image: res.data?.image || res.data?.url || "",
-        }));
-
-        notify(
-          "Package image uploaded successfully.",
-          "success",
-          "Image Uploaded"
-        );
-      } catch (err) {
-        notify(
-          err.response?.data?.error || "Unable to upload package image.",
-          "error",
-          "Upload Failed"
-        );
-      }
-    };
-
-    reader.readAsDataURL(file);
-    e.target.value = "";
+      reader.readAsDataURL(file);
+    });
   };
 
-  const removePackageImage = () => {
-    setNewPackage((prevPackage) => ({
-      ...prevPackage,
-      image: "",
-    }));
+  const handlePackageImages = async (e) => {
+    const files = Array.from(e.target.files || []);
+
+    if (files.length === 0) return;
+
+    try {
+      setUploadingImage(true);
+
+      const results = await Promise.allSettled(
+        files.map((file) => uploadSinglePackageImage(file))
+      );
+
+      const uploadedImages = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value);
+
+      if (uploadedImages.length > 0) {
+        setNewPackage((prev) => {
+          const finalImages = uniqueImages([
+            ...(prev.images || []),
+            ...uploadedImages,
+          ]);
+
+          return {
+            ...prev,
+            images: finalImages,
+            image: finalImages[0] || "",
+          };
+        });
+      }
+
+      if (uploadedImages.length !== files.length) {
+        notify(
+          "Some images could not be uploaded.",
+          "error",
+          "Upload Warning"
+        );
+      }
+    } catch (err) {
+      notify(
+        err.response?.data?.error || "Unable to upload package images.",
+        "error",
+        "Upload Failed"
+      );
+    } finally {
+      setUploadingImage(false);
+      e.target.value = "";
+    }
+  };
+
+  const removePackageImage = (indexToRemove) => {
+    setNewPackage((prev) => {
+      const newImages = (prev.images || []).filter(
+        (_, index) => index !== indexToRemove
+      );
+
+      return {
+        ...prev,
+        images: newImages,
+        image: newImages[0] || "",
+      };
+    });
   };
 
   const savePackage = async () => {
@@ -301,9 +480,7 @@ export default function Packages() {
     const editingPackageId = getPackageId(editingPackage);
 
     if (isEditing && !editingPackageId) {
-      setShowPackageForm(false);
-      setNewPackage(EMPTY_PACKAGE);
-      setEditingPackage(null);
+      closePackageForm();
 
       notify(
         "Package ID not found. Please refresh the page and try again.",
@@ -312,6 +489,12 @@ export default function Packages() {
       );
       return;
     }
+
+    const packageImages = Array.isArray(newPackage.images)
+      ? newPackage.images.filter(Boolean)
+      : [];
+
+    const selectedTripType = normalizeTripType(newPackage.tripType);
 
     const packageData = {
       name,
@@ -325,9 +508,16 @@ export default function Packages() {
       programme: newPackage.programme.trim(),
       price: newPackage.price.trim() || newPackage.startPrice.trim(),
       visibility: newPackage.visibility || "Private",
-      image: newPackage.image,
-      displayOrder: Number(newPackage.displayOrder || 0),
 
+      tripType: selectedTripType,
+      trip_type: selectedTripType,
+      category: selectedTripType,
+      type: selectedTripType,
+
+      image: packageImages[0] || "",
+      images: packageImages,
+
+      displayOrder: Number(newPackage.displayOrder || 0),
       options: safeArray(editingPackage?.options),
       itinerary: safeArray(editingPackage?.itinerary),
     };
@@ -339,10 +529,25 @@ export default function Packages() {
         ? await API.put(`/admin/packages/${editingPackageId}`, packageData)
         : await API.post("/admin/packages", packageData);
 
-      const savedPackage = getPackageFromResponse(res.data, {
+      const responsePackage = getPackageFromResponse(res.data, {
         id: editingPackageId || Date.now(),
         ...packageData,
       });
+
+      const savedPackage = {
+        ...responsePackage,
+        image: responsePackage?.image || packageImages[0] || "",
+        images:
+          normalizeImagesValue(responsePackage?.images).length > 0
+            ? normalizeImagesValue(responsePackage?.images)
+            : packageImages,
+        tripType: normalizeTripType(
+          responsePackage?.tripType ||
+            responsePackage?.trip_type ||
+            responsePackage?.category ||
+            selectedTripType
+        ),
+      };
 
       setPackages((prevPackages) =>
         isEditing
@@ -352,15 +557,16 @@ export default function Packages() {
           : [savedPackage, ...prevPackages]
       );
 
+      closePackageForm();
+
       notify(
         isEditing
-          ? "Package updated successfully."
-          : "Package added successfully.",
+          ? "Package edited successfully."
+          : "New package added successfully.",
         "success",
-        "Saved Successfully"
+        isEditing ? "Package Updated" : "Package Added"
       );
 
-      closePackageForm();
       fetchPackages();
     } catch (err) {
       console.log("Save package error:", err.response?.data || err.message);
@@ -394,7 +600,13 @@ export default function Packages() {
         )
       );
 
-      notify("Package visibility updated.", "success", "Updated");
+      notify(
+        visibility === "Published"
+          ? "Package published successfully."
+          : "Package moved to private successfully.",
+        "success",
+        visibility === "Published" ? "Published" : "Updated"
+      );
     } catch (err) {
       console.log("Visibility error:", err.response?.data || err.message);
 
@@ -427,7 +639,7 @@ export default function Packages() {
         prevPackages.filter((item) => getPackageId(item) !== id)
       );
 
-      notify("Package deleted successfully.", "success", "Deleted");
+      notify("Package deleted successfully.", "success", "Package Deleted");
     } catch (err) {
       console.log("Delete package error:", err.response?.data || err.message);
 
@@ -462,7 +674,7 @@ export default function Packages() {
         <div className="client-tools">
           <input
             type="text"
-            placeholder="Search packages by name, programme or price..."
+            placeholder="Search packages by name, programme, category or price..."
             value={packageSearch}
             onChange={(e) => setPackageSearch(e.target.value)}
           />
@@ -473,82 +685,136 @@ export default function Packages() {
         ) : filteredPackages.length === 0 ? (
           <p className="empty-msg">No packages found.</p>
         ) : (
-          <div className="packages-admin-grid">
-            {filteredPackages.map((item, index) => {
-              const packageId = getPackageId(item);
-              const visibility = item?.visibility || "Private";
+          <>
+            <div className="packages-admin-grid">
+              {paginatedPackages.map((item, index) => {
+                const packageId = getPackageId(item);
+                const visibility = item?.visibility || "Private";
+                const packageImages = getPackageImages(item);
+                const tripType = normalizeTripType(
+                  item?.tripType ||
+                    item?.trip_type ||
+                    item?.category ||
+                    item?.type
+                );
 
-              return (
-                <div
-                  className="package-admin-card package-card-pro"
-                  key={packageId || index}
-                >
-                  <img
-                    src={getImageUrl(
-                      item?.image || item?.image_url || item?.cover
-                    )}
-                    alt={item?.name || item?.title || "Package"}
-                    className="package-admin-image"
-                    onError={(e) => {
-                      e.currentTarget.src = DEFAULT_COVER;
-                    }}
-                  />
+                return (
+                  <div
+                    className="package-admin-card package-card-pro"
+                    key={packageId || index}
+                  >
+                    <div className="package-admin-image-wrap">
+                      <img
+                        src={getImageUrl(packageImages[0])}
+                        alt={item?.name || item?.title || "Package"}
+                        className="package-admin-image"
+                        onError={(e) => {
+                          e.currentTarget.src = DEFAULT_COVER;
+                        }}
+                      />
 
-                  <div className="package-admin-content">
-                    <h3>{item?.name || item?.title || "Untitled Package"}</h3>
+                      {packageImages.length > 1 && (
+                        <span className="package-image-number">
+                          +{packageImages.length - 1}
+                        </span>
+                      )}
+                    </div>
 
-                    <p>
-                      {item?.programme ||
-                        item?.transfer ||
-                        "No programme added for this package yet."}
-                    </p>
+                    <div className="package-admin-content">
+                      <h3>{item?.name || item?.title || "Untitled Package"}</h3>
 
-                    <div className="package-admin-meta">
-                      <span>
-                        {item?.startPrice ||
-                          item?.start_price ||
-                          item?.price ||
-                          "No price"}
-                      </span>
+                      <p>
+                        {item?.programme ||
+                          item?.transfer ||
+                          "No programme added for this package yet."}
+                      </p>
 
-                      <span>{visibility}</span>
+                      <div className="package-admin-meta">
+                        <span>
+                          {item?.startPrice ||
+                            item?.start_price ||
+                            item?.price ||
+                            "No price"}
+                        </span>
+
+                        <span>{getTripTypeLabel(tripType)}</span>
+
+                        <span>{visibility}</span>
+                      </div>
+                    </div>
+
+                    <div className="package-admin-actions package-actions-pro">
+                      <button
+                        type="button"
+                        className="package-edit-action-btn"
+                        onClick={() => openEditPackage(item)}
+                      >
+                        <FaEdit /> Edit
+                      </button>
+
+                      <select
+                        className={`package-visibility-select ${
+                          visibility === "Published" ? "published" : "private"
+                        }`}
+                        value={visibility}
+                        onChange={(e) =>
+                          updatePackageVisibility(packageId, e.target.value)
+                        }
+                      >
+                        <option value="Published">Published</option>
+                        <option value="Private">Private</option>
+                      </select>
+
+                      <button
+                        type="button"
+                        className="package-delete-action-btn"
+                        onClick={() => deletePackage(packageId)}
+                      >
+                        <FaTrash /> Delete
+                      </button>
                     </div>
                   </div>
+                );
+              })}
+            </div>
 
-                  <div className="package-admin-actions package-actions-pro">
-                    <button
-                      type="button"
-                      className="package-edit-action-btn"
-                      onClick={() => openEditPackage(item)}
-                    >
-                      <FaEdit /> Edit
-                    </button>
+            {totalPages > 1 && (
+              <div className="admin-pagination">
+                <button
+                  type="button"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
 
-                    <select
-                      className={`package-visibility-select ${
-                        visibility === "Published" ? "published" : "private"
-                      }`}
-                      value={visibility}
-                      onChange={(e) =>
-                        updatePackageVisibility(packageId, e.target.value)
-                      }
-                    >
-                      <option value="Published">Published</option>
-                      <option value="Private">Private</option>
-                    </select>
+                <div className="admin-pagination-numbers">
+                  {Array.from({ length: totalPages }, (_, index) => {
+                    const page = index + 1;
 
-                    <button
-                      type="button"
-                      className="package-delete-action-btn"
-                      onClick={() => deletePackage(packageId)}
-                    >
-                      <FaTrash /> Delete
-                    </button>
-                  </div>
+                    return (
+                      <button
+                        type="button"
+                        key={page}
+                        className={currentPage === page ? "active" : ""}
+                        onClick={() => goToPage(page)}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+
+                <button
+                  type="button"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
@@ -668,37 +934,76 @@ export default function Packages() {
               </div>
 
               <div className="package-form-section">
-                <h3>Package Image</h3>
+                <h3>Trip Category</h3>
 
-                <label className="package-image-upload">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePackageImage}
-                  />
+                <select
+                  className="package-trip-type-select"
+                  value={newPackage.tripType}
+                  onChange={(e) =>
+                    updatePackageField("tripType", e.target.value)
+                  }
+                >
+                  <option value="egypt">Egypt Trips</option>
+                  <option value="international">International Trips</option>
+                </select>
+              </div>
 
-                  <span>Choose package image</span>
-                  <small>PNG, JPG, JPEG or WEBP</small>
-                </label>
+              <div className="package-form-section">
+                <h3>Package Images</h3>
 
-                {newPackage.image && (
-                  <div className="hotel-preview-grid">
-                    <div className="hotel-preview-item">
-                      <img
-                        src={getImageUrl(newPackage.image)}
-                        alt="Package preview"
-                      />
+                <div className="package-multi-upload-box">
+                  <label className="package-image-upload-modern">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePackageImages}
+                    />
 
-                      <button
-                        type="button"
-                        className="package-remove-image-btn"
-                        onClick={removePackageImage}
-                      >
-                        ×
-                      </button>
+                    <FaCloudUploadAlt />
+                    <span>
+                      {uploadingImage ? "Uploading..." : "Choose Images"}
+                    </span>
+                    <small>You can select more than one image</small>
+                  </label>
+
+                  {newPackage.images?.length > 0 ? (
+                    <>
+                      <p className="package-images-count">
+                        {newPackage.images.length} image
+                        {newPackage.images.length > 1 ? "s" : ""} selected
+                      </p>
+
+                      <div className="package-images-preview-grid">
+                        {newPackage.images.map((image, index) => (
+                          <div
+                            className="package-image-preview-card"
+                            key={`${index}-${String(getImageUrl(image))}`}
+                          >
+                            <img
+                              src={getImageUrl(image)}
+                              alt={`Package preview ${index + 1}`}
+                            />
+
+                            <button
+                              type="button"
+                              className="package-image-remove-x"
+                              onClick={() => removePackageImage(index)}
+                              title="Remove image"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="package-image-empty-box full">
+                      <FaImage />
+                      <span>No images selected</span>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 <select
                   className={`package-visibility-select ${
@@ -721,7 +1026,7 @@ export default function Packages() {
                   type="button"
                   className="package-save-action-btn"
                   onClick={savePackage}
-                  disabled={saving}
+                  disabled={saving || uploadingImage}
                 >
                   {saving
                     ? "Saving..."
@@ -745,7 +1050,10 @@ export default function Packages() {
       )}
 
       {packagePopup.open && (
-        <div className="package-message-popup-overlay" onClick={closeMessagePopup}>
+        <div
+          className="package-message-popup-overlay"
+          onClick={closeMessagePopup}
+        >
           <div
             className={`package-message-popup ${packagePopup.type}`}
             onClick={(e) => e.stopPropagation()}

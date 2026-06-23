@@ -18,11 +18,13 @@ import bgImg from "../assets/image/bg.webp";
 import LuxorImg from "../assets/image/Luxor.webp";
 import pyra from "../assets/image/pyra.webp";
 
+/* VIDEO */
+import egyptVideo from "../assets/video/egypt-home.mp4";
+
 /* FEATURED PACKAGES IMAGES */
 import cairoHurghadaPackage from "../assets/image/cairo-hurghada1.png";
 import cairoSharmPackage from "../assets/image/cairo-sharm.png";
 import cairoLuxorPackage from "../assets/image/cairo-luxor2.png";
-
 
 const SITE_NAME = "Egypt Holiday Travel";
 const SITE_URL = "https://egyptholidaytravel.com/";
@@ -158,17 +160,6 @@ const DEFAULT_REVIEWS = [
   },
 ];
 
-const getReviewData = (review, index) => {
-  const meta = REVIEW_META[index % REVIEW_META.length];
-  const code = getFlagCode(review.code || review.flag || review.country || meta.code);
-
-  return {
-    ...review,
-    code,
-    country: review.country || meta.country,
-  };
-};
-
 const getFlagCode = (value = "") => {
   const clean = String(value).trim().toLowerCase();
 
@@ -187,6 +178,17 @@ const getFlagCode = (value = "") => {
   return REVIEW_META[0].code;
 };
 
+const getReviewData = (review, index) => {
+  const meta = REVIEW_META[index % REVIEW_META.length];
+  const code = getFlagCode(review.code || review.flag || review.country || meta.code);
+
+  return {
+    ...review,
+    code,
+    country: review.country || meta.country,
+  };
+};
+
 const getFlagUrl = (code) => {
   const cleanCode = getFlagCode(code);
   return `https://flagcdn.com/w80/${cleanCode}.png`;
@@ -201,7 +203,6 @@ const renderStars = (rating) => {
     </span>
   ));
 };
-
 
 const isMobileAutoSlider = () => {
   if (typeof window === "undefined") return false;
@@ -341,9 +342,10 @@ const useAutoDragSlider = (speed = 0.85, refreshKey = 0) => {
     const handleWheel = (event) => {
       if (!canSlide()) return;
 
-      const movement = Math.abs(event.deltaX) > Math.abs(event.deltaY)
-        ? event.deltaX
-        : event.deltaY;
+      const movement =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+          ? event.deltaX
+          : event.deltaY;
 
       event.preventDefault();
       slider.scrollLeft += movement;
@@ -360,6 +362,7 @@ const useAutoDragSlider = (speed = 0.85, refreshKey = 0) => {
       state.initialized = false;
       centerSlider();
     };
+
     const handlePointerEnter = () => {
       if (!canSlide()) return;
       state.isHovering = true;
@@ -374,7 +377,6 @@ const useAutoDragSlider = (speed = 0.85, refreshKey = 0) => {
         slider.classList.remove("is-paused-by-user");
       }
     };
-
 
     slider.addEventListener("pointerenter", handlePointerEnter);
     slider.addEventListener("pointerleave", handlePointerLeave);
@@ -422,7 +424,6 @@ const useAutoDragSlider = (speed = 0.85, refreshKey = 0) => {
 
 export default function Home() {
   const navigate = useNavigate();
-
 
   const [showButton, setShowButton] = useState(false);
   const [subscriberEmail, setSubscriberEmail] = useState("");
@@ -750,6 +751,60 @@ export default function Home() {
 
       <HomeInfoSection onOpen={setSelectedInfo} />
 
+      <section className="egypt-video-section" id="egypt-video">
+        <div className="egypt-video-media">
+          <video
+            className="egypt-home-video"
+            src={egyptVideo}
+            poster={pyra}
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            preload="metadata"
+            controlsList="nodownload"
+            aria-label="Egypt travel video"
+          >
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <div className="egypt-video-content">
+  <span className="egypt-video-kicker">Discover Egypt in Motion</span>
+
+  <h2>
+    Experience Egypt
+    <br />
+    Like Never Before
+  </h2>
+
+  <p>
+    Watch the beauty of Egypt through iconic landmarks, Red Sea views,
+    golden deserts, and unforgettable travel moments.
+  </p>
+
+  <p>
+    With Egypt Holiday Travel, every journey is carefully planned to give
+    you comfort, discovery, and a memorable travel experience.
+  </p>
+
+  <div className="egypt-video-points">
+    <span>Iconic landmarks</span>
+    <span>Red Sea views</span>
+    <span>Tailor-made trips</span>
+  </div>
+
+  <button
+    type="button"
+    className="egypt-video-btn"
+    onClick={handleBookNow}
+  >
+    Explore Packages
+  </button>
+</div>
+      </section>
+
       <section className="destinations-section" id="destinations">
         <h2 className="section-title">Top Destinations</h2>
 
@@ -943,8 +998,6 @@ export default function Home() {
 
       <section className="testimonials-section improved-testimonials-section">
         <div className="testimonials-head">
-          
-
           <h2>Customers Say</h2>
 
           <div className="testimonials-divider">
@@ -991,7 +1044,6 @@ export default function Home() {
                 >
                   {renderStars(item.rating)}
                 </div>
-
 
                 <p className="review-text">“{item.text}”</p>
               </article>

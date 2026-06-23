@@ -16,6 +16,19 @@ const PROFILE_ME_ENDPOINT = "/auth/me";
 const PROFILE_UPDATE_ENDPOINT = "/admin/profile";
 const PASSWORD_UPDATE_ENDPOINT = "/admin/profile/password";
 
+const ADMIN_TASKS = [
+  "dashboard",
+  "packages",
+  "hotels",
+  "reservations",
+  "create_reservation",
+  "users",
+  "payments",
+  "messages",
+  "reviews",
+  "settings",
+];
+
 const EMPTY_PROFILE = {
   firstName: "",
   lastName: "",
@@ -23,12 +36,37 @@ const EMPTY_PROFILE = {
   phone: "",
   address: "",
   avatar: "",
+  role: "admin",
+  adminType: "",
+  permissions: [],
 };
 
 const EMPTY_PASSWORD = {
   currentPassword: "",
   newPassword: "",
   confirmPassword: "",
+};
+
+const normalizePermissions = (value) => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch {
+      return value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
 };
 
 export default function Profile() {
@@ -76,22 +114,70 @@ export default function Profile() {
   };
 
   const normalizeProfile = (user) => {
-    const firstName = user?.firstName || user?.first_name || "";
-    const lastName = user?.lastName || user?.last_name || "";
+    let storedUser = null;
+
+    try {
+      const saved = localStorage.getItem("user");
+      storedUser = saved ? JSON.parse(saved) : null;
+    } catch {
+      storedUser = null;
+    }
+
+    const mergedUser = {
+      ...(storedUser || {}),
+      ...(user || {}),
+    };
+
+    const firstName = mergedUser?.firstName || mergedUser?.first_name || "";
+    const lastName = mergedUser?.lastName || mergedUser?.last_name || "";
+    const role = (mergedUser?.role || "admin").toLowerCase();
+
+    const rawAdminType = String(
+      mergedUser?.admin_type || mergedUser?.adminType || ""
+    ).toLowerCase();
+
+    const permissions = normalizePermissions(
+      mergedUser?.permissions ||
+        mergedUser?.tasks ||
+        mergedUser?.adminPermissions
+    );
+
+    const isGeneralAdmin =
+      role === "admin" &&
+      (rawAdminType === "general_admin" ||
+        mergedUser?.email === "admin@gmail.com" ||
+        (!rawAdminType && permissions.length === 0) ||
+        ADMIN_TASKS.every((task) => permissions.includes(task)));
+
+    const adminType =
+      role === "admin" ? (isGeneralAdmin ? "general_admin" : "sub_admin") : "";
 
     return {
       firstName,
       lastName,
-      email: user?.email || "",
-      phone: user?.phone || "",
-      address: user?.address || user?.adresse || "",
-      avatar: user?.avatar || user?.image || user?.photo || "",
+      email: mergedUser?.email || "",
+      phone: mergedUser?.phone || "",
+      address: mergedUser?.address || mergedUser?.adresse || "",
+      avatar: mergedUser?.avatar || mergedUser?.image || mergedUser?.photo || "",
+      role,
+      adminType,
+      permissions: isGeneralAdmin ? ADMIN_TASKS : permissions,
     };
   };
 
   const getFullName = () => {
     const fullName = `${profile.firstName} ${profile.lastName}`.trim();
     return fullName || "Admin Profile";
+  };
+
+  const getAdminTypeLabel = () => {
+    return profile.adminType === "general_admin" ? "General Admin" : "Sub Admin";
+  };
+
+  const getAdminTypeText = () => {
+    return profile.adminType === "general_admin"
+      ? "Full access to all admin panel tasks."
+      : "Limited access based on selected tasks.";
   };
 
   const getAvatarSrc = () => {
@@ -218,6 +304,16 @@ export default function Profile() {
       formData.append("adresse", address);
       formData.append("role", "admin");
 
+      if (profile.adminType) {
+        formData.append("admin_type", profile.adminType);
+        formData.append("adminType", profile.adminType);
+      }
+
+      if (profile.permissions?.length) {
+        formData.append("permissions", JSON.stringify(profile.permissions));
+        formData.append("tasks", JSON.stringify(profile.permissions));
+      }
+
       if (avatarFile) {
         formData.append("avatar", avatarFile);
         formData.append("image", avatarFile);
@@ -330,11 +426,7 @@ export default function Profile() {
         <div className="admin-profile-hero">
           <div className="admin-profile-avatar-box">
             <div className="admin-profile-avatar">
-              {avatarSrc ? (
-                <img src={avatarSrc} alt="Admin" />
-              ) : (
-                <FaUser />
-              )}
+              {avatarSrc ? <img src={avatarSrc} alt="Admin" /> : <FaUser />}
             </div>
 
             {editProfile && (
@@ -368,9 +460,13 @@ export default function Profile() {
           </div>
 
           <div className="admin-profile-hero-info">
-            <span>Admin Account</span>
             <h2>{getFullName()}</h2>
             <p>{profile.email || "No email available"}</p>
+
+            <div className="admin-profile-access-box">
+              <strong>{getAdminTypeLabel()}</strong>
+              <small>{getAdminTypeText()}</small>
+            </div>
           </div>
 
           <button

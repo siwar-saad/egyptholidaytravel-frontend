@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCloudUploadAlt,
+  FaImage,
+} from "react-icons/fa";
 import API from "../../api";
+
+const HOTELS_PER_PAGE = 12;
 
 const emptyPeriod = {
   from: "",
@@ -27,15 +35,69 @@ const createEmptyHotel = () => ({
 const apiOrigin =
   (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
 
+const defaultCover =
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
+
 const getImageUrl = (src) => {
   if (!src) return "";
   if (/^(https?:|data:|blob:)/i.test(src)) return src;
   if (src.startsWith("/images/")) return `${apiOrigin}${src}`;
+  if (src.startsWith("/uploads/")) return `${apiOrigin}${src}`;
+  if (src.startsWith("/")) return `${apiOrigin}${src}`;
   return src;
 };
 
-const cleanUniqueImages = (images = []) =>
-  [...new Set(images.map((item) => String(item || "").trim()).filter(Boolean))];
+const normalizeImagesValue = (value) => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    const clean = value.trim();
+
+    if (!clean) return [];
+
+    try {
+      const parsed = JSON.parse(clean);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [clean];
+    } catch {
+      return [clean];
+    }
+  }
+
+  if (typeof value === "object") {
+    return [value];
+  }
+
+  return [];
+};
+
+const cleanUniqueImages = (images = []) => {
+  const seen = new Set();
+
+  return images
+    .map((item) => String(item || "").trim())
+    .filter(Boolean)
+    .filter((item) => {
+      if (seen.has(item)) return false;
+      seen.add(item);
+      return true;
+    });
+};
+
+const getHotelGallery = (hotel) => {
+  const gallery = normalizeImagesValue(
+    hotel?.gallery || hotel?.images || hotel?.photos || hotel?.image_urls
+  );
+
+  const cover = normalizeImagesValue(
+    hotel?.image || hotel?.image_url || hotel?.cover
+  );
+
+  return cleanUniqueImages([...cover, ...gallery]);
+};
 
 const monthMap = {
   jan: "01",
@@ -147,11 +209,10 @@ const normalizePeriodsForForm = (periods = []) => {
 };
 
 export default function Hotels() {
-  const defaultCover =
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e";
-
   const [hotels, setHotels] = useState([]);
   const [hotelSearch, setHotelSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
   const [showHotelForm, setShowHotelForm] = useState(false);
   const [editingHotel, setEditingHotel] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -184,7 +245,7 @@ export default function Hotels() {
     });
   };
 
-  const getHotelId = (hotel) => hotel?._id || hotel?.id;
+  const getHotelId = (hotel) => hotel?._id || hotel?.id || hotel?.hotelId || null;
 
   const loadHotels = async () => {
     try {
@@ -203,6 +264,21 @@ export default function Hotels() {
     loadHotels();
   }, []);
 
+  useEffect(() => {
+    if (!showHotelForm) return;
+
+    const oldBodyOverflow = document.body.style.overflow;
+    const oldHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = oldBodyOverflow;
+      document.documentElement.style.overflow = oldHtmlOverflow;
+    };
+  }, [showHotelForm]);
+
   const filteredHotels = hotels.filter((hotel) =>
     `${hotel.name || ""} ${hotel.city || ""} ${hotel.meal || ""} ${
       hotel.group_title || hotel.groupTitle || ""
@@ -211,12 +287,37 @@ export default function Hotels() {
       .includes(hotelSearch.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredHotels.length / HOTELS_PER_PAGE);
+
+  const paginatedHotels = filteredHotels.slice(
+    (currentPage - 1) * HOTELS_PER_PAGE,
+    currentPage * HOTELS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [hotelSearch]);
+
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const closeHotelForm = () => {
     setShowHotelForm(false);
     setEditingHotel(null);
     setHotelForm(createEmptyHotel());
     setManualImageUrl("");
     setSaving(false);
+    setUploadingImages(false);
   };
 
   const openAddHotel = () => {
@@ -227,8 +328,7 @@ export default function Hotels() {
   };
 
   const openEditHotel = (hotel) => {
-    const gallery = Array.isArray(hotel.gallery) ? hotel.gallery : [];
-    const cleanedGallery = cleanUniqueImages([hotel.image, ...gallery]);
+    const gallery = getHotelGallery(hotel);
     const periods = Array.isArray(hotel.periods) ? hotel.periods : [];
 
     setEditingHotel(hotel);
@@ -237,8 +337,8 @@ export default function Hotels() {
       name: hotel.name || "",
       city: hotel.city || "",
       meal: hotel.meal || "",
-      image: hotel.image || cleanedGallery[0] || "",
-      gallery: cleanedGallery,
+      image: hotel.image || gallery[0] || "",
+      gallery,
       description: hotel.description || "",
       groupTitle: hotel.group_title || hotel.groupTitle || "",
       groupSubtitle: hotel.group_subtitle || hotel.groupSubtitle || "",
@@ -288,6 +388,7 @@ export default function Hotels() {
 
   const uploadHotelImages = async (event) => {
     const files = Array.from(event.target.files || []);
+
     event.target.value = "";
 
     if (files.length === 0) return;
@@ -295,35 +396,52 @@ export default function Hotels() {
     try {
       setUploadingImages(true);
 
-      const uploadedUrls = [];
+      const results = await Promise.allSettled(
+        files.map(async (file) => {
+          const dataUrl = await readFileAsDataUrl(file);
 
-      for (const file of files) {
-        const dataUrl = await readFileAsDataUrl(file);
+          const res = await API.post("/admin/upload-image", {
+            fileName: file.name,
+            dataUrl,
+          });
 
-        const res = await API.post("/admin/upload-image", {
-          fileName: file.name,
-          dataUrl,
+          return res.data?.url || res.data?.image || res.data?.path || dataUrl;
+        })
+      );
+
+      const uploadedUrls = results
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value)
+        .filter(Boolean);
+
+      if (uploadedUrls.length > 0) {
+        setHotelForm((current) => {
+          const nextGallery = cleanUniqueImages([
+            ...current.gallery,
+            ...uploadedUrls,
+          ]);
+
+          return {
+            ...current,
+            image: current.image || uploadedUrls[0] || nextGallery[0] || "",
+            gallery: nextGallery,
+          };
         });
-
-        if (res.data?.url) {
-          uploadedUrls.push(res.data.url);
-        }
       }
 
-      setHotelForm((current) => {
-        const nextGallery = cleanUniqueImages([
-          ...current.gallery,
-          ...uploadedUrls,
-        ]);
-
-        return {
-          ...current,
-          image: current.image || uploadedUrls[0] || "",
-          gallery: nextGallery,
-        };
-      });
-
-      notify("Hotel photos uploaded successfully.", "success", "Photos Uploaded");
+      if (uploadedUrls.length === files.length) {
+        notify(
+          "Hotel photos uploaded successfully.",
+          "success",
+          "Photos Uploaded"
+        );
+      } else {
+        notify(
+          "Some hotel photos could not be uploaded.",
+          "error",
+          "Upload Warning"
+        );
+      }
     } catch (err) {
       notify(
         err.response?.data?.error || "Unable to upload hotel photos.",
@@ -411,6 +529,8 @@ export default function Hotels() {
   };
 
   const saveHotel = async () => {
+    if (saving || uploadingImages) return;
+
     const payload = buildPayload();
 
     if (!payload.name || !payload.city || !payload.meal) {
@@ -427,6 +547,7 @@ export default function Hotels() {
 
     if (isEditing && !hotelId) {
       closeHotelForm();
+
       notify(
         "Hotel ID not found. Please refresh the page and try again.",
         "error",
@@ -447,15 +568,17 @@ export default function Hotels() {
           )
         );
 
+        closeHotelForm();
         notify("Hotel updated successfully.", "success", "Hotel Updated");
       } else {
         const res = await API.post("/admin/add", payload);
+
         setHotels((current) => [res.data, ...current]);
 
+        closeHotelForm();
         notify("Hotel added successfully.", "success", "Hotel Added");
       }
 
-      closeHotelForm();
       loadHotels();
     } catch (err) {
       notify(
@@ -482,7 +605,7 @@ export default function Hotels() {
         city: hotel.city || "",
         meal: hotel.meal || "",
         image: hotel.image || "",
-        gallery: Array.isArray(hotel.gallery) ? hotel.gallery : [],
+        gallery: getHotelGallery(hotel),
         description: hotel.description || "",
         groupTitle: hotel.group_title || hotel.groupTitle || "",
         groupSubtitle: hotel.group_subtitle || hotel.groupSubtitle || "",
@@ -499,7 +622,13 @@ export default function Hotels() {
         )
       );
 
-      notify("Hotel visibility updated.", "success", "Visibility Updated");
+      notify(
+        visibility === "Published"
+          ? "Hotel published successfully."
+          : "Hotel moved to private successfully.",
+        "success",
+        visibility === "Published" ? "Published" : "Updated"
+      );
     } catch (err) {
       notify(
         err.response?.data?.error || "Unable to update hotel visibility.",
@@ -515,7 +644,9 @@ export default function Hotels() {
       return;
     }
 
-    const confirmed = window.confirm("Are you sure you want to delete this hotel?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this hotel?"
+    );
 
     if (!confirmed) return;
 
@@ -566,80 +697,134 @@ export default function Hotels() {
         {filteredHotels.length === 0 ? (
           <p className="empty-msg">No hotels found.</p>
         ) : (
-          <div className="packages-admin-grid">
-            {filteredHotels.map((hotel) => {
-              const periods = Array.isArray(hotel.periods)
-                ? hotel.periods
-                : [];
+          <>
+            <div className="packages-admin-grid">
+              {paginatedHotels.map((hotel, index) => {
+                const periods = Array.isArray(hotel.periods)
+                  ? hotel.periods
+                  : [];
 
-              const firstPeriod = periods[0] || {};
-              const hotelId = getHotelId(hotel);
-              const visibility = hotel.visibility || "Private";
+                const firstPeriod = periods[0] || {};
+                const hotelId = getHotelId(hotel);
+                const visibility = hotel.visibility || "Private";
+                const gallery = getHotelGallery(hotel);
 
-              return (
-                <div className="package-admin-card hotel-admin-card" key={hotelId}>
-                  <img
-                    src={getImageUrl(hotel.image) || defaultCover}
-                    alt={hotel.name || "Hotel"}
-                    className="package-admin-image"
-                    onError={(e) => {
-                      e.currentTarget.src = defaultCover;
-                    }}
-                  />
+                return (
+                  <div
+                    className="package-admin-card hotel-admin-card"
+                    key={hotelId || index}
+                  >
+                    <div className="hotel-admin-image-wrap">
+                      <img
+                        src={
+                          getImageUrl(hotel.image || gallery[0]) || defaultCover
+                        }
+                        alt={hotel.name || "Hotel"}
+                        className="package-admin-image"
+                        onError={(e) => {
+                          e.currentTarget.src = defaultCover;
+                        }}
+                      />
 
-                  <div className="package-admin-content">
-                    <h3>{hotel.name || "Untitled Hotel"}</h3>
+                      {gallery.length > 1 && (
+                        <span className="hotel-image-number">
+                          +{gallery.length - 1}
+                        </span>
+                      )}
+                    </div>
 
-                    <p>
-                      <strong>City:</strong> {hotel.city || "-"} <br />
-                      <strong>Meal Plan:</strong> {hotel.meal || "-"} <br />
-                      <strong>Group:</strong>{" "}
-                      {hotel.group_title || hotel.groupTitle || "Our Hotels"}{" "}
-                      <br />
-                      <strong>Periods:</strong> {periods.length}
-                    </p>
+                    <div className="package-admin-content">
+                      <h3>{hotel.name || "Untitled Hotel"}</h3>
 
-                    <div className="package-admin-meta">
-                      <span>Single: {firstPeriod.single || "-"}</span>
-                      <span>Double: {firstPeriod.double || "-"}</span>
-                      <span>{visibility}</span>
+                      <p>
+                        <strong>City:</strong> {hotel.city || "-"} <br />
+                        <strong>Meal Plan:</strong> {hotel.meal || "-"} <br />
+                        <strong>Group:</strong>{" "}
+                        {hotel.group_title || hotel.groupTitle || "Our Hotels"}{" "}
+                        <br />
+                        <strong>Photos:</strong> {gallery.length} <br />
+                        <strong>Periods:</strong> {periods.length}
+                      </p>
+
+                      <div className="package-admin-meta">
+                        <span>Single: {firstPeriod.single || "-"}</span>
+                        <span>Double: {firstPeriod.double || "-"}</span>
+                        <span>{visibility}</span>
+                      </div>
+                    </div>
+
+                    <div className="package-admin-actions hotel-admin-actions">
+                      <button
+                        type="button"
+                        className="hotel-edit-btn"
+                        onClick={() => openEditHotel(hotel)}
+                      >
+                        <FaEdit /> Edit
+                      </button>
+
+                      <select
+                        className={`hotel-visibility-select ${
+                          visibility === "Published" ? "published" : "private"
+                        }`}
+                        value={visibility}
+                        onChange={(e) =>
+                          updateHotelVisibility(hotel, e.target.value)
+                        }
+                      >
+                        <option value="Published">Published</option>
+                        <option value="Private">Private</option>
+                      </select>
+
+                      <button
+                        type="button"
+                        className="hotel-delete-btn"
+                        onClick={() => deleteHotel(hotelId)}
+                      >
+                        <FaTrash /> Delete
+                      </button>
                     </div>
                   </div>
+                );
+              })}
+            </div>
 
-                  <div className="package-admin-actions hotel-admin-actions">
-                    <button
-                      type="button"
-                      className="hotel-edit-btn"
-                      onClick={() => openEditHotel(hotel)}
-                    >
-                      <FaEdit /> Edit
-                    </button>
+            {totalPages > 1 && (
+              <div className="admin-pagination">
+                <button
+                  type="button"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
 
-                    <select
-                      className={`hotel-visibility-select ${
-                        visibility === "Published" ? "published" : "private"
-                      }`}
-                      value={visibility}
-                      onChange={(e) =>
-                        updateHotelVisibility(hotel, e.target.value)
-                      }
-                    >
-                      <option value="Published">Published</option>
-                      <option value="Private">Private</option>
-                    </select>
+                <div className="admin-pagination-numbers">
+                  {Array.from({ length: totalPages }, (_, index) => {
+                    const page = index + 1;
 
-                    <button
-                      type="button"
-                      className="hotel-delete-btn"
-                      onClick={() => deleteHotel(hotelId)}
-                    >
-                      <FaTrash /> Delete
-                    </button>
-                  </div>
+                    return (
+                      <button
+                        type="button"
+                        key={page}
+                        className={currentPage === page ? "active" : ""}
+                        onClick={() => goToPage(page)}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+
+                <button
+                  type="button"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
@@ -729,8 +914,10 @@ export default function Hotels() {
                 }
               />
 
-              <div className="hotel-upload-zone">
-                <label className="hotel-upload-label">
+              <div className="hotel-modern-upload-zone">
+                <h3>Hotel Images</h3>
+
+                <label className="hotel-modern-upload-label">
                   <input
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
@@ -739,13 +926,13 @@ export default function Hotels() {
                     disabled={uploadingImages}
                   />
 
+                  <FaCloudUploadAlt />
                   <span>
                     {uploadingImages
                       ? "Uploading photos..."
                       : "Choose hotel photos"}
                   </span>
-
-                  <small>PNG, JPG, JPEG or WEBP</small>
+                  <small>You can select more than one image</small>
                 </label>
 
                 <div className="hotel-url-row">
@@ -764,46 +951,59 @@ export default function Hotels() {
                     Add
                   </button>
                 </div>
-              </div>
 
-              {hotelForm.gallery.length > 0 && (
-                <div className="hotel-images-preview-grid">
-                  {hotelForm.gallery.map((photo, index) => (
-                    <div
-                      className="hotel-image-preview-card"
-                      key={`${photo}-${index}`}
-                    >
-                      <img
-                        src={getImageUrl(photo)}
-                        alt={`Hotel preview ${index + 1}`}
-                        onError={(e) => {
-                          e.currentTarget.src = defaultCover;
-                        }}
-                      />
+                {hotelForm.gallery.length > 0 ? (
+                  <>
+                    <p className="hotel-images-count">
+                      {hotelForm.gallery.length} image
+                      {hotelForm.gallery.length > 1 ? "s" : ""} selected
+                    </p>
 
-                      <button
-                        type="button"
-                        className="remove-hotel-image-btn"
-                        onClick={() => removeHotelImage(photo)}
-                      >
-                        ×
-                      </button>
-
-                      {hotelForm.image === photo ? (
-                        <span className="hotel-cover-badge">Cover</span>
-                      ) : (
-                        <button
-                          type="button"
-                          className="set-cover-btn"
-                          onClick={() => setCoverImage(photo)}
+                    <div className="hotel-images-preview-grid">
+                      {hotelForm.gallery.map((photo, index) => (
+                        <div
+                          className="hotel-image-preview-card"
+                          key={`${photo}-${index}`}
                         >
-                          Set cover
-                        </button>
-                      )}
+                          <img
+                            src={getImageUrl(photo)}
+                            alt={`Hotel preview ${index + 1}`}
+                            onError={(e) => {
+                              e.currentTarget.src = defaultCover;
+                            }}
+                          />
+
+                          <button
+                            type="button"
+                            className="remove-hotel-image-btn"
+                            onClick={() => removeHotelImage(photo)}
+                            title="Remove image"
+                          >
+                            ×
+                          </button>
+
+                          {hotelForm.image === photo ? (
+                            <span className="hotel-cover-badge">Cover</span>
+                          ) : (
+                            <button
+                              type="button"
+                              className="set-cover-btn"
+                              onClick={() => setCoverImage(photo)}
+                            >
+                              Set cover
+                            </button>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  </>
+                ) : (
+                  <div className="hotel-image-empty-box">
+                    <FaImage />
+                    <span>No images selected</span>
+                  </div>
+                )}
+              </div>
 
               <textarea
                 placeholder="Description"
@@ -902,9 +1102,13 @@ export default function Hotels() {
                   type="button"
                   className="hotel-save-btn"
                   onClick={saveHotel}
-                  disabled={saving}
+                  disabled={saving || uploadingImages}
                 >
-                  {saving ? "Saving..." : "Save Hotel"}
+                  {saving
+                    ? "Saving..."
+                    : editingHotel
+                    ? "Save Changes"
+                    : "Save Hotel"}
                 </button>
 
                 <button
