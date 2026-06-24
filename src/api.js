@@ -11,12 +11,12 @@ API.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    if (error.response?.status === 401) {
+    if (
+      error.response?.status === 401 &&
+      !error.config?.skipAuthRedirect
+    ) {
       clearStoredAuth();
-
-      if (!error.config?.skipAuthRedirect) {
-        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-      }
+      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
     }
 
     return Promise.reject(error);
@@ -40,4 +40,5 @@ export const logoutClient = async () => {
 };
 
 export default API;
+
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
 import API from "../../api";
+import { setRuntimeAuthUser } from "../../utils/authStorage";
 import useRedirectIfLoggedIn from "../../hooks/useRedirectIfLoggedIn";
 import "./Login.css";
 
@@ -32,7 +33,7 @@ export default function Login() {
 
   const [authMessage, setAuthMessage] = useState(EMPTY_MESSAGE);
   const [loading, setLoading] = useState(false);
-  const checkingAuth = useRedirectIfLoggedIn();
+  useRedirectIfLoggedIn();
 
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState("");
@@ -240,6 +241,7 @@ export default function Login() {
       localStorage.removeItem("user");
       sessionStorage.removeItem("user");
       storage.setItem("user", JSON.stringify(user));
+      setRuntimeAuthUser(user);
       window.dispatchEvent(new Event("authChanged"));
 
       navigate(user.role === "admin" ? "/admin" : "/profile", {
@@ -285,10 +287,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
-  if (checkingAuth) {
-    return null;
-  }
 
   return (
     <>
@@ -502,5 +500,8 @@ function EmailVerificationPopup({
     </div>
   );
 }
+
+
+
 
 

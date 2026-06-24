@@ -2,9 +2,23 @@
 import { Navigate, useLocation } from "react-router-dom";
 import API from "../api";
 import Navbar from "./navbar";
-import { clearStoredAuth } from "../utils/authStorage";
+import {
+  clearStoredAuth,
+  getRuntimeAuthUser,
+  setRuntimeAuthUser,
+} from "../utils/authStorage";
 
-let verifiedSessionUser = null;
+const readStoredUser = () => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("user") ||
+        sessionStorage.getItem("user") ||
+        "null"
+    );
+  } catch {
+    return null;
+  }
+};
 
 const saveStoredUser = (user) => {
   if (!user) return;
@@ -20,18 +34,25 @@ const saveStoredUser = (user) => {
 
 function ProtectedRoute({ children, requiredRole }) {
   const location = useLocation();
+  const initialUser = getRuntimeAuthUser() || readStoredUser();
   const [status, setStatus] = useState(
-    verifiedSessionUser ? "authenticated" : "checking"
+    initialUser ? "authenticated" : "checking"
   );
-  const [user, setUser] = useState(verifiedSessionUser);
+  const [user, setUser] = useState(initialUser);
 
   useEffect(() => {
     let isActive = true;
 
     const verifySession = async () => {
-      if (!verifiedSessionUser) {
-        setStatus("checking");
+      const runtimeUser = getRuntimeAuthUser();
+
+      if (runtimeUser) {
+        setUser(runtimeUser);
+        setStatus("authenticated");
+        return;
       }
+
+      setStatus("checking");
 
       try {
         const res = await API.get("/auth/me", { timeout: 5000 });
@@ -40,21 +61,19 @@ function ProtectedRoute({ children, requiredRole }) {
         if (!isActive) return;
 
         if (!verifiedUser) {
-          verifiedSessionUser = null;
           clearStoredAuth();
           setUser(null);
           setStatus("guest");
           return;
         }
 
-        verifiedSessionUser = verifiedUser;
+        setRuntimeAuthUser(verifiedUser);
         setUser(verifiedUser);
         saveStoredUser(verifiedUser);
         setStatus("authenticated");
       } catch {
         if (!isActive) return;
 
-        verifiedSessionUser = null;
         clearStoredAuth();
         setUser(null);
         setStatus("guest");
@@ -62,7 +81,6 @@ function ProtectedRoute({ children, requiredRole }) {
     };
 
     const handleUnauthorized = () => {
-      verifiedSessionUser = null;
       clearStoredAuth();
       setUser(null);
       setStatus("guest");
@@ -93,6 +111,9 @@ function ProtectedRoute({ children, requiredRole }) {
 }
 
 export default ProtectedRoute;
+
+
+
 
 
 

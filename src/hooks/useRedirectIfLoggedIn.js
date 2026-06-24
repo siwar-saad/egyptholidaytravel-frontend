@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import API from "../api";
-import { clearStoredAuth } from "../utils/authStorage";
+import { setRuntimeAuthUser } from "../utils/authStorage";
 
 /* ================= AUTH REDIRECT ================= */
 export default function useRedirectIfLoggedIn() {
@@ -11,11 +11,14 @@ export default function useRedirectIfLoggedIn() {
 
   useEffect(() => {
     let mounted = true;
+    const controller = new AbortController();
 
     const redirectIfLoggedIn = async () => {
       try {
         const res = await API.get("/auth/me", {
           skipAuthRedirect: true,
+          timeout: 5000,
+          signal: controller.signal,
         });
 
         const user = res.data?.user;
@@ -26,6 +29,7 @@ export default function useRedirectIfLoggedIn() {
             : sessionStorage;
 
           storage.setItem("user", JSON.stringify(user));
+          setRuntimeAuthUser(user);
           window.dispatchEvent(new Event("authChanged"));
 
           navigate(user.role === "admin" ? "/admin" : "/profile", {
@@ -33,8 +37,8 @@ export default function useRedirectIfLoggedIn() {
           });
         }
       } catch (error) {
-        if (error.response?.status === 401) {
-          clearStoredAuth();
+        if (error.code !== "ERR_CANCELED" && error.name !== "CanceledError") {
+          // A guest can stay on the login page without changing auth state.
         }
       } finally {
         if (mounted) {
@@ -47,8 +51,15 @@ export default function useRedirectIfLoggedIn() {
 
     return () => {
       mounted = false;
+      controller.abort();
     };
   }, [navigate]);
 
   return checkingAuth;
 }
+
+
+
+
+
+
