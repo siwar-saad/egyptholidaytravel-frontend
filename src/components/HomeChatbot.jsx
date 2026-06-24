@@ -20,7 +20,6 @@ import {
 
 import API from "../api";
 import "./HomeChatbot.css";
-import { clearStoredAuth } from "../utils/authStorage";
 import { debugLog } from "../utils/debugLog";
 
 export default function HomeChatbot() {
@@ -120,9 +119,7 @@ export default function HomeChatbot() {
         const res = await API.get("/auth/me", { skipAuthRedirect: true });
         setUser(res.data?.user || null);
       } catch (error) {
-        if (error.response?.status === 401) {
-          clearStoredAuth();
-        }
+  
 
         setUser(null);
       }
