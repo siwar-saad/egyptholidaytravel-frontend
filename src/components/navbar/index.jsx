@@ -1,4 +1,4 @@
-import "./style.css";
+﻿import "./style.css";
 import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
@@ -46,21 +46,15 @@ export default function Navbar() {
   }, [location.pathname]);
 
   const getUserName = () => {
-  if (!user) return "";
+    if (!user) return "";
 
-  const role = (user.role || "").toLowerCase();
+    const fullName =
+      user.name ||
+      `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+      `${user.first_name || ""} ${user.last_name || ""}`.trim();
 
-  if (role === "admin") {
-    return "Admin EgyptHoliday";
-  }
-
-  return (
-    user.name ||
-    `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-    user.email ||
-    "Profile"
-  );
-};
+    return fullName || user.email || "Profile";
+  };
 
   const getUserAvatar = () => {
     return getImageUrl(user?.avatar || user?.image || user?.profileImage || "");

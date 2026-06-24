@@ -1,6 +1,16 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import API from "../../api";
 import "./Admin.css";
+
+const getReviewFlagUrl = (review) => {
+  const code = String(review.code || review.countryCode || "")
+    .trim()
+    .toLowerCase();
+
+  return /^[a-z]{2}$/.test(code)
+    ? `https://flagcdn.com/w80/${code}.png`
+    : "";
+};
 
 export default function AdminReviews() {
   const [reviews, setReviews] = useState([]);
@@ -138,11 +148,29 @@ export default function AdminReviews() {
                     {review.name?.charAt(0)?.toUpperCase() || "U"}
                   </div>
 
-                  <div>
-                    <h3>{review.name}</h3>
+                  <div className="admin-review-person">
+                    <h3>
+                      {review.name}
+                      {getReviewFlagUrl(review) && (
+                        <img
+                          className="admin-review-flag"
+                          src={getReviewFlagUrl(review)}
+                          alt={`${review.country || "Country"} flag`}
+                          title={review.country || "Country"}
+                          loading="lazy"
+                        />
+                      )}
+                    </h3>
+
                     <span className="admin-review-stars">
-                      {"★".repeat(Number(review.rating || 5))}
+                      {"\u2605".repeat(Number(review.rating || 5))}
                     </span>
+
+                    {review.country && (
+                      <small className="admin-review-country">
+                        {review.country} traveler
+                      </small>
+                    )}
                   </div>
 
                   <span className={`review-status ${review.status}`}>
@@ -211,7 +239,7 @@ function ReviewNoticePopup({ notice, onClose }) {
     <div className="admin-pro-popup-overlay">
       <div className={`admin-pro-popup ${notice.type}`}>
         <div className="admin-pro-popup-icon">
-          {notice.type === "success" ? "✓" : "!"}
+          {notice.type === "success" ? "\u2713" : "!"}
         </div>
 
         <h3>{notice.title}</h3>

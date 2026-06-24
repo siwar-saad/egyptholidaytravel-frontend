@@ -4480,3 +4480,86 @@ tbody tr:hover {
     width: 100%;
   }
 }
+
+/* ================= ADMIN SIDEBAR BRAND ================= */
+.admin-sidebar .admin-sidebar-brand {
+  appearance: none !important;
+  width: 100% !important;
+  min-height: 72px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  margin: 0 0 20px !important;
+  padding: 8px 4px 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #2d1b12 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.admin-sidebar .admin-sidebar-brand:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.admin-sidebar-brand-icon {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  flex: 0 0 52px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 16px !important;
+  background: #91491b !important;
+  color: #ffffff !important;
+  font-size: 20px !important;
+  box-shadow: 0 12px 24px rgba(117, 57, 20, 0.18) !important;
+}
+
+.admin-sidebar-brand-icon svg {
+  display: block !important;
+  width: 21px !important;
+  height: 21px !important;
+  fill: currentColor !important;
+}
+
+.admin-sidebar-brand-text {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  line-height: 1.1 !important;
+}
+
+.admin-sidebar-brand-text strong {
+  display: block !important;
+  color: #935426 !important;
+  font-family: "Playfair Display", serif !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.admin-sidebar-brand-text small {
+  display: block !important;
+  margin-top: 5px !important;
+  color: #5f3824 !important;
+  font-family: "Inika", serif !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1100px) {
+  .admin-sidebar .admin-sidebar-brand {
+    margin-top: -56px !important;
+    padding-right: 48px !important;
+  }
+}

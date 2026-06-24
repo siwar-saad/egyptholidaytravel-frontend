@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   FaChevronDown,
   FaPlus,
@@ -137,7 +137,8 @@ export default function Users() {
 
   const storedAdmin = useMemo(() => {
     try {
-      const storedUser = localStorage.getItem("user");
+      const storedUser =
+        localStorage.getItem("user") || sessionStorage.getItem("user");
       return storedUser ? JSON.parse(storedUser) : null;
     } catch {
       return null;
@@ -879,7 +880,7 @@ export default function Users() {
                 className="close-package-popup"
                 onClick={closeUserPopup}
               >
-                ×
+                x
               </button>
             </div>
 
@@ -1137,7 +1138,7 @@ function DeleteConfirmPopup({ user, role, name, loading, onCancel, onConfirm }) 
           disabled={loading}
           aria-label="Close"
         >
-          ×
+          x
         </button>
 
         <div className={isAdmin ? "delete-icon admin" : "delete-icon client"}>
@@ -1194,11 +1195,11 @@ function UserNoticePopup({ notice, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <button type="button" className="user-notice-close" onClick={onClose}>
-          ×
+          x
         </button>
 
         <div className={`user-notice-icon ${notice.type}`}>
-          {isSuccess ? "✓" : "!"}
+          {isSuccess ? <FaCheckCircle /> : "!"}
         </div>
 
         <div className="user-notice-content">
@@ -1216,3 +1217,4 @@ function UserNoticePopup({ notice, onClose }) {
     </div>
   );
 }
+

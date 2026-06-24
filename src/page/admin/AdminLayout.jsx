@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaHome,
@@ -15,6 +15,7 @@ import {
   FaHotel,
   FaBars,
   FaTimes,
+  FaPlaneDeparture,
 } from "react-icons/fa";
 
 import Navbar from "../../components/navbar";
@@ -266,6 +267,22 @@ export default function AdminLayout({ children }) {
             <FaTimes />
           </button>
 
+          <button
+            type="button"
+            className="admin-sidebar-brand"
+            onClick={() => goToPage("/admin")}
+            aria-label="Open admin dashboard"
+          >
+            <span className="admin-sidebar-brand-icon">
+              <FaPlaneDeparture />
+            </span>
+
+            <span className="admin-sidebar-brand-text">
+              <strong>Egypt Holiday</strong>
+              <small>Admin Panel</small>
+            </span>
+          </button>
+
           <div className="admin-sidebar-menu">
             {menu.map((item) => (
               <button
@@ -312,3 +329,4 @@ export default function AdminLayout({ children }) {
     </>
   );
 }
+

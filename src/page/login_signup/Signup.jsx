@@ -202,15 +202,25 @@ export default function Signup() {
     try {
       setVerifyLoading(true);
 
-      await sendVerificationCode();
+      await API.post("/auth/resend-verification-code", {
+        email: pendingEmail || email.trim().toLowerCase(),
+      });
 
       setVerificationCode("");
       setCodeMessage("A new verification code has been sent to your email.");
     } catch (err) {
+      const serverError =
+        err.response?.data?.message || err.response?.data?.error;
+      const serverCode = err.response?.data?.code;
+
       setCodeError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Could not resend the code. Please try again."
+        serverError
+          ? serverCode
+            ? `${serverError} (${serverCode})`
+            : serverError
+          : err.response
+          ? "The backend returned an error without details."
+          : "The backend is not reachable. Please check that the server is running on port 3000."
       );
     } finally {
       setVerifyLoading(false);
