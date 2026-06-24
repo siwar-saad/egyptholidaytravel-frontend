@@ -13,9 +13,7 @@ import InfoPopup from "./homeInfo/InfoPopup";
 /* IMAGES */
 import cairoCover from "../assets/image/cairo.webp";
 import dahabImg from "../assets/image/dahab.webp";
-import sharmImg from "../assets/image/sharm.webp";
 import bgImg from "../assets/image/bg.webp";
-import LuxorImg from "../assets/image/Luxor.webp";
 import pyra from "../assets/image/pyra.webp";
 
 /* VIDEO */
@@ -153,7 +151,9 @@ const getFlagCode = (value = "") => {
 
 const getReviewData = (review, index) => {
   const meta = REVIEW_META[index % REVIEW_META.length];
-  const code = getFlagCode(review.code || review.flag || review.country || meta.code);
+  const code = getFlagCode(
+    review.code || review.flag || review.country || meta.code
+  );
 
   return {
     ...review,
@@ -425,35 +425,49 @@ export default function Home() {
   });
 
   const destinations = [
-    { name: "Cairo", desc: "Explore Egypt", img: cairoCover },
-    { name: "Dahab", desc: "Explore Egypt", img: dahabImg },
-    { name: "Sharm El Sheikh", desc: "Explore Egypt", img: sharmImg },
-    { name: "Luxor", desc: "Explore Egypt", img: LuxorImg },
+    {
+      name: "Exclusive Travel Offer — Cairo",
+      desc: "04 Nights / 05 Days",
+      img: cairoCover,
+      programId: "exclusive-cairo",
+    },
+    {
+      name: "Cairo – Hurghada",
+      desc: "5 Nights • Cairo & Hurghada",
+      img: cairoHurghadaPackage,
+      programId: "cairo-hurghada-5",
+    },
+    {
+      name: "Cairo – Luxor",
+      desc: "6 Nights • Cairo & Luxor",
+      img: cairoLuxorPackage,
+      programId: "cairo-luxor-6",
+    },
   ];
 
   const packages = [
-  {
-    name: "Cairo – Hurghada",
-    desc: "Cairo & Red Sea Package",
-    img: cairoHurghadaPackage,
-    packageId: "cairo-hurghada-5",
-    keyword: "cairo hurghada",
-  },
-  {
-    name: "Cairo – Sharm El Sheikh",
-    desc: "6 Days / 5 Nights Program",
-    img: cairoSharmPackage,
-    packageId: "cairo-sharm-6-days",
-    keyword: "cairo sharm",
-  },
-  {
-    name: "Cairo – Luxor",
-    desc: "Ancient Egypt & Nile Package",
-    img: cairoLuxorPackage,
-    packageId: "cairo-luxor-6",
-    keyword: "cairo luxor",
-  },
-];
+    {
+      name: "Cairo – Hurghada",
+      desc: "Cairo & Red Sea Package",
+      img: cairoHurghadaPackage,
+      packageId: "cairo-hurghada-5",
+      keyword: "cairo hurghada",
+    },
+    {
+      name: "Cairo – Sharm El Sheikh",
+      desc: "6 Days / 5 Nights Program",
+      img: cairoSharmPackage,
+      packageId: "cairo-sharm-6-days",
+      keyword: "cairo sharm",
+    },
+    {
+      name: "Cairo – Luxor",
+      desc: "Ancient Egypt & Nile Package",
+      img: cairoLuxorPackage,
+      packageId: "cairo-luxor-6",
+      keyword: "cairo luxor",
+    },
+  ];
 
   const featureCards = [
     {
@@ -478,7 +492,11 @@ export default function Home() {
     },
   ];
 
-  const destinationSliderItems = [...destinations, ...destinations, ...destinations];
+  const destinationSliderItems = [
+    ...destinations,
+    ...destinations,
+    ...destinations,
+  ];
   const packageSliderItems = [...packages, ...packages, ...packages];
   const topHotelSliderItems = [...topHotels, ...topHotels, ...topHotels];
   const featureSliderItems = [...featureCards, ...featureCards, ...featureCards];
@@ -627,14 +645,23 @@ export default function Home() {
   };
 
   const openPackageFromHome = (item) => {
-  navigate("/packages", {
-    state: {
-      openPackageId: item.packageId,
-      openPackageName: item.name,
-      openPackageKeyword: item.keyword || item.name,
-    },
-  });
-};
+    navigate("/packages", {
+      state: {
+        openPackageId: item.packageId,
+        openPackageName: item.name,
+        openPackageKeyword: item.keyword || item.name,
+      },
+    });
+  };
+
+  const openDestinationFromHome = (item) => {
+    navigate("/destination", {
+      state: {
+        openProgramId: item.programId,
+        openProgramName: item.name,
+      },
+    });
+  };
 
   const openHotelFromHome = (hotel) => {
     navigate("/hotels", {
@@ -751,38 +778,38 @@ export default function Home() {
         </div>
 
         <div className="egypt-video-content">
-  <span className="egypt-video-kicker">Discover Egypt in Motion</span>
+          <span className="egypt-video-kicker">Discover Egypt in Motion</span>
 
-  <h2>
-    Experience Egypt
-    <br />
-    Like Never Before
-  </h2>
+          <h2>
+            Experience Egypt
+            <br />
+            Like Never Before
+          </h2>
 
-  <p>
-    Watch the beauty of Egypt through iconic landmarks, Red Sea views,
-    golden deserts, and unforgettable travel moments.
-  </p>
+          <p>
+            Watch the beauty of Egypt through iconic landmarks, Red Sea views,
+            golden deserts, and unforgettable travel moments.
+          </p>
 
-  <p>
-    With Egypt Holiday Travel, every journey is carefully planned to give
-    you comfort, discovery, and a memorable travel experience.
-  </p>
+          <p>
+            With Egypt Holiday Travel, every journey is carefully planned to give
+            you comfort, discovery, and a memorable travel experience.
+          </p>
 
-  <div className="egypt-video-points">
-    <span>Iconic landmarks</span>
-    <span>Red Sea views</span>
-    <span>Tailor-made trips</span>
-  </div>
+          <div className="egypt-video-points">
+            <span>Iconic landmarks</span>
+            <span>Red Sea views</span>
+            <span>Tailor-made trips</span>
+          </div>
 
-  <button
-    type="button"
-    className="egypt-video-btn"
-    onClick={handleBookNow}
-  >
-    Explore Packages
-  </button>
-</div>
+          <button
+            type="button"
+            className="egypt-video-btn"
+            onClick={handleBookNow}
+          >
+            Explore Packages
+          </button>
+        </div>
       </section>
 
       <section className="destinations-section" id="destinations">
@@ -794,11 +821,17 @@ export default function Home() {
         >
           {destinationSliderItems.map((item, index) => (
             <div
-              key={`${item.name}-${index}`}
+              key={`${item.programId}-${index}`}
               className={`destination-card-new ${
                 index >= destinations.length ? "mobile-clone" : ""
               }`}
               aria-hidden={index >= destinations.length}
+              onClick={() => openDestinationFromHome(item)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") openDestinationFromHome(item);
+              }}
             >
               <img src={item.img} alt={item.name} loading="lazy" />
               <div className="card-overlay"></div>
@@ -812,8 +845,8 @@ export default function Home() {
         </div>
 
         <p className="destinations-note">
-          For more details about our destinations, please contact our agency.
-          Our team will be happy to help you choose the perfect trip.
+          Click on a destination program to view the full details and book your
+          trip.
         </p>
       </section>
 
@@ -853,7 +886,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="destinations-section top-hotels-section" id="top-hotels">
+      <section
+        className="destinations-section top-hotels-section"
+        id="top-hotels"
+      >
         <h2 className="section-title">Top Hotels</h2>
 
         {topHotels.length > 0 ? (
@@ -863,7 +899,9 @@ export default function Home() {
           >
             {topHotelSliderItems.map((hotel, index) => (
               <div
-                key={`${hotel.id || hotel._id || hotel.name || "hotel"}-${index}`}
+                key={`${
+                  hotel.id || hotel._id || hotel.name || "hotel"
+                }-${index}`}
                 className={`destination-card-new top-hotel-card ${
                   index >= topHotels.length ? "mobile-clone" : ""
                 }`}
@@ -898,7 +936,8 @@ export default function Home() {
 
         {topHotels.length > 0 && (
           <p className="destinations-note">
-            Choose one of our selected hotels and view more details on the hotels page.
+            Choose one of our selected hotels and view more details on the
+            hotels page.
           </p>
         )}
       </section>
@@ -954,7 +993,9 @@ export default function Home() {
             <button
               type="button"
               className="why-accordion-title"
-              onClick={() => setOpenWhy(openWhy === "choose" ? null : "choose")}
+              onClick={() =>
+                setOpenWhy(openWhy === "choose" ? null : "choose")
+              }
             >
               <span>Why Choose Us</span>
               <span className="why-arrow">{"\u2304"}</span>
@@ -1025,7 +1066,11 @@ export default function Home() {
                   {renderStars(item.rating)}
                 </div>
 
-                <p className="review-text">{"\u201C"}{item.text}{"\u201D"}</p>
+                <p className="review-text">
+                  {"\u201C"}
+                  {item.text}
+                  {"\u201D"}
+                </p>
               </article>
             );
           })}
@@ -1066,11 +1111,21 @@ export default function Home() {
                   setReviewForm({ ...reviewForm, rating: e.target.value })
                 }
               >
-                <option value="5">{"\u2605\u2605\u2605\u2605\u2605 Excellent"}</option>
-                <option value="4">{"\u2605\u2605\u2605\u2605\u2606 Very Good"}</option>
-                <option value="3">{"\u2605\u2605\u2605\u2606\u2606 Good"}</option>
-                <option value="2">{"\u2605\u2605\u2606\u2606\u2606 Average"}</option>
-                <option value="1">{"\u2605\u2606\u2606\u2606\u2606 Poor"}</option>
+                <option value="5">
+                  {"\u2605\u2605\u2605\u2605\u2605 Excellent"}
+                </option>
+                <option value="4">
+                  {"\u2605\u2605\u2605\u2605\u2606 Very Good"}
+                </option>
+                <option value="3">
+                  {"\u2605\u2605\u2605\u2606\u2606 Good"}
+                </option>
+                <option value="2">
+                  {"\u2605\u2605\u2606\u2606\u2606 Average"}
+                </option>
+                <option value="1">
+                  {"\u2605\u2606\u2606\u2606\u2606 Poor"}
+                </option>
               </select>
             </div>
 
@@ -1204,5 +1259,3 @@ export default function Home() {
     </div>
   );
 }
-
-

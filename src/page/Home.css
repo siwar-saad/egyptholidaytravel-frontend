@@ -3927,3 +3927,13 @@ button {
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
+@media (min-width: 1025px) {
+  .destination-card-new.mobile-clone {
+    display: none;
+  }
+
+  .destinations-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 980px;
+  }
+}

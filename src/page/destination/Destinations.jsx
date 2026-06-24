@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
 import API from "../../api";
@@ -21,11 +22,10 @@ const IMAGES = {
 
 const getStoredUser = () => {
   try {
-    const user =
-      JSON.parse(localStorage.getItem("user") || "null") ||
-      JSON.parse(sessionStorage.getItem("user") || "null");
+    const localUser = JSON.parse(localStorage.getItem("user") || "null");
+    const sessionUser = JSON.parse(sessionStorage.getItem("user") || "null");
 
-    return user || {};
+    return localUser || sessionUser || {};
   } catch {
     return {};
   }
@@ -53,6 +53,7 @@ const getInitialBookingForm = (program = {}) => {
 
 const PROGRAMS = [
   {
+    id: "exclusive-cairo",
     tag: "File 01",
     stamp: "Egypt",
     title: "Exclusive Travel Offer — Cairo",
@@ -156,6 +157,7 @@ const PROGRAMS = [
     ],
   },
   {
+    id: "cairo-hurghada-5",
     tag: "File 02",
     stamp: "Egypt",
     title: "Cairo – Hurghada",
@@ -265,6 +267,7 @@ const PROGRAMS = [
     ],
   },
   {
+    id: "cairo-hurghada-6",
     tag: "File 03",
     stamp: "Egypt",
     title: "Cairo – Hurghada",
@@ -383,6 +386,7 @@ const PROGRAMS = [
     ],
   },
   {
+    id: "cairo-alexandria-6",
     tag: "File 04",
     stamp: "Egypt",
     title: "Cairo – Alexandria",
@@ -501,6 +505,7 @@ const PROGRAMS = [
     ],
   },
   {
+    id: "cairo-luxor-6",
     tag: "File 05",
     stamp: "Egypt",
     title: "Cairo – Luxor",
@@ -622,24 +627,30 @@ const PROGRAMS = [
 ];
 
 export default function Destinations() {
+  const location = useLocation();
+
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingSaving, setBookingSaving] = useState(false);
   const [bookingNotice, setBookingNotice] = useState(null);
   const [bookingForm, setBookingForm] = useState(getInitialBookingForm());
 
-  useEffect(() => {
-    if (!selectedProgram && !bookingOpen) return;
+  const openProgramPopup = (program) => {
+    if (!program) return;
 
-    const oldBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
 
-    return () => {
-      document.body.style.overflow = oldBodyOverflow;
-    };
-  }, [selectedProgram, bookingOpen]);
+    setSelectedProgram(program);
+    setBookingOpen(false);
+    setBookingNotice(null);
+  };
 
   const closeProgramPopup = () => {
+    if (bookingSaving) return;
+
     setSelectedProgram(null);
     setBookingOpen(false);
     setBookingNotice(null);
@@ -672,10 +683,14 @@ export default function Destinations() {
 
     if (!selectedProgram) return;
 
+    const fullName = bookingForm.fullName.trim();
+    const email = bookingForm.email.trim();
+    const phone = bookingForm.phone.trim();
+
     if (
-      !bookingForm.fullName.trim() ||
-      !bookingForm.email.trim() ||
-      !bookingForm.phone.trim() ||
+      !fullName ||
+      !email ||
+      !phone ||
       !bookingForm.travelDate ||
       !bookingForm.travelers
     ) {
@@ -689,19 +704,24 @@ export default function Destinations() {
     const payload = {
       type: "package",
       packageName: selectedProgram.title,
+      package_name: selectedProgram.title,
       route: selectedProgram.route,
       duration: selectedProgram.duration,
       travelDate: bookingForm.travelDate,
+      travel_date: bookingForm.travelDate,
       roomType: bookingForm.roomType,
-      fullName: bookingForm.fullName,
-      email: bookingForm.email,
-      phone: bookingForm.phone,
+      room_type: bookingForm.roomType,
+      fullName,
+      full_name: fullName,
+      email,
+      phone,
       travelers: bookingForm.travelers,
       notes: bookingForm.notes,
 
       search_params: {
         name: selectedProgram.title,
         backendName: selectedProgram.title,
+        backend_name: selectedProgram.title,
         route: selectedProgram.route,
         duration: selectedProgram.duration,
         travelDate: bookingForm.travelDate,
@@ -711,10 +731,10 @@ export default function Destinations() {
       },
 
       customer_info: {
-        fullName: bookingForm.fullName,
-        full_name: bookingForm.fullName,
-        email: bookingForm.email,
-        phone: bookingForm.phone,
+        fullName,
+        full_name: fullName,
+        email,
+        phone,
         travelers: bookingForm.travelers,
         notes: bookingForm.notes,
       },
@@ -744,6 +764,38 @@ export default function Destinations() {
       setBookingSaving(false);
     }
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const openProgramId =
+      location.state?.openProgramId || params.get("program") || "";
+    const openProgramName = location.state?.openProgramName || "";
+
+    if (!openProgramId && !openProgramName) return;
+
+    const foundProgram = PROGRAMS.find(
+      (program) =>
+        program.id === openProgramId ||
+        program.title === openProgramName ||
+        program.route === openProgramName
+    );
+
+    if (foundProgram) {
+      openProgramPopup(foundProgram);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
+
+  useEffect(() => {
+    if (!selectedProgram && !bookingOpen) return;
+
+    const oldBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = oldBodyOverflow;
+    };
+  }, [selectedProgram, bookingOpen]);
 
   return (
     <>
@@ -804,12 +856,12 @@ export default function Destinations() {
             {PROGRAMS.map((program, index) => (
               <article
                 className="program-card"
-                key={index}
-                onClick={() => setSelectedProgram(program)}
+                key={program.id || index}
+                onClick={() => openProgramPopup(program)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") setSelectedProgram(program);
+                  if (e.key === "Enter") openProgramPopup(program);
                 }}
               >
                 <div
@@ -845,7 +897,7 @@ export default function Destinations() {
                     className="program-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedProgram(program);
+                      openProgramPopup(program);
                     }}
                   >
                     View Program
