@@ -4275,128 +4275,291 @@ tbody tr:hover {
     width: 100%;
   }
 }
-.admin-review-person {
-  min-width: 0 !important;
-}
+/* =========================
+   Professional Delete Popup
+========================= */
 
-.admin-review-person h3 {
-  display: flex !important;
-  align-items: center !important;
-  gap: 9px !important;
-  min-width: 0 !important;
-}
-
-.admin-review-flag {
-  width: 30px !important;
-  height: 20px !important;
-  object-fit: cover !important;
-  border-radius: 3px !important;
-  border: 1px solid rgba(36, 22, 15, 0.12) !important;
-  box-shadow: 0 3px 8px rgba(36, 22, 15, 0.12) !important;
-  flex: 0 0 auto !important;
-}
-
-.admin-review-country {
-  display: block !important;
-  margin-top: 5px !important;
-  color: #765b49 !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-}
-
-/* ================= ADMIN SIDEBAR BRAND ================= */
-.admin-sidebar-brand {
-  width: 100%;
+.admin-delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 25000;
   display: flex;
   align-items: center;
-  gap: 13px;
-  margin: 0 0 22px;
-  padding: 4px 8px 17px;
-  border: 0;
-  border-bottom: 1px solid rgba(147, 84, 38, 0.12);
-  background: transparent;
-  color: #2d1b12;
-  text-align: left;
-  cursor: pointer;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(34, 25, 18, 0.6);
+  backdrop-filter: blur(7px);
+  animation: deleteOverlayIn 0.25s ease;
 }
 
-.admin-sidebar-logo {
-  width: 58px;
-  height: 58px;
-  flex: 0 0 58px;
-  object-fit: contain;
+.admin-delete-confirm-popup {
+  position: relative;
+  width: min(470px, 100%);
+  padding: 34px 30px 28px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #fffaf5 0%, #ffffff 100%);
+  border: 1px solid rgba(147, 84, 38, 0.16);
+  box-shadow: 0 35px 90px rgba(28, 20, 14, 0.38);
+  text-align: center;
+  animation: deletePopupIn 0.28s ease;
+}
+
+.admin-delete-confirm-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
   border-radius: 50%;
+  background: rgba(168, 116, 70, 0.12);
+  color: #935426;
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.25s ease;
 }
 
-.admin-sidebar-brand-text {
-  min-width: 0;
+.admin-delete-confirm-close:hover:not(:disabled) {
+  background: rgba(168, 116, 70, 0.22);
+  transform: rotate(90deg);
+}
+
+.delete-icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 38px;
+  font-weight: 900;
+  box-shadow: 0 16px 36px rgba(43, 28, 20, 0.2);
+}
+
+.delete-icon.client {
+  background: linear-gradient(135deg, #c85b3e, #9c2f1f);
+}
+
+.delete-icon.admin {
+  background: linear-gradient(135deg, #2b1c14, #935426);
+}
+
+.delete-warning-label {
+  display: inline-flex;
+  margin-bottom: 10px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(168, 116, 70, 0.12);
+  color: #935426;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-delete-confirm-popup h2 {
+  margin: 0 0 11px;
+  color: #2b1c14;
+  font-size: 30px;
+  font-weight: 900;
   line-height: 1.15;
 }
 
-.admin-sidebar-brand-text strong {
-  color: #8f4d1f;
-  font-family: "Playfair Display", serif;
-  font-size: 22px;
-  font-weight: 800;
-  white-space: nowrap;
+.admin-delete-confirm-popup p {
+  margin: 0 auto 16px;
+  max-width: 360px;
+  color: #6d5a4b;
+  font-size: 15.5px;
+  line-height: 1.65;
 }
 
-.admin-sidebar-brand-text small {
-  margin-top: 4px;
-  color: #6f4a34;
-  font-family: "Inika", serif;
-  font-size: 13px;
+.admin-delete-confirm-popup p strong {
+  color: #2b1c14;
+  font-weight: 900;
 }
 
-@media (max-width: 1100px) {
-  .admin-sidebar-brand {
-    margin-top: -48px;
-    padding-right: 45px;
+.delete-warning-box {
+  margin: 0 auto 24px;
+  padding: 13px 15px;
+  max-width: 370px;
+  border-radius: 17px;
+  background: #fff1f1;
+  border: 1px solid rgba(196, 45, 45, 0.13);
+  color: #9c2f1f;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.admin-delete-confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.admin-delete-confirm-actions button {
+  min-width: 135px;
+  min-height: 48px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 900;
+  transition: 0.25s ease;
+}
+
+.delete-confirm-cancel {
+  background: rgba(168, 116, 70, 0.12);
+  color: #935426;
+}
+
+.delete-confirm-cancel:hover:not(:disabled) {
+  background: rgba(168, 116, 70, 0.2);
+  transform: translateY(-2px);
+}
+
+.delete-confirm-danger {
+  background: linear-gradient(135deg, #c85b3e, #9c2f1f);
+  color: #ffffff;
+  box-shadow: 0 15px 32px rgba(156, 47, 31, 0.28);
+}
+
+.delete-confirm-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(156, 47, 31, 0.36);
+}
+
+.admin-delete-confirm-actions button:disabled,
+.admin-delete-confirm-close:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@keyframes deleteOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
-/* Exact sidebar brand shown in the admin reference */
-.admin-sidebar-brand {
+@keyframes deletePopupIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-delete-confirm-popup {
+    padding: 30px 20px 24px;
+    border-radius: 24px;
+  }
+
+  .admin-delete-confirm-popup h2 {
+    font-size: 25px;
+  }
+
+  .admin-delete-confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-delete-confirm-actions button {
+    width: 100%;
+  }
+}
+
+/* ================= ADMIN SIDEBAR BRAND ================= */
+.admin-sidebar .admin-sidebar-brand {
+  appearance: none !important;
+  width: 100% !important;
+  min-height: 72px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   gap: 14px !important;
-  margin: 0 0 25px !important;
-  padding: 3px 4px 20px !important;
-  border-bottom: 0 !important;
+  margin: 0 0 20px !important;
+  padding: 8px 4px 12px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #2d1b12 !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.admin-sidebar .admin-sidebar-brand:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .admin-sidebar-brand-icon {
   width: 52px !important;
   height: 52px !important;
+  min-width: 52px !important;
   flex: 0 0 52px !important;
   display: grid !important;
   place-items: center !important;
   border-radius: 16px !important;
   background: #91491b !important;
-  color: #fff !important;
+  color: #ffffff !important;
   font-size: 20px !important;
   box-shadow: 0 12px 24px rgba(117, 57, 20, 0.18) !important;
 }
 
 .admin-sidebar-brand-icon svg {
+  display: block !important;
   width: 21px !important;
   height: 21px !important;
+  fill: currentColor !important;
+}
+
+.admin-sidebar-brand-text {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  line-height: 1.1 !important;
 }
 
 .admin-sidebar-brand-text strong {
+  display: block !important;
   color: #935426 !important;
-  font-size: 25px !important;
+  font-family: "Playfair Display", serif !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
   line-height: 1 !important;
+  white-space: nowrap !important;
 }
 
 .admin-sidebar-brand-text small {
-  margin-top: 3px !important;
+  display: block !important;
+  margin-top: 5px !important;
   color: #5f3824 !important;
+  font-family: "Inika", serif !important;
   font-size: 13px !important;
+  font-weight: 400 !important;
+  white-space: nowrap !important;
 }
 
 @media (max-width: 1100px) {
-  .admin-sidebar-brand {
-    margin-top: -48px !important;
+  .admin-sidebar .admin-sidebar-brand {
+    margin-top: -56px !important;
+    padding-right: 48px !important;
   }
 }

@@ -432,25 +432,28 @@ export default function Home() {
   ];
 
   const packages = [
-    {
-      name: "Cairo \u2013 Hurghada",
-      desc: "Cairo & Red Sea Package",
-      img: cairoHurghadaPackage,
-      packageId: "cairo-hurghada-5",
-    },
-    {
-      name: "Cairo \u2013 Sharm El Sheikh",
-      desc: "6 Days / 5 Nights Program",
-      img: cairoSharmPackage,
-      packageId: "cairo-sharm-6-days",
-    },
-    {
-      name: "Cairo \u2013 Luxor",
-      desc: "Ancient Egypt & Nile Package",
-      img: cairoLuxorPackage,
-      packageId: "cairo-luxor-6",
-    },
-  ];
+  {
+    name: "Cairo – Hurghada",
+    desc: "Cairo & Red Sea Package",
+    img: cairoHurghadaPackage,
+    packageId: "cairo-hurghada-5",
+    keyword: "cairo hurghada",
+  },
+  {
+    name: "Cairo – Sharm El Sheikh",
+    desc: "6 Days / 5 Nights Program",
+    img: cairoSharmPackage,
+    packageId: "cairo-sharm-6-days",
+    keyword: "cairo sharm",
+  },
+  {
+    name: "Cairo – Luxor",
+    desc: "Ancient Egypt & Nile Package",
+    img: cairoLuxorPackage,
+    packageId: "cairo-luxor-6",
+    keyword: "cairo luxor",
+  },
+];
 
   const featureCards = [
     {
@@ -623,11 +626,15 @@ export default function Home() {
     });
   };
 
-  const openPackageFromHome = (packageId) => {
-    navigate("/packages", {
-      state: { openPackageId: packageId },
-    });
-  };
+  const openPackageFromHome = (item) => {
+  navigate("/packages", {
+    state: {
+      openPackageId: item.packageId,
+      openPackageName: item.name,
+      openPackageKeyword: item.keyword || item.name,
+    },
+  });
+};
 
   const openHotelFromHome = (hotel) => {
     navigate("/hotels", {
@@ -824,7 +831,7 @@ export default function Home() {
               }`}
               key={`${item.packageId}-${index}`}
               aria-hidden={index >= packages.length}
-              onClick={() => openPackageFromHome(item.packageId)}
+              onClick={() => openPackageFromHome(item)}
             >
               <img src={item.img} loading="lazy" alt={item.name} />
 
@@ -836,7 +843,7 @@ export default function Home() {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  openPackageFromHome(item.packageId);
+                  openPackageFromHome(item);
                 }}
               >
                 View details

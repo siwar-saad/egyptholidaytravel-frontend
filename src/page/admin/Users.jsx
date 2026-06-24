@@ -1126,13 +1126,17 @@ function DeleteConfirmPopup({ user, role, name, loading, onCancel, onConfirm }) 
   const isAdmin = role === "admin";
 
   return (
-    <div className="admin-delete-confirm-overlay">
-      <div className="admin-delete-confirm-popup">
+    <div className="admin-delete-confirm-overlay" onClick={onCancel}>
+      <div
+        className="admin-delete-confirm-popup"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           className="admin-delete-confirm-close"
           onClick={onCancel}
           disabled={loading}
+          aria-label="Close"
         >
           x
         </button>
@@ -1141,6 +1145,10 @@ function DeleteConfirmPopup({ user, role, name, loading, onCancel, onConfirm }) 
           !
         </div>
 
+        <span className="delete-warning-label">
+          {isAdmin ? "Admin Account" : "Client Account"}
+        </span>
+
         <h2>{isAdmin ? "Delete Admin" : "Delete Client"}</h2>
 
         <p>
@@ -1148,10 +1156,10 @@ function DeleteConfirmPopup({ user, role, name, loading, onCancel, onConfirm }) 
           <strong>{name || user?.email || "this user"}</strong>?
         </p>
 
-        <span>
+        <div className="delete-warning-box">
           This action will remove the account from the admin panel. You cannot
           undo this action.
-        </span>
+        </div>
 
         <div className="admin-delete-confirm-actions">
           <button
