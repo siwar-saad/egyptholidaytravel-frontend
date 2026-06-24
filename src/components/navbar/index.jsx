@@ -5,7 +5,6 @@ import { FaUser } from "react-icons/fa";
 
 import API from "../../api";
 import agency from "../../assets/image/agency.png";
-import { clearStoredAuth } from "../../utils/authStorage";
 
 const apiOrigin =
   (import.meta.env.VITE_API_URL || "/api").replace(/\/api\/?$/, "") || "";
@@ -29,9 +28,7 @@ export default function Navbar() {
         const res = await API.get("/auth/me", { skipAuthRedirect: true });
         setUser(res.data?.user || null);
       } catch (error) {
-        if (error.response?.status === 401) {
-          clearStoredAuth();
-        }
+        if (error.response?.status === 401) 
 
         setUser(null);
       }

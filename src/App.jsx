@@ -10,7 +10,7 @@ import ResetPassword from "./page/login_signup/ResetPassword";
 import Packages from "./page/packages/Packages.jsx";
 import Hotels from "./page/hotel/Hotels";
 import FlightComingSoon from "./page/flight/flightcomingsoon";
-import DestinationsComingSoon from "./page/destination/DestinationsComingSoon";
+import Destinations from "./page/destination/Destinations";
 
 import AdminLayout from "./page/admin/AdminLayout";
 import Dashboard from "./page/admin/Dashboard";
@@ -48,7 +48,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/packages" element={<Packages />} />
         <Route path="/hotels" element={<Hotels />} />
-        <Route path="/destinations" element={<DestinationsComingSoon />} />
+        <Route path="/destinations" element={<Destinations />} />
 
         {/* FLIGHTS */}
         <Route path="/flight" element={<FlightComingSoon />} />
