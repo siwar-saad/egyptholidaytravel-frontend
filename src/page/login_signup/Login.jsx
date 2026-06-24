@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 
@@ -237,7 +237,10 @@ export default function Login() {
       const user = res.data.user;
       const storage = rememberMe ? localStorage : sessionStorage;
 
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("user");
       storage.setItem("user", JSON.stringify(user));
+      window.dispatchEvent(new Event("authChanged"));
 
       navigate(user.role === "admin" ? "/admin" : "/profile", {
         replace: true,
@@ -499,3 +502,5 @@ function EmailVerificationPopup({
     </div>
   );
 }
+
+

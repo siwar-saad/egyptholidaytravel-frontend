@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import "./Home.css";
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
@@ -133,45 +133,18 @@ const REVIEW_META = [
   },
 ];
 
-const DEFAULT_REVIEWS = [
-  {
-    id: 1,
-    name: "Sarah M.",
-    rating: 5,
-    text: "Everything was perfectly organized. The team made our trip easy, safe, and full of beautiful moments. Highly recommended!",
-    code: "tn",
-    country: "Tunisia",
-  },
-  {
-    id: 2,
-    name: "Emre Y.",
-    rating: 5,
-    text: "Great experience! The communication was clear, and every destination was exactly as described. Excellent service.",
-    code: "tr",
-    country: "Turkey",
-  },
-  {
-    id: 3,
-    name: "Laura P.",
-    rating: 5,
-    text: "I discovered Egypt in a completely new way. The planning, timing, and professionalism were outstanding.",
-    code: "ma",
-    country: "Morocco",
-  },
-];
-
 const getFlagCode = (value = "") => {
   const clean = String(value).trim().toLowerCase();
 
-  if (clean.includes("🇹🇳") || clean.includes("tunisia") || clean === "tn") {
+  if (clean.includes("tunisia") || clean === "tn") {
     return "tn";
   }
 
-  if (clean.includes("🇹🇷") || clean.includes("turkey") || clean === "tr") {
+  if (clean.includes("turkey") || clean === "tr") {
     return "tr";
   }
 
-  if (clean.includes("🇲🇦") || clean.includes("morocco") || clean === "ma") {
+  if (clean.includes("morocco") || clean === "ma") {
     return "ma";
   }
 
@@ -199,7 +172,7 @@ const renderStars = (rating) => {
 
   return Array.from({ length: 5 }).map((_, index) => (
     <span key={index} className={index < value ? "active" : ""}>
-      ★
+      {"\u2605"}
     </span>
   ));
 };
@@ -430,7 +403,7 @@ export default function Home() {
   const [selectedInfo, setSelectedInfo] = useState(null);
   const [openWhy, setOpenWhy] = useState(null);
 
-  const [reviews, setReviews] = useState(DEFAULT_REVIEWS);
+  const [reviews, setReviews] = useState([]);
   const [topHotels, setTopHotels] = useState([]);
 
   const destinationsSliderRef = useAutoDragSlider(0.92);
@@ -460,19 +433,19 @@ export default function Home() {
 
   const packages = [
     {
-      name: "Cairo – Hurghada",
+      name: "Cairo \u2013 Hurghada",
       desc: "Cairo & Red Sea Package",
       img: cairoHurghadaPackage,
       packageId: "cairo-hurghada-5",
     },
     {
-      name: "Cairo – Sharm El Sheikh",
+      name: "Cairo \u2013 Sharm El Sheikh",
       desc: "6 Days / 5 Nights Program",
       img: cairoSharmPackage,
       packageId: "cairo-sharm-6-days",
     },
     {
-      name: "Cairo – Luxor",
+      name: "Cairo \u2013 Luxor",
       desc: "Ancient Egypt & Nile Package",
       img: cairoLuxorPackage,
       packageId: "cairo-luxor-6",
@@ -481,22 +454,22 @@ export default function Home() {
 
   const featureCards = [
     {
-      icon: "🛡️",
+      icon: "\u{1F6E1}\uFE0F",
       title: "Trust",
       text: "Trusted Global Brand",
     },
     {
-      icon: "⏱️",
+      icon: "\u23F1\uFE0F",
       title: "Speed",
       text: "Fast & Efficient Booking",
     },
     {
-      icon: "📍",
+      icon: "\u{1F4CD}",
       title: "Experience",
       text: "Expert Local Guides",
     },
     {
-      icon: "🎧",
+      icon: "\u{1F3A7}",
       title: "Support",
       text: "24/7 Customer Support",
     },
@@ -595,10 +568,10 @@ export default function Home() {
           getReviewData(review, index)
         );
 
-        setReviews([...formattedDatabaseReviews, ...DEFAULT_REVIEWS]);
+        setReviews(formattedDatabaseReviews);
       } catch (error) {
         debugLog("Reviews load error:", error.response?.data || error.message);
-        setReviews(DEFAULT_REVIEWS);
+        setReviews([]);
       }
     };
 
@@ -955,7 +928,7 @@ export default function Home() {
               onClick={() => setOpenWhy(openWhy === "visit" ? null : "visit")}
             >
               <span>Why Visit Egypt?</span>
-              <span className="why-arrow">⌄</span>
+              <span className="why-arrow">{"\u2304"}</span>
             </button>
 
             <div className="why-accordion-content">
@@ -977,7 +950,7 @@ export default function Home() {
               onClick={() => setOpenWhy(openWhy === "choose" ? null : "choose")}
             >
               <span>Why Choose Us</span>
-              <span className="why-arrow">⌄</span>
+              <span className="why-arrow">{"\u2304"}</span>
             </button>
 
             <div className="why-accordion-content">
@@ -1017,7 +990,7 @@ export default function Home() {
                 key={item.id || `${item.name}-${index}`}
                 style={{ "--delay": `${index * 0.12}s` }}
               >
-                <span className="testimonial-quote">“</span>
+                <span className="testimonial-quote">{"\u201C"}</span>
 
                 <div className="testimonial-top improved-testimonial-top">
                   <div className="testimonial-user-info improved-user-info">
@@ -1045,7 +1018,7 @@ export default function Home() {
                   {renderStars(item.rating)}
                 </div>
 
-                <p className="review-text">“{item.text}”</p>
+                <p className="review-text">{"\u201C"}{item.text}{"\u201D"}</p>
               </article>
             );
           })}
@@ -1086,11 +1059,11 @@ export default function Home() {
                   setReviewForm({ ...reviewForm, rating: e.target.value })
                 }
               >
-                <option value="5">★★★★★ Excellent</option>
-                <option value="4">★★★★☆ Very Good</option>
-                <option value="3">★★★☆☆ Good</option>
-                <option value="2">★★☆☆☆ Average</option>
-                <option value="1">★☆☆☆☆ Poor</option>
+                <option value="5">{"\u2605\u2605\u2605\u2605\u2605 Excellent"}</option>
+                <option value="4">{"\u2605\u2605\u2605\u2605\u2606 Very Good"}</option>
+                <option value="3">{"\u2605\u2605\u2605\u2606\u2606 Good"}</option>
+                <option value="2">{"\u2605\u2605\u2606\u2606\u2606 Average"}</option>
+                <option value="1">{"\u2605\u2606\u2606\u2606\u2606 Poor"}</option>
               </select>
             </div>
 
@@ -1124,7 +1097,7 @@ export default function Home() {
         </div>
 
         <div className="newsletter-pro-right">
-          <div className="newsletter-pro-mail">✉</div>
+          <div className="newsletter-pro-mail">{"\u2709"}</div>
 
           <h2 className="newsletter-pro-title">
             Ready To Explore
@@ -1148,7 +1121,7 @@ export default function Home() {
               />
             </svg>
 
-            <span className="route-plane">✈</span>
+            <span className="route-plane">{"\u2708"}</span>
           </div>
 
           <div className="newsletter-pro-subtitle">
@@ -1185,11 +1158,11 @@ export default function Home() {
               type="button"
               onClick={closeReviewPopup}
             >
-              ×
+              {"\u00D7"}
             </button>
 
             <div className={`review-popup-icon ${reviewPopup.type}`}>
-              {reviewPopup.type === "success" ? "✓" : "!"}
+              {reviewPopup.type === "success" ? "\u2713" : "!"}
             </div>
 
             <h3>{reviewPopup.title}</h3>
@@ -1224,3 +1197,5 @@ export default function Home() {
     </div>
   );
 }
+
+

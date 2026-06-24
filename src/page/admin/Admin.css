@@ -4275,3 +4275,128 @@ tbody tr:hover {
     width: 100%;
   }
 }
+.admin-review-person {
+  min-width: 0 !important;
+}
+
+.admin-review-person h3 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  min-width: 0 !important;
+}
+
+.admin-review-flag {
+  width: 30px !important;
+  height: 20px !important;
+  object-fit: cover !important;
+  border-radius: 3px !important;
+  border: 1px solid rgba(36, 22, 15, 0.12) !important;
+  box-shadow: 0 3px 8px rgba(36, 22, 15, 0.12) !important;
+  flex: 0 0 auto !important;
+}
+
+.admin-review-country {
+  display: block !important;
+  margin-top: 5px !important;
+  color: #765b49 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+
+/* ================= ADMIN SIDEBAR BRAND ================= */
+.admin-sidebar-brand {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin: 0 0 22px;
+  padding: 4px 8px 17px;
+  border: 0;
+  border-bottom: 1px solid rgba(147, 84, 38, 0.12);
+  background: transparent;
+  color: #2d1b12;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-sidebar-logo {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.admin-sidebar-brand-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.admin-sidebar-brand-text strong {
+  color: #8f4d1f;
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.admin-sidebar-brand-text small {
+  margin-top: 4px;
+  color: #6f4a34;
+  font-family: "Inika", serif;
+  font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+  .admin-sidebar-brand {
+    margin-top: -48px;
+    padding-right: 45px;
+  }
+}
+
+/* Exact sidebar brand shown in the admin reference */
+.admin-sidebar-brand {
+  gap: 14px !important;
+  margin: 0 0 25px !important;
+  padding: 3px 4px 20px !important;
+  border-bottom: 0 !important;
+}
+
+.admin-sidebar-brand-icon {
+  width: 52px !important;
+  height: 52px !important;
+  flex: 0 0 52px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 16px !important;
+  background: #91491b !important;
+  color: #fff !important;
+  font-size: 20px !important;
+  box-shadow: 0 12px 24px rgba(117, 57, 20, 0.18) !important;
+}
+
+.admin-sidebar-brand-icon svg {
+  width: 21px !important;
+  height: 21px !important;
+}
+
+.admin-sidebar-brand-text strong {
+  color: #935426 !important;
+  font-size: 25px !important;
+  line-height: 1 !important;
+}
+
+.admin-sidebar-brand-text small {
+  margin-top: 3px !important;
+  color: #5f3824 !important;
+  font-size: 13px !important;
+}
+
+@media (max-width: 1100px) {
+  .admin-sidebar-brand {
+    margin-top: -48px !important;
+  }
+}

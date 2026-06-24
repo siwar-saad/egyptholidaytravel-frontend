@@ -1,19 +1,10 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import API from "../api";
 import Navbar from "./navbar";
 import { clearStoredAuth } from "../utils/authStorage";
 
-const safeParse = (value) => {
-  try {
-    return JSON.parse(value || "null");
-  } catch {
-    return null;
-  }
-};
-
-const getStoredUser = () =>
-  safeParse(localStorage.getItem("user") || sessionStorage.getItem("user"));
+let verifiedSessionUser = null;
 
 const saveStoredUser = (user) => {
   if (!user) return;
@@ -29,19 +20,16 @@ const saveStoredUser = (user) => {
 
 function ProtectedRoute({ children, requiredRole }) {
   const location = useLocation();
-  const initialUser = getStoredUser();
-  const [status, setStatus] = useState("checking");
-  const [user, setUser] = useState(initialUser);
+  const [status, setStatus] = useState(
+    verifiedSessionUser ? "authenticated" : "checking"
+  );
+  const [user, setUser] = useState(verifiedSessionUser);
 
   useEffect(() => {
     let isActive = true;
 
-    const verifyToken = async () => {
-      const storedUser = getStoredUser();
-
-      if (storedUser) {
-        setUser(storedUser);
-      } else {
+    const verifySession = async () => {
+      if (!verifiedSessionUser) {
         setStatus("checking");
       }
 
@@ -52,23 +40,21 @@ function ProtectedRoute({ children, requiredRole }) {
         if (!isActive) return;
 
         if (!verifiedUser) {
+          verifiedSessionUser = null;
+          clearStoredAuth();
           setUser(null);
           setStatus("guest");
           return;
         }
 
+        verifiedSessionUser = verifiedUser;
         setUser(verifiedUser);
         saveStoredUser(verifiedUser);
         setStatus("authenticated");
-      } catch (error) {
+      } catch {
         if (!isActive) return;
 
-        if (storedUser && (!error.response || error.response.status >= 500)) {
-          setUser(storedUser);
-          setStatus("authenticated");
-          return;
-        }
-
+        verifiedSessionUser = null;
         clearStoredAuth();
         setUser(null);
         setStatus("guest");
@@ -76,64 +62,23 @@ function ProtectedRoute({ children, requiredRole }) {
     };
 
     const handleUnauthorized = () => {
+      verifiedSessionUser = null;
       clearStoredAuth();
       setUser(null);
       setStatus("guest");
     };
 
-    verifyToken();
-
+    verifySession();
     window.addEventListener("auth:unauthorized", handleUnauthorized);
 
     return () => {
       isActive = false;
       window.removeEventListener("auth:unauthorized", handleUnauthorized);
     };
-  }, [location.pathname]);
+  }, []);
 
   if (status === "checking") {
-    return (
-      <>
-        <Navbar />
-        <div
-          style={{
-            minHeight: "calc(100vh - 88px)",
-            display: "grid",
-            placeItems: "center",
-            padding: 32,
-            background: "#fbf7f1",
-          }}
-        >
-          <div
-            style={{
-              minWidth: 260,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              padding: "18px 22px",
-              border: "1px solid rgba(160, 89, 32, 0.16)",
-              borderRadius: 8,
-              background: "#fff",
-              boxShadow: "0 18px 45px rgba(82, 47, 22, 0.08)",
-              color: "#5f3418",
-              fontWeight: 700,
-            }}
-          >
-            <span
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                background: "#9b531f",
-                display: "inline-block",
-              }}
-            ></span>
-            <p>Checking your session...</p>
-          </div>
-        </div>
-      </>
-    );
+    return null;
   }
 
   if (status === "guest") {
@@ -148,3 +93,6 @@ function ProtectedRoute({ children, requiredRole }) {
 }
 
 export default ProtectedRoute;
+
+
+
