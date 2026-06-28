@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { FaPlus, FaEdit } from "react-icons/fa";
 import API from "../../api";
 
@@ -563,7 +563,7 @@ export default function Reservations({ showSuccess }) {
         : `/admin/reservations/${booking.id}/status`;
 
     try {
-      await API.put(endpoint, { status });
+      const res = await API.put(endpoint, { status });
 
       setBookings((prev) =>
         prev.map((item) =>
@@ -573,7 +573,16 @@ export default function Reservations({ showSuccess }) {
         )
       );
 
-      notify("Reservation status updated.");
+      const emailSent = res.data?.emailSent === true;
+      const emailWarning = res.data?.emailWarning;
+
+      notify(
+        emailSent
+          ? "Reservation status updated and email sent to the client."
+          : emailWarning
+          ? `Status updated, but email was not sent: ${emailWarning}`
+          : "Reservation status updated."
+      );
     } catch (err) {
       notify(err.response?.data?.error || "Unable to update status.");
     }
@@ -745,7 +754,7 @@ export default function Reservations({ showSuccess }) {
                 className="close-package-popup"
                 onClick={closeForm}
               >
-                ×
+                Ã—
               </button>
             </div>
 
