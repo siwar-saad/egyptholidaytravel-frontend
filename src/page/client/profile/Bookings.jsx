@@ -1,6 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const badTitles = ["package", "packages", "hotel", "hotels", "booking", "reservation"];
+const DESTINATION_RESERVATIONS_KEY = "egypt_holiday_destination_reservations";
+
+const badTitles = [
+  "package",
+  "packages",
+  "hotel",
+  "hotels",
+  "destination",
+  "destinations",
+  "booking",
+  "reservation",
+];
 
 const getByPath = (obj, path) => {
   if (!obj || !path) return "";
@@ -16,7 +27,9 @@ const toText = (value) => {
 
   if (typeof value === "object") {
     return (
+      value.destinationName ||
       value.packageName ||
+      value.hotelName ||
       value.title ||
       value.name ||
       value.label ||
@@ -45,7 +58,7 @@ const getValue = (booking, keys, fallback = "") => {
 const InfoItem = ({ label, value }) => (
   <div className="booking-info-item">
     <span>{label}</span>
-    <strong>{value}</strong>
+    <strong>{value || "-"}</strong>
   </div>
 );
 
@@ -74,6 +87,7 @@ const ROOM_LABELS = {
 
 const getCountryFromPhone = (phone = "") => {
   const cleanPhone = String(phone).trim();
+
   const country = PHONE_COUNTRIES.find((item) =>
     cleanPhone.startsWith(item.dialCode)
   );
@@ -86,17 +100,114 @@ const getRoomLabel = (room = "") => {
   return ROOM_LABELS[cleanRoom.toUpperCase()] || cleanRoom;
 };
 
+const getCurrentUserEmail = () => {
+  try {
+    const user =
+      JSON.parse(localStorage.getItem("user") || "null") ||
+      JSON.parse(sessionStorage.getItem("user") || "null");
+
+    return String(user?.email || "").trim().toLowerCase();
+  } catch {
+    return "";
+  }
+};
+
+const getStoredDestinationReservations = () => {
+  try {
+    const saved = localStorage.getItem(DESTINATION_RESERVATIONS_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const normalizeDestinationReservation = (booking, index) => ({
+  ...booking,
+  id: booking.id || `destination-${index}`,
+  type: "destination",
+
+  destinationName:
+    booking.destinationName ||
+    booking.destination_name ||
+    booking.title ||
+    booking.name ||
+    "Destination Reservation",
+
+  destinationCountry:
+    booking.destinationCountry ||
+    booking.destination_country ||
+    booking.country ||
+    "Egypt",
+
+  destinationLocation:
+    booking.destinationLocation ||
+    booking.destination_location ||
+    booking.location ||
+    "",
+
+  duration: booking.duration || booking.destinationDuration || "",
+  travelDate:
+    booking.travelDate ||
+    booking.travel_date ||
+    booking.destinationTravelDate ||
+    booking.date ||
+    "",
+
+  fullName: booking.fullName || booking.client || booking.clientName || "",
+  email: booking.email || booking.clientEmail || "",
+  phone: booking.phone || booking.clientPhone || "",
+  travelers: booking.travelers || "",
+  roomType: booking.roomType || booking.room_type || "",
+  notes: booking.notes || "",
+  status: booking.status || "Pending",
+});
+
 export default function Bookings({
   bookings = [],
   bookingTab = "packages",
   setBookingTab = () => {},
 }) {
   const [bookingSearch, setBookingSearch] = useState("");
+  const [destinationBookings, setDestinationBookings] = useState([]);
 
   const safeBookings = Array.isArray(bookings) ? bookings : [];
 
+  useEffect(() => {
+    const loadDestinationBookings = () => {
+      const currentEmail = getCurrentUserEmail();
+
+      const stored = getStoredDestinationReservations()
+        .map(normalizeDestinationReservation)
+        .filter((booking) => {
+          const bookingEmail = String(booking.email || "")
+            .trim()
+            .toLowerCase();
+
+          if (!currentEmail) return true;
+          return bookingEmail === currentEmail;
+        });
+
+      setDestinationBookings(stored);
+    };
+
+    loadDestinationBookings();
+
+    window.addEventListener("storage", loadDestinationBookings);
+    window.addEventListener("destinationReservationsChanged", loadDestinationBookings);
+
+    return () => {
+      window.removeEventListener("storage", loadDestinationBookings);
+      window.removeEventListener(
+        "destinationReservationsChanged",
+        loadDestinationBookings
+      );
+    };
+  }, []);
+
   const getBookingTitle = (booking) => {
-    if (bookingTab === "hotels") {
+    if (bookingTab === "hotels" || booking.type === "hotel") {
       return getValue(
         booking,
         [
@@ -109,6 +220,25 @@ export default function Bookings({
           "selectedHotel.title",
         ],
         "Hotel Reservation"
+      );
+    }
+
+    if (bookingTab === "destinations" || booking.type === "destination") {
+      return getValue(
+        booking,
+        [
+          "destinationName",
+          "destinationTitle",
+          "destination.name",
+          "destination.title",
+          "selectedDestination.name",
+          "selectedDestination.title",
+          "placeName",
+          "tourName",
+          "title",
+          "name",
+        ],
+        "Destination Reservation"
       );
     }
 
@@ -139,8 +269,6 @@ export default function Bookings({
         "tripTitle",
         "trip.name",
         "trip.title",
-        "destination",
-        "placeName",
         "route",
         "tourName",
         "tourTitle",
@@ -189,35 +317,6 @@ export default function Bookings({
       "No email"
     );
 
-  const getCountry = (booking) => {
-    const countryValue =
-      booking.country ||
-      booking.clientCountry ||
-      booking.customerCountry ||
-      booking.nationality ||
-      booking.customer_info?.country ||
-      booking.customerInfo?.country ||
-      booking.search_params?.country ||
-      booking.searchParams?.country ||
-      booking.formData?.country;
-
-    if (countryValue && typeof countryValue === "object") {
-      const city = countryValue.city || countryValue.state || "";
-      const country =
-        countryValue.country ||
-        countryValue.countryName ||
-        countryValue.name ||
-        countryValue.label ||
-        countryValue.value ||
-        "";
-
-      if (city && country && city !== country) return `${city} / ${country}`;
-      return country || city || "No country";
-    }
-
-    return toText(countryValue) || getCountryFromPhone(getPhone(booking)) || "No country";
-  };
-
   const getPhone = (booking) => {
     const dialCode = getValue(booking, [
       "dialCode",
@@ -247,11 +346,73 @@ export default function Bookings({
     return phone || "No phone";
   };
 
+  const getCountry = (booking) => {
+    const countryValue =
+      booking.destinationCountry ||
+      booking.destination_country ||
+      booking.country ||
+      booking.clientCountry ||
+      booking.customerCountry ||
+      booking.nationality ||
+      booking.customer_info?.country ||
+      booking.customerInfo?.country ||
+      booking.search_params?.country ||
+      booking.searchParams?.country ||
+      booking.formData?.country;
+
+    if (countryValue && typeof countryValue === "object") {
+      const city = countryValue.city || countryValue.state || "";
+      const country =
+        countryValue.country ||
+        countryValue.countryName ||
+        countryValue.name ||
+        countryValue.label ||
+        countryValue.value ||
+        "";
+
+      if (city && country && city !== country) return `${city} / ${country}`;
+      return country || city || "No country";
+    }
+
+    return toText(countryValue) || getCountryFromPhone(getPhone(booking)) || "No country";
+  };
+
+  const getLocation = (booking) =>
+    getValue(
+      booking,
+      [
+        "destinationLocation",
+        "destination_location",
+        "location",
+        "city",
+        "destination.location",
+        "selectedDestination.location",
+      ],
+      ""
+    );
+
+  const getDuration = (booking) =>
+    getValue(
+      booking,
+      [
+        "duration",
+        "destinationDuration",
+        "destination_duration",
+        "package.duration",
+        "selectedPackage.duration",
+        "search_params.duration",
+        "searchParams.duration",
+      ],
+      ""
+    );
+
   const getTravelDate = (booking) =>
     getValue(
       booking,
       [
         "travelDate",
+        "travel_date",
+        "destinationTravelDate",
         "date",
         "bookingDate",
         "startDate",
@@ -291,24 +452,24 @@ export default function Bookings({
   const getRoom = (booking) =>
     getRoomLabel(
       getValue(
-      booking,
-      [
-        "roomType",
-        "room",
-        "roomName",
-        "selectedRoom",
-        "selectedRoom.name",
-        "selectedRoom.title",
-        "formData.roomType",
-        "search_params.roomType",
-        "search_params.room_type",
-        "searchParams.roomType",
-        "selected_hotel.roomType",
-        "selected_hotel.room_type",
-        "selectedHotel.roomType",
-        "formData.room",
-      ],
-      "No room"
+        booking,
+        [
+          "roomType",
+          "room",
+          "roomName",
+          "selectedRoom",
+          "selectedRoom.name",
+          "selectedRoom.title",
+          "formData.roomType",
+          "search_params.roomType",
+          "search_params.room_type",
+          "searchParams.roomType",
+          "selected_hotel.roomType",
+          "selected_hotel.room_type",
+          "selectedHotel.roomType",
+          "formData.room",
+        ],
+        "No room"
       )
     );
 
@@ -329,8 +490,11 @@ export default function Bookings({
   const getStatus = (booking) =>
     toText(booking.status || booking.bookingStatus) || "Pending";
 
-  const packageBookings = safeBookings.filter(
-    (booking) =>
+  const packageBookings = safeBookings.filter((booking) => {
+    if (booking.type === "destination") return false;
+    if (booking.type === "hotel") return false;
+
+    return (
       booking.type === "package" ||
       booking.packageName ||
       booking.packageTitle ||
@@ -339,9 +503,9 @@ export default function Bookings({
       booking.selectedPackage ||
       booking.packageData ||
       booking.trip ||
-      booking.destination ||
-      (!booking.hotelName && booking.type !== "hotel")
-  );
+      (!booking.hotelName && !booking.destinationName)
+    );
+  });
 
   const hotelBookings = safeBookings.filter(
     (booking) =>
@@ -359,6 +523,8 @@ export default function Bookings({
       getClientName(booking),
       getEmail(booking),
       getCountry(booking),
+      getLocation(booking),
+      getDuration(booking),
       getPhone(booking),
       getTravelDate(booking),
       getTravelers(booking),
@@ -373,15 +539,22 @@ export default function Bookings({
     const search = bookingSearch.trim().toLowerCase();
     if (!search) return items;
 
-    return items.filter((booking) =>
-      getSearchContent(booking).includes(search)
-    );
+    return items.filter((booking) => getSearchContent(booking).includes(search));
   };
 
   const visibleBookings =
-    bookingTab === "packages"
-      ? filterBookings(packageBookings)
-      : filterBookings(hotelBookings);
+    bookingTab === "hotels"
+      ? filterBookings(hotelBookings)
+      : bookingTab === "destinations"
+      ? filterBookings(destinationBookings)
+      : filterBookings(packageBookings);
+
+  const emptyLabel =
+    bookingTab === "hotels"
+      ? "hotel"
+      : bookingTab === "destinations"
+      ? "destination"
+      : "package";
 
   return (
     <section className="page-section">
@@ -392,7 +565,7 @@ export default function Bookings({
         </div>
       </div>
 
-      <div className="booking-tabs">
+      <div className="booking-tabs booking-tabs-three">
         <button
           type="button"
           className={bookingTab === "packages" ? "active" : ""}
@@ -408,26 +581,34 @@ export default function Bookings({
         >
           Hotels Reservations
         </button>
+
+        <button
+          type="button"
+          className={bookingTab === "destinations" ? "active" : ""}
+          onClick={() => setBookingTab("destinations")}
+        >
+          Destinations Reservations
+        </button>
       </div>
 
       <input
         className="booking-search"
         type="text"
-        placeholder="Search by client, email, phone, package or date..."
+        placeholder="Search by client, email, phone, package, hotel, destination or date..."
         value={bookingSearch}
         onChange={(e) => setBookingSearch(e.target.value)}
       />
 
       <div className="booking-list">
         {visibleBookings.length === 0 ? (
-          <p className="empty-msg">
-            No {bookingTab === "packages" ? "package" : "hotel"} reservations found.
-          </p>
+          <p className="empty-msg">No {emptyLabel} reservations found.</p>
         ) : (
           visibleBookings.map((booking, index) => {
             const title = getBookingTitle(booking);
             const status = getStatus(booking);
             const notes = getNotes(booking);
+            const location = getLocation(booking);
+            const duration = getDuration(booking);
 
             return (
               <div
@@ -443,6 +624,8 @@ export default function Bookings({
                     className={`status ${
                       status.toLowerCase() === "confirmed"
                         ? "confirmed"
+                        : status.toLowerCase() === "cancelled"
+                        ? "cancelled"
                         : "pending"
                     }`}
                   >
@@ -454,6 +637,13 @@ export default function Bookings({
                   <InfoItem label="Client" value={getClientName(booking)} />
                   <InfoItem label="Email" value={getEmail(booking)} />
                   <InfoItem label="Country" value={getCountry(booking)} />
+
+                  {bookingTab === "destinations" && location && (
+                    <InfoItem label="Location" value={location} />
+                  )}
+
+                  {duration && <InfoItem label="Duration" value={duration} />}
+
                   <InfoItem label="Phone / WhatsApp" value={getPhone(booking)} />
                   <InfoItem label="Travel Date" value={getTravelDate(booking)} />
                   <InfoItem label="Travelers" value={getTravelers(booking)} />

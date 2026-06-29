@@ -2268,3 +2268,23 @@
 .messenger-composer {
   flex-shrink: 0;
 }
+.booking-tabs-three {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.booking-tabs-three button {
+  width: 100%;
+}
+
+.status.cancelled {
+  background: #fff0f0;
+  color: #c62828;
+}
+
+@media (max-width: 900px) {
+  .booking-tabs-three {
+    grid-template-columns: 1fr;
+  }
+}
