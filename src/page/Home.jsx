@@ -17,7 +17,7 @@ import bgImg from "../assets/image/bg.webp";
 import pyra from "../assets/image/pyra.webp";
 
 /* VIDEO */
-import egyptVideo from "../assets/video/egypt-home.mp4";
+import egyptVideo from "../assets/video/egypt-home-2026.mp4";
 
 /* FEATURED PACKAGES IMAGES */
 import cairoHurghadaPackage from "../assets/image/cairo-hurghada1.png";
@@ -765,7 +765,7 @@ export default function Home() {
             loop
             playsInline
             controls
-            preload="metadata"
+            preload="auto"
             controlsList="nodownload"
             aria-label="Egypt travel video"
           >
