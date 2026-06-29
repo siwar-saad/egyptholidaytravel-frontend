@@ -2,17 +2,27 @@
 import { FaPlus, FaEdit } from "react-icons/fa";
 import API from "../../api";
 
+const DESTINATIONS_STORAGE_KEY = "egypt_holiday_destinations";
+const DESTINATION_RESERVATIONS_KEY = "egypt_holiday_destination_reservations";
+
 const EMPTY_FORM = {
   type: "package",
+
   packageName: "",
   route: "",
   duration: "",
   travelDate: "",
+
   hotelName: "",
   city: "",
   mealPlan: "",
   checkIn: "",
   checkOut: "",
+
+  destinationName: "",
+  destinationCountry: "",
+  destinationLocation: "",
+
   roomType: "Double Room",
   fullName: "",
   email: "",
@@ -37,6 +47,14 @@ const getCurrentAdminName = () => {
   } catch {
     return "Admin";
   }
+};
+
+const getArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.reservations)) return data.reservations;
+  if (Array.isArray(data?.bookings)) return data.bookings;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
 };
 
 const getCreatedBy = (booking = {}) => {
@@ -121,12 +139,46 @@ const formatCreatedTime = (value) => {
   });
 };
 
+const getStoredDestinations = () => {
+  try {
+    const saved = localStorage.getItem(DESTINATIONS_STORAGE_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const getStoredDestinationReservations = () => {
+  try {
+    const saved = localStorage.getItem(DESTINATION_RESERVATIONS_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveStoredDestinationReservations = (reservations) => {
+  localStorage.setItem(DESTINATION_RESERVATIONS_KEY, JSON.stringify(reservations));
+};
+
+const makeLocalId = () => {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `destination-reservation-${Date.now()}-${Math.random()
+    .toString(16)
+    .slice(2)}`;
+};
+
 export default function Reservations({ showSuccess }) {
   const [reservationTab, setReservationTab] = useState("packages");
   const [reservationSearch, setReservationSearch] = useState("");
   const [bookings, setBookings] = useState([]);
+
   const [packages, setPackages] = useState([]);
   const [hotels, setHotels] = useState([]);
+  const [destinations, setDestinations] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -137,15 +189,11 @@ export default function Reservations({ showSuccess }) {
   const [selectedBooking, setSelectedBooking] = useState(null);
 
   const notify = (message) => {
-    if (typeof showSuccess === "function") showSuccess(message);
-  };
-
-  const getArray = (data) => {
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data?.reservations)) return data.reservations;
-    if (Array.isArray(data?.bookings)) return data.bookings;
-    if (Array.isArray(data?.data)) return data.data;
-    return [];
+    if (typeof showSuccess === "function") {
+      showSuccess(message);
+    } else {
+      alert(message);
+    }
   };
 
   const normalizePackageReservation = (booking, index) => {
@@ -185,6 +233,7 @@ export default function Reservations({ showSuccess }) {
 
       route: searchParams.route || booking.route || "",
       duration: searchParams.duration || booking.duration || "",
+
       totalPrice:
         searchParams.totalPrice ||
         searchParams.total_price ||
@@ -292,6 +341,42 @@ export default function Reservations({ showSuccess }) {
     };
   };
 
+  const normalizeDestinationReservation = (booking, index) => {
+    const createdAt = booking.createdAt || booking.created_at || "";
+
+    return {
+      id: booking.id || `destination-${index}`,
+      type: "destination",
+
+      client: booking.fullName || booking.client || "Client",
+      email: booking.email || "-",
+      phone: booking.phone || "-",
+
+      destinationName:
+        booking.destinationName ||
+        booking.destination_name ||
+        booking.title ||
+        "Destination",
+
+      destinationCountry:
+        booking.destinationCountry || booking.country || "Egypt",
+
+      destinationLocation:
+        booking.destinationLocation || booking.location || "-",
+
+      duration: booking.duration || "",
+      date: booking.travelDate || booking.travel_date || booking.date || "-",
+      travelers: booking.travelers || "-",
+      roomType: booking.roomType || booking.room_type || "-",
+      totalPrice: booking.totalPrice || booking.total_price || "",
+      status: booking.status || "Pending",
+      notes: booking.notes || "",
+      createdBy: booking.createdBy || "Admin",
+      createdDate: formatCreatedDate(createdAt),
+      createdTime: formatCreatedTime(createdAt),
+    };
+  };
+
   const fetchReservations = async () => {
     try {
       setLoading(true);
@@ -309,10 +394,19 @@ export default function Reservations({ showSuccess }) {
         normalizeHotelReservation(booking, index)
       );
 
-      setBookings([...packageBookings, ...hotelBookings]);
+      const destinationBookings = getStoredDestinationReservations().map(
+        (booking, index) => normalizeDestinationReservation(booking, index)
+      );
+
+      setBookings([...packageBookings, ...hotelBookings, ...destinationBookings]);
     } catch (err) {
       console.log("Reservations error:", err.response?.data || err.message);
-      setBookings([]);
+
+      const destinationBookings = getStoredDestinationReservations().map(
+        (booking, index) => normalizeDestinationReservation(booking, index)
+      );
+
+      setBookings(destinationBookings);
     } finally {
       setLoading(false);
     }
@@ -327,8 +421,10 @@ export default function Reservations({ showSuccess }) {
 
       setPackages(getArray(packageRes.data));
       setHotels(getArray(hotelRes.data));
+      setDestinations(getStoredDestinations());
     } catch (err) {
       console.log("Reservation options error:", err.response?.data || err.message);
+      setDestinations(getStoredDestinations());
     }
   };
 
@@ -347,8 +443,17 @@ export default function Reservations({ showSuccess }) {
     [bookings]
   );
 
+  const destinationReservations = useMemo(
+    () => bookings.filter((booking) => booking.type === "destination"),
+    [bookings]
+  );
+
   const currentReservations =
-    reservationTab === "packages" ? packageReservations : hotelReservations;
+    reservationTab === "packages"
+      ? packageReservations
+      : reservationTab === "hotels"
+      ? hotelReservations
+      : destinationReservations;
 
   const filteredReservations = currentReservations.filter((booking) =>
     Object.values(booking)
@@ -361,9 +466,14 @@ export default function Reservations({ showSuccess }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const openCreateForm = (
-    type = reservationTab === "hotels" ? "hotel" : "package"
-  ) => {
+  const openCreateForm = () => {
+    const type =
+      reservationTab === "hotels"
+        ? "hotel"
+        : reservationTab === "destinations"
+        ? "destination"
+        : "package";
+
     setEditMode(false);
     setSelectedBooking(null);
     setForm({ ...EMPTY_FORM, type });
@@ -390,7 +500,7 @@ export default function Reservations({ showSuccess }) {
         notes: booking.notes || "",
         totalPrice: booking.totalPrice || "",
       });
-    } else {
+    } else if (booking.type === "hotel") {
       setForm({
         ...EMPTY_FORM,
         type: "hotel",
@@ -399,6 +509,23 @@ export default function Reservations({ showSuccess }) {
         mealPlan: booking.mealPlan || "",
         checkIn: booking.checkIn !== "-" ? booking.checkIn : "",
         checkOut: booking.checkOut !== "-" ? booking.checkOut : "",
+        roomType: booking.roomType || "Double Room",
+        fullName: booking.client || "",
+        email: booking.email !== "-" ? booking.email : "",
+        phone: booking.phone !== "-" ? booking.phone : "",
+        travelers: booking.travelers !== "-" ? booking.travelers : "",
+        notes: booking.notes || "",
+        totalPrice: booking.totalPrice || "",
+      });
+    } else {
+      setForm({
+        ...EMPTY_FORM,
+        type: "destination",
+        destinationName: booking.destinationName || "",
+        destinationCountry: booking.destinationCountry || "Egypt",
+        destinationLocation: booking.destinationLocation || "",
+        duration: booking.duration || "",
+        travelDate: booking.date !== "-" ? booking.date : "",
         roomType: booking.roomType || "Double Room",
         fullName: booking.client || "",
         email: booking.email !== "-" ? booking.email : "",
@@ -452,6 +579,24 @@ export default function Reservations({ showSuccess }) {
     }));
   };
 
+  const chooseDestination = (destinationId) => {
+    const selectedDestination = destinations.find(
+      (item) => String(item.id) === String(destinationId)
+    );
+
+    if (!selectedDestination) return;
+
+    setForm((prev) => ({
+      ...prev,
+      destinationName:
+        selectedDestination.title || selectedDestination.name || "",
+      destinationCountry: selectedDestination.country || "Egypt",
+      destinationLocation: selectedDestination.location || "",
+      duration: selectedDestination.duration || "",
+      totalPrice: selectedDestination.price || "",
+    }));
+  };
+
   const buildPayload = () => {
     const adminName = getCurrentAdminName();
 
@@ -474,8 +619,40 @@ export default function Reservations({ showSuccess }) {
     };
   };
 
+  const buildDestinationPayload = () => {
+    const adminName = getCurrentAdminName();
+
+    return {
+      id: editMode && selectedBooking ? selectedBooking.id : makeLocalId(),
+      type: "destination",
+      destinationName: form.destinationName.trim(),
+      destinationCountry: form.destinationCountry.trim() || "Egypt",
+      destinationLocation: form.destinationLocation.trim(),
+      duration: form.duration.trim(),
+      travelDate: form.travelDate,
+      roomType: form.roomType,
+      fullName: form.fullName.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      travelers: form.travelers,
+      notes: form.notes,
+      totalPrice: form.totalPrice,
+      status: selectedBooking?.status || "Pending",
+      createdBy:
+        editMode && selectedBooking
+          ? selectedBooking.createdBy
+          : `Admin - ${adminName}`,
+      createdAt:
+        editMode && selectedBooking?.createdDate !== "-"
+          ? selectedBooking.createdAt || new Date().toISOString()
+          : new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  };
+
   const validateForm = () => {
     const isHotel = form.type === "hotel";
+    const isDestination = form.type === "destination";
 
     if (!form.fullName.trim() || !form.email.trim()) {
       notify("Client name and email are required.");
@@ -487,7 +664,12 @@ export default function Reservations({ showSuccess }) {
       return false;
     }
 
-    if (!isHotel && !form.packageName.trim()) {
+    if (isDestination && !form.destinationName.trim()) {
+      notify("Destination name is required.");
+      return false;
+    }
+
+    if (!isHotel && !isDestination && !form.packageName.trim()) {
       notify("Package name is required.");
       return false;
     }
@@ -495,11 +677,46 @@ export default function Reservations({ showSuccess }) {
     return true;
   };
 
+  const createDestinationReservation = () => {
+    const payload = buildDestinationPayload();
+    const saved = getStoredDestinationReservations();
+
+    saveStoredDestinationReservations([payload, ...saved]);
+
+    notify("Destination reservation created successfully.");
+    closeForm();
+    fetchReservations();
+  };
+
+  const editDestinationReservation = () => {
+    if (!selectedBooking) return;
+
+    const payload = buildDestinationPayload();
+    const saved = getStoredDestinationReservations();
+
+    const nextList = saved.map((item) =>
+      String(item.id) === String(selectedBooking.id) ? payload : item
+    );
+
+    saveStoredDestinationReservations(nextList);
+
+    notify("Destination reservation updated successfully.");
+    closeForm();
+    fetchReservations();
+  };
+
   const createReservation = async () => {
     if (saving) return;
     if (!validateForm()) return;
 
     const isHotel = form.type === "hotel";
+    const isDestination = form.type === "destination";
+
+    if (isDestination) {
+      createDestinationReservation();
+      return;
+    }
+
     const payload = buildPayload();
 
     try {
@@ -525,6 +742,11 @@ export default function Reservations({ showSuccess }) {
     if (saving) return;
     if (!selectedBooking) return;
     if (!validateForm()) return;
+
+    if (selectedBooking.type === "destination") {
+      editDestinationReservation();
+      return;
+    }
 
     const payload = buildPayload();
 
@@ -556,7 +778,32 @@ export default function Reservations({ showSuccess }) {
     }
   };
 
+  const updateDestinationReservationStatus = (booking, status) => {
+    const saved = getStoredDestinationReservations();
+
+    const nextList = saved.map((item) =>
+      String(item.id) === String(booking.id) ? { ...item, status } : item
+    );
+
+    saveStoredDestinationReservations(nextList);
+
+    setBookings((prev) =>
+      prev.map((item) =>
+        item.id === booking.id && item.type === "destination"
+          ? { ...item, status }
+          : item
+      )
+    );
+
+    notify("Destination reservation status updated.");
+  };
+
   const updateReservationStatus = async (booking, status) => {
+    if (booking.type === "destination") {
+      updateDestinationReservationStatus(booking, status);
+      return;
+    }
+
     const endpoint =
       booking.type === "hotel"
         ? `/admin/hotels/reservations/${booking.id}/status`
@@ -588,17 +835,42 @@ export default function Reservations({ showSuccess }) {
     }
   };
 
+  const getMainColumnTitle = () => {
+    if (reservationTab === "packages") return "Package";
+    if (reservationTab === "hotels") return "Hotel";
+    return "Destination";
+  };
+
+  const getDateColumnTitle = () => {
+    if (reservationTab === "hotels") return "Check In";
+    return "Date";
+  };
+
+  const getBookingMainName = (booking) => {
+    if (booking.type === "package") return booking.packageName;
+    if (booking.type === "hotel") return booking.hotelName;
+    return booking.destinationName;
+  };
+
+  const getBookingDate = (booking) => {
+    if (booking.type === "hotel") return booking.checkIn;
+    return booking.date;
+  };
+
   return (
     <>
       <section className="admin-panel">
         <div className="panel-head">
           <div>
             <h2>Reservations</h2>
-            <p>Admin can create and edit hotel and package bookings manually.</p>
+            <p>
+              Admin can create and edit hotel, package and destination bookings
+              manually.
+            </p>
           </div>
 
           <div className="panel-actions">
-            <button type="button" onClick={() => openCreateForm()}>
+            <button type="button" onClick={openCreateForm}>
               <FaPlus /> Add Booking
             </button>
 
@@ -608,7 +880,7 @@ export default function Reservations({ showSuccess }) {
           </div>
         </div>
 
-        <div className="reservation-switcher">
+        <div className="reservation-switcher reservation-switcher-three">
           <button
             type="button"
             className={reservationTab === "packages" ? "active" : ""}
@@ -624,12 +896,20 @@ export default function Reservations({ showSuccess }) {
           >
             Hotels Reservations ({hotelReservations.length})
           </button>
+
+          <button
+            type="button"
+            className={reservationTab === "destinations" ? "active" : ""}
+            onClick={() => setReservationTab("destinations")}
+          >
+            Destinations Reservations ({destinationReservations.length})
+          </button>
         </div>
 
         <div className="client-tools">
           <input
             type="text"
-            placeholder="Search reservations by client, email, phone, hotel, package, created by or date..."
+            placeholder="Search reservations by client, email, phone, hotel, package, destination, created by or date..."
             value={reservationSearch}
             onChange={(e) => setReservationSearch(e.target.value)}
           />
@@ -647,8 +927,8 @@ export default function Reservations({ showSuccess }) {
                   <th>Client</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>{reservationTab === "packages" ? "Package" : "Hotel"}</th>
-                  <th>{reservationTab === "packages" ? "Date" : "Check In"}</th>
+                  <th>{getMainColumnTitle()}</th>
+                  <th>{getDateColumnTitle()}</th>
                   {reservationTab === "hotels" && <th>Check Out</th>}
                   <th>Travelers</th>
                   <th>Room</th>
@@ -667,17 +947,9 @@ export default function Reservations({ showSuccess }) {
                     <td>{booking.email}</td>
                     <td>{booking.phone}</td>
 
-                    <td>
-                      {booking.type === "package"
-                        ? booking.packageName
-                        : booking.hotelName}
-                    </td>
+                    <td>{getBookingMainName(booking)}</td>
 
-                    <td>
-                      {booking.type === "package"
-                        ? booking.date
-                        : booking.checkIn}
-                    </td>
+                    <td>{getBookingDate(booking)}</td>
 
                     {reservationTab === "hotels" && <td>{booking.checkOut}</td>}
 
@@ -744,8 +1016,8 @@ export default function Reservations({ showSuccess }) {
                 <h2>{editMode ? "Edit Booking" : "Add Booking"}</h2>
                 <p>
                   {editMode
-                    ? "Update package or hotel reservation information."
-                    : "Create a manual package or hotel reservation."}
+                    ? "Update package, hotel or destination reservation information."
+                    : "Create a manual package, hotel or destination reservation."}
                 </p>
               </div>
 
@@ -754,7 +1026,7 @@ export default function Reservations({ showSuccess }) {
                 className="close-package-popup"
                 onClick={closeForm}
               >
-                Ã—
+                ×
               </button>
             </div>
 
@@ -768,9 +1040,10 @@ export default function Reservations({ showSuccess }) {
               >
                 <option value="package">Package Booking</option>
                 <option value="hotel">Hotel Booking</option>
+                <option value="destination">Destination Booking</option>
               </select>
 
-              {form.type === "package" ? (
+              {form.type === "package" && (
                 <>
                   {!editMode && (
                     <select onChange={(e) => choosePackage(e.target.value)}>
@@ -810,7 +1083,9 @@ export default function Reservations({ showSuccess }) {
                     onChange={(e) => updateForm("travelDate", e.target.value)}
                   />
                 </>
-              ) : (
+              )}
+
+              {form.type === "hotel" && (
                 <>
                   {!editMode && (
                     <select onChange={(e) => chooseHotel(e.target.value)}>
@@ -854,6 +1129,61 @@ export default function Reservations({ showSuccess }) {
                     type="date"
                     value={form.checkOut}
                     onChange={(e) => updateForm("checkOut", e.target.value)}
+                  />
+                </>
+              )}
+
+              {form.type === "destination" && (
+                <>
+                  {!editMode && (
+                    <select onChange={(e) => chooseDestination(e.target.value)}>
+                      <option value="">Choose existing destination</option>
+                      {destinations.map((item) => (
+                        <option value={item.id} key={item.id}>
+                          {item.title || item.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  <input
+                    type="text"
+                    placeholder="Destination Name"
+                    value={form.destinationName}
+                    onChange={(e) =>
+                      updateForm("destinationName", e.target.value)
+                    }
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Country"
+                    value={form.destinationCountry}
+                    onChange={(e) =>
+                      updateForm("destinationCountry", e.target.value)
+                    }
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Location"
+                    value={form.destinationLocation}
+                    onChange={(e) =>
+                      updateForm("destinationLocation", e.target.value)
+                    }
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Duration"
+                    value={form.duration}
+                    onChange={(e) => updateForm("duration", e.target.value)}
+                  />
+
+                  <input
+                    type="date"
+                    value={form.travelDate}
+                    onChange={(e) => updateForm("travelDate", e.target.value)}
                   />
                 </>
               )}
