@@ -3937,3 +3937,13 @@ button {
     max-width: 980px;
   }
 }
+@media (min-width: 1025px) {
+  .destination-card-new.mobile-clone {
+    display: none;
+  }
+
+  .destinations-section .destinations-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 980px;
+  }
+}

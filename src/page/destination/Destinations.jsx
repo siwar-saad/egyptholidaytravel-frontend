@@ -638,14 +638,14 @@ export default function Destinations() {
   const openProgramPopup = (program) => {
     if (!program) return;
 
+    setSelectedProgram(program);
+    setBookingOpen(false);
+    setBookingNotice(null);
+
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-
-    setSelectedProgram(program);
-    setBookingOpen(false);
-    setBookingNotice(null);
   };
 
   const closeProgramPopup = () => {
@@ -767,8 +767,10 @@ export default function Destinations() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+
     const openProgramId =
       location.state?.openProgramId || params.get("program") || "";
+
     const openProgramName = location.state?.openProgramName || "";
 
     if (!openProgramId && !openProgramName) return;
@@ -780,11 +782,14 @@ export default function Destinations() {
         program.route === openProgramName
     );
 
-    if (foundProgram) {
+    if (!foundProgram) return;
+
+    const timer = setTimeout(() => {
       openProgramPopup(foundProgram);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.key]);
+    }, 80);
+
+    return () => clearTimeout(timer);
+  }, [location.key, location.search, location.state]);
 
   useEffect(() => {
     if (!selectedProgram && !bookingOpen) return;

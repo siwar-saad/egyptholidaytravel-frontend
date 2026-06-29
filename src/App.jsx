@@ -16,6 +16,7 @@ import AdminLayout from "./page/admin/AdminLayout";
 import Dashboard from "./page/admin/Dashboard";
 import AdminPackages from "./page/admin/Packages";
 import AdminHotels from "./page/admin/Hotels";
+import AdminDestinations from "./page/admin/Destinations";
 import Reservations from "./page/admin/Reservations";
 import CreateReservation from "./page/admin/CreateReservation";
 import Users from "./page/admin/Users";
@@ -31,6 +32,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import HomeChatbot from "./components/HomeChatbot";
 import ScrollToTop from "./components/ScrollToTop";
+
+function AdminPage({ children }) {
+  return (
+    <ProtectedRoute requiredRole="admin">
+      <AdminLayout>{children}</AdminLayout>
+    </ProtectedRoute>
+  );
+}
 
 function App() {
   return (
@@ -68,11 +77,9 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Dashboard />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Dashboard />
+            </AdminPage>
           }
         />
 
@@ -80,11 +87,9 @@ function App() {
         <Route
           path="/admin/packages"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <AdminPackages />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <AdminPackages />
+            </AdminPage>
           }
         />
 
@@ -92,11 +97,19 @@ function App() {
         <Route
           path="/admin/hotels"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <AdminHotels />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <AdminHotels />
+            </AdminPage>
+          }
+        />
+
+        {/* ADMIN DESTINATIONS */}
+        <Route
+          path="/admin/destinations"
+          element={
+            <AdminPage>
+              <AdminDestinations />
+            </AdminPage>
           }
         />
 
@@ -104,11 +117,9 @@ function App() {
         <Route
           path="/admin/reservations"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Reservations />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Reservations />
+            </AdminPage>
           }
         />
 
@@ -116,11 +127,9 @@ function App() {
         <Route
           path="/admin/create-reservation"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <CreateReservation />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <CreateReservation />
+            </AdminPage>
           }
         />
 
@@ -128,22 +137,18 @@ function App() {
         <Route
           path="/admin/users"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Users />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Users />
+            </AdminPage>
           }
         />
 
         <Route
           path="/admin/clients"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Users />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Users />
+            </AdminPage>
           }
         />
 
@@ -151,11 +156,9 @@ function App() {
         <Route
           path="/admin/payments"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Payments />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Payments />
+            </AdminPage>
           }
         />
 
@@ -163,11 +166,9 @@ function App() {
         <Route
           path="/admin/messages"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Messages />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Messages />
+            </AdminPage>
           }
         />
 
@@ -175,11 +176,9 @@ function App() {
         <Route
           path="/admin/subscribers"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Subscribers />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Subscribers />
+            </AdminPage>
           }
         />
 
@@ -187,11 +186,9 @@ function App() {
         <Route
           path="/admin/reviews"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <AdminReviews />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <AdminReviews />
+            </AdminPage>
           }
         />
 
@@ -199,11 +196,9 @@ function App() {
         <Route
           path="/admin/profile"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Profile />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Profile />
+            </AdminPage>
           }
         />
 
@@ -211,11 +206,9 @@ function App() {
         <Route
           path="/admin/settings"
           element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout>
-                <Settings />
-              </AdminLayout>
-            </ProtectedRoute>
+            <AdminPage>
+              <Settings />
+            </AdminPage>
           }
         />
 

@@ -134,23 +134,16 @@ const REVIEW_META = [
 const getFlagCode = (value = "") => {
   const clean = String(value).trim().toLowerCase();
 
-  if (clean.includes("tunisia") || clean === "tn") {
-    return "tn";
-  }
-
-  if (clean.includes("turkey") || clean === "tr") {
-    return "tr";
-  }
-
-  if (clean.includes("morocco") || clean === "ma") {
-    return "ma";
-  }
+  if (clean.includes("tunisia") || clean === "tn") return "tn";
+  if (clean.includes("turkey") || clean === "tr") return "tr";
+  if (clean.includes("morocco") || clean === "ma") return "ma";
 
   return REVIEW_META[0].code;
 };
 
 const getReviewData = (review, index) => {
   const meta = REVIEW_META[index % REVIEW_META.length];
+
   const code = getFlagCode(
     review.code || review.flag || review.country || meta.code
   );
@@ -294,7 +287,7 @@ const useAutoDragSlider = (speed = 0.85, refreshKey = 0) => {
       try {
         slider.releasePointerCapture?.(event.pointerId);
       } catch {
-        // Ignore release errors when pointer capture is not active.
+        // ignore
       }
 
       pauseManualControl(1000);
@@ -338,12 +331,14 @@ const useAutoDragSlider = (speed = 0.85, refreshKey = 0) => {
 
     const handlePointerEnter = () => {
       if (!canSlide()) return;
+
       state.isHovering = true;
       slider.classList.add("is-paused-by-user");
     };
 
     const handlePointerLeave = () => {
       if (!canSlide()) return;
+
       state.isHovering = false;
 
       if (!state.isPointerDown) {
@@ -497,6 +492,7 @@ export default function Home() {
     ...destinations,
     ...destinations,
   ];
+
   const packageSliderItems = [...packages, ...packages, ...packages];
   const topHotelSliderItems = [...topHotels, ...topHotels, ...topHotels];
   const featureSliderItems = [...featureCards, ...featureCards, ...featureCards];
@@ -655,7 +651,7 @@ export default function Home() {
   };
 
   const openDestinationFromHome = (item) => {
-    navigate("/destination", {
+    navigate(`/destinations?program=${item.programId}`, {
       state: {
         openProgramId: item.programId,
         openProgramName: item.name,
@@ -936,8 +932,8 @@ export default function Home() {
 
         {topHotels.length > 0 && (
           <p className="destinations-note">
-            Choose one of our selected hotels and view more details on the
-            hotels page.
+            Choose one of our selected hotels and view more details on the hotels
+            page.
           </p>
         )}
       </section>
