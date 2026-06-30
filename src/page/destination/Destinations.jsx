@@ -629,9 +629,12 @@ const PROGRAMS = [
 export default function Destinations() {
   const location = useLocation();
 
+  const [programs, setPrograms] = useState(PROGRAMS);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingSaving, setBookingSaving] = useState(false);
+  const [bookingAsAdmin, setBookingAsAdmin] = useState(false);
+  const [bookingAuthorized, setBookingAuthorized] = useState(false);
   const [bookingNotice, setBookingNotice] = useState(null);
   const [bookingForm, setBookingForm] = useState(getInitialBookingForm());
 
@@ -656,12 +659,33 @@ export default function Destinations() {
     setBookingNotice(null);
   };
 
-  const openBookingPopup = () => {
+  const openBookingPopup = async () => {
     if (!selectedProgram) return;
 
     setBookingForm(getInitialBookingForm(selectedProgram));
     setBookingNotice(null);
     setBookingOpen(true);
+    setBookingAuthorized(false);
+
+    try {
+      const response = await API.get("/auth/me", {
+        skipAuthRedirect: true,
+      });
+      const authUser = response.data?.user || response.data || {};
+      setBookingAsAdmin(
+        String(authUser.role || "").toLowerCase() === "admin"
+      );
+      setBookingAuthorized(true);
+    } catch (error) {
+      setBookingAsAdmin(false);
+      setBookingAuthorized(false);
+      setBookingNotice({
+        type: "error",
+        message:
+          error.response?.data?.error ||
+          "Please login or create an account before booking.",
+      });
+    }
   };
 
   const closeBookingPopup = () => {
@@ -683,6 +707,14 @@ export default function Destinations() {
 
     if (!selectedProgram) return;
 
+    if (!bookingAuthorized) {
+      setBookingNotice({
+        type: "error",
+        message: "Please login or create an account before booking.",
+      });
+      return;
+    }
+
     const fullName = bookingForm.fullName.trim();
     const email = bookingForm.email.trim();
     const phone = bookingForm.phone.trim();
@@ -702,7 +734,8 @@ export default function Destinations() {
     }
 
     const payload = {
-      type: "package",
+      type: "destination",
+      booking_type: "destination",
       packageName: selectedProgram.title,
       package_name: selectedProgram.title,
       route: selectedProgram.route,
@@ -719,6 +752,7 @@ export default function Destinations() {
       notes: bookingForm.notes,
 
       search_params: {
+        destinationId: selectedProgram.id,
         name: selectedProgram.title,
         backendName: selectedProgram.title,
         backend_name: selectedProgram.title,
@@ -743,7 +777,26 @@ export default function Destinations() {
     try {
       setBookingSaving(true);
 
-      await API.post("/reservations", payload);
+      if (bookingAsAdmin) {
+        await API.post("/admin/destinations/reservations", {
+          destinationId: selectedProgram.id,
+          destinationName: selectedProgram.title,
+          destinationCountry: selectedProgram.country || selectedProgram.stamp || "Egypt",
+          destinationLocation: selectedProgram.location || selectedProgram.route,
+          route: selectedProgram.route,
+          duration: selectedProgram.duration,
+          travelDate: bookingForm.travelDate,
+          roomType: bookingForm.roomType,
+          fullName,
+          email,
+          phone,
+          travelers: bookingForm.travelers,
+          notes: bookingForm.notes,
+          totalPrice: 0,
+        });
+      } else {
+        await API.post("/client/bookings", payload);
+      }
 
       setBookingNotice({
         type: "success",
@@ -758,12 +811,43 @@ export default function Destinations() {
     } catch (err) {
       setBookingNotice({
         type: "error",
-        message: err.response?.data?.error || "Unable to send booking request.",
+        message:
+          err.response?.data?.error ||
+          err.message ||
+          "Unable to send booking request.",
       });
     } finally {
       setBookingSaving(false);
     }
   };
+
+  useEffect(() => {
+    let active = true;
+
+    const loadPrograms = async () => {
+      try {
+        const response = await API.get("/destinations");
+        if (active && Array.isArray(response.data) && response.data.length > 0) {
+          const bundledPrograms = new Map(
+            PROGRAMS.map((program) => [program.id, program])
+          );
+          setPrograms(
+            response.data.map((program) => ({
+              ...(bundledPrograms.get(program.id) || {}),
+              ...program,
+            }))
+          );
+        }
+      } catch {
+        // Keep the bundled programs available if the API is temporarily offline.
+      }
+    };
+
+    loadPrograms();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -775,7 +859,7 @@ export default function Destinations() {
 
     if (!openProgramId && !openProgramName) return;
 
-    const foundProgram = PROGRAMS.find(
+    const foundProgram = programs.find(
       (program) =>
         program.id === openProgramId ||
         program.title === openProgramName ||
@@ -789,7 +873,7 @@ export default function Destinations() {
     }, 80);
 
     return () => clearTimeout(timer);
-  }, [location.key, location.search, location.state]);
+  }, [location.key, location.search, location.state, programs]);
 
   useEffect(() => {
     if (!selectedProgram && !bookingOpen) return;
@@ -828,7 +912,7 @@ export default function Destinations() {
 
             <div className="destination-hero-stats">
               <div>
-                <strong>{PROGRAMS.length}</strong>
+                <strong>{programs.length}</strong>
                 <span>Blocks</span>
               </div>
 
@@ -858,7 +942,7 @@ export default function Destinations() {
           </div>
 
           <div className="program-grid">
-            {PROGRAMS.map((program, index) => (
+            {programs.map((program, index) => (
               <article
                 className="program-card"
                 key={program.id || index}

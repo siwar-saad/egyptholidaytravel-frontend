@@ -10,6 +10,7 @@ import {
   FaImage,
   FaSave,
 } from "react-icons/fa";
+import API from "../../api";
 
 import "./Admin.css";
 
@@ -183,7 +184,26 @@ export default function AdminDestinations() {
   });
 
   useEffect(() => {
-    setDestinations(getDestinations());
+    let active = true;
+
+    const loadDestinations = async () => {
+      try {
+        const response = await API.get("/admin/destinations");
+        if (active) setDestinations((response.data || []).map(normalizeDestination));
+      } catch (error) {
+        if (active) {
+          showNotice(
+            "error",
+            error.response?.data?.error || "Unable to load destinations."
+          );
+        }
+      }
+    };
+
+    loadDestinations();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const showNotice = (type, message) => {
@@ -340,7 +360,7 @@ export default function AdminDestinations() {
       .filter(Boolean);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!form.title.trim()) {
@@ -358,7 +378,26 @@ export default function AdminDestinations() {
       return;
     }
 
-    const finalImages = form.images.length > 0 ? form.images : [defaultCover];
+    const finalImages = form.images;
+
+    let uploadedImages;
+    try {
+      uploadedImages = await Promise.all(
+        finalImages.map(async (image) => {
+          if (!String(image).startsWith("data:image/")) return image;
+          const response = await API.post("/admin/destinations/upload-image", {
+            image,
+          });
+          return response.data.image;
+        })
+      );
+    } catch (error) {
+      showNotice(
+        "error",
+        error.response?.data?.error || "Unable to upload destination image."
+      );
+      return;
+    }
 
     const destinationData = {
       id: editingId || makeDestinationId(),
@@ -367,8 +406,8 @@ export default function AdminDestinations() {
       title: form.title.trim(),
       duration: form.duration.trim(),
       location: form.location.trim(),
-      images: finalImages,
-      image: finalImages[0],
+      images: uploadedImages,
+      image: uploadedImages[0] || "",
       description: form.description.trim(),
       highlights: textToArray(form.highlightsText),
       included: textToArray(form.includedText),
@@ -382,43 +421,77 @@ export default function AdminDestinations() {
         .filter((day) => day.day && day.title),
     };
 
-    let nextList;
+    try {
+      const response = editingId
+        ? await API.put(`/admin/destinations/${editingId}`, destinationData)
+        : await API.post("/admin/destinations", destinationData);
 
-    if (editingId) {
-      nextList = destinations.map((item) =>
-        item.id === editingId ? destinationData : item
+      const savedDestination = normalizeDestination(response.data);
+      setDestinations((current) =>
+        editingId
+          ? current.map((item) =>
+              item.id === editingId ? savedDestination : item
+            )
+          : [savedDestination, ...current]
       );
-      showNotice("success", "Destination updated successfully.");
-    } else {
-      nextList = [destinationData, ...destinations];
-      showNotice("success", "New destination added successfully.");
+      showNotice(
+        "success",
+        editingId
+          ? "Destination updated successfully."
+          : "New destination added successfully."
+      );
+      closeModal();
+    } catch (error) {
+      showNotice(
+        "error",
+        error.response?.data?.error || "Unable to save destination."
+      );
     }
-
-    persist(nextList);
-    closeModal();
   };
 
-  const togglePublish = (destinationId) => {
-    const nextList = destinations.map((item) =>
-      item.id === destinationId
-        ? { ...item, isPublished: !item.isPublished }
-        : item
-    );
+  const togglePublish = async (destinationId) => {
+    const destination = destinations.find((item) => item.id === destinationId);
+    if (!destination) return;
 
-    persist(nextList);
-    showNotice("success", "Destination status changed.");
+    try {
+      const response = await API.put(
+        `/admin/destinations/${destinationId}/visibility`,
+        { isPublished: !destination.isPublished }
+      );
+      const updatedDestination = normalizeDestination(response.data);
+      setDestinations((current) =>
+        current.map((item) =>
+          item.id === destinationId ? updatedDestination : item
+        )
+      );
+      showNotice("success", "Destination status changed.");
+    } catch (error) {
+      showNotice(
+        "error",
+        error.response?.data?.error || "Unable to change destination status."
+      );
+    }
   };
 
-  const deleteDestination = (destinationId) => {
+  const deleteDestination = async (destinationId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this destination?"
     );
 
     if (!confirmDelete) return;
 
-    const nextList = destinations.filter((item) => item.id !== destinationId);
-    persist(nextList);
-    showNotice("success", "Destination deleted successfully.");
+    try {
+      await API.delete(`/admin/destinations/${destinationId}`);
+      setDestinations((current) =>
+        current.filter((item) => item.id !== destinationId)
+      );
+      showNotice("success", "Destination deleted successfully.");
+    } catch (error) {
+      showNotice(
+        "error",
+        error.response?.data?.error || "Unable to delete destination."
+      );
+    }
   };
 
   return (

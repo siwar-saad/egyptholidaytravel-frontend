@@ -342,36 +342,47 @@ export default function Reservations({ showSuccess }) {
   };
 
   const normalizeDestinationReservation = (booking, index) => {
+    const searchParams = booking.search_params || booking.searchParams || {};
+    const customerInfo = booking.customer_info || booking.customerInfo || {};
     const createdAt = booking.createdAt || booking.created_at || "";
 
     return {
       id: booking.id || `destination-${index}`,
       type: "destination",
 
-      client: booking.fullName || booking.client || "Client",
-      email: booking.email || "-",
-      phone: booking.phone || "-",
+      client:
+        customerInfo.fullName || customerInfo.full_name ||
+        booking.fullName || booking.client || "Client",
+      email: customerInfo.email || booking.email || "-",
+      phone: customerInfo.phone || booking.phone || "-",
 
       destinationName:
+        searchParams.name ||
+        searchParams.destinationName ||
         booking.destinationName ||
         booking.destination_name ||
         booking.title ||
         "Destination",
 
       destinationCountry:
-        booking.destinationCountry || booking.country || "Egypt",
+        searchParams.country || booking.destinationCountry || booking.country || "Egypt",
 
       destinationLocation:
+        searchParams.location || searchParams.route ||
         booking.destinationLocation || booking.location || "-",
 
-      duration: booking.duration || "",
-      date: booking.travelDate || booking.travel_date || booking.date || "-",
-      travelers: booking.travelers || "-",
-      roomType: booking.roomType || booking.room_type || "-",
+      duration: searchParams.duration || booking.duration || "",
+      date:
+        searchParams.travelDate || searchParams.travel_date ||
+        booking.travelDate || booking.travel_date || booking.date || "-",
+      travelers: customerInfo.travelers || booking.travelers || "-",
+      roomType:
+        searchParams.roomType || searchParams.room_type ||
+        booking.roomType || booking.room_type || "-",
       totalPrice: booking.totalPrice || booking.total_price || "",
       status: booking.status || "Pending",
-      notes: booking.notes || "",
-      createdBy: booking.createdBy || "Admin",
+      notes: customerInfo.notes || booking.notes || "",
+      createdBy: getCreatedBy(booking),
       createdDate: formatCreatedDate(createdAt),
       createdTime: formatCreatedTime(createdAt),
     };
@@ -381,32 +392,66 @@ export default function Reservations({ showSuccess }) {
     try {
       setLoading(true);
 
-      const [packageRes, hotelRes] = await Promise.all([
+      const [packageResult, hotelResult, destinationResult] =
+        await Promise.allSettled([
         API.get("/admin/reservations"),
         API.get("/admin/hotels/reservations"),
+        API.get("/admin/destinations/reservations"),
       ]);
 
-      const packageBookings = getArray(packageRes.data).map((booking, index) =>
-        normalizePackageReservation(booking, index)
+      const combinedReservationRows =
+        packageResult.status === "fulfilled"
+          ? getArray(packageResult.value.data)
+          : [];
+
+      const packageBookings = combinedReservationRows
+        .filter(
+          (booking) =>
+            (booking.booking_type || booking.type || "package") !==
+            "destination"
+        )
+        .map((booking, index) => normalizePackageReservation(booking, index));
+
+      const hotelBookings =
+        hotelResult.status === "fulfilled"
+          ? getArray(hotelResult.value.data).map((booking, index) =>
+              normalizeHotelReservation(booking, index)
+            )
+          : [];
+
+      const destinationRowsFromMain = combinedReservationRows.filter(
+        (booking) =>
+          (booking.booking_type || booking.type) === "destination"
+      );
+      const destinationRowsFromDedicatedEndpoint =
+        destinationResult.status === "fulfilled"
+          ? getArray(destinationResult.value.data)
+          : [];
+      const destinationRows = Array.from(
+        new Map(
+          [
+            ...destinationRowsFromMain,
+            ...destinationRowsFromDedicatedEndpoint,
+          ].map((booking) => [String(booking.id), booking])
+        ).values()
+      );
+      const destinationBookings = destinationRows.map((booking, index) =>
+        normalizeDestinationReservation(booking, index)
       );
 
-      const hotelBookings = getArray(hotelRes.data).map((booking, index) =>
-        normalizeHotelReservation(booking, index)
-      );
-
-      const destinationBookings = getStoredDestinationReservations().map(
-        (booking, index) => normalizeDestinationReservation(booking, index)
-      );
+      if (destinationResult.status === "rejected") {
+        console.log(
+          "Destination reservations error:",
+          destinationResult.reason?.response?.data ||
+            destinationResult.reason?.message
+        );
+      }
 
       setBookings([...packageBookings, ...hotelBookings, ...destinationBookings]);
     } catch (err) {
       console.log("Reservations error:", err.response?.data || err.message);
 
-      const destinationBookings = getStoredDestinationReservations().map(
-        (booking, index) => normalizeDestinationReservation(booking, index)
-      );
-
-      setBookings(destinationBookings);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -414,17 +459,31 @@ export default function Reservations({ showSuccess }) {
 
   const fetchOptions = async () => {
     try {
-      const [packageRes, hotelRes] = await Promise.all([
+      const [packageResult, hotelResult, destinationResult] =
+        await Promise.allSettled([
         API.get("/admin/packages"),
         API.get("/hotels"),
+        API.get("/admin/destinations"),
       ]);
 
-      setPackages(getArray(packageRes.data));
-      setHotels(getArray(hotelRes.data));
-      setDestinations(getStoredDestinations());
+      setPackages(
+        packageResult.status === "fulfilled"
+          ? getArray(packageResult.value.data)
+          : []
+      );
+      setHotels(
+        hotelResult.status === "fulfilled"
+          ? getArray(hotelResult.value.data)
+          : []
+      );
+      setDestinations(
+        destinationResult.status === "fulfilled"
+          ? getArray(destinationResult.value.data)
+          : []
+      );
     } catch (err) {
       console.log("Reservation options error:", err.response?.data || err.message);
-      setDestinations(getStoredDestinations());
+      setDestinations([]);
     }
   };
 
@@ -677,32 +736,39 @@ export default function Reservations({ showSuccess }) {
     return true;
   };
 
-  const createDestinationReservation = () => {
+  const createDestinationReservation = async () => {
     const payload = buildDestinationPayload();
-    const saved = getStoredDestinationReservations();
-
-    saveStoredDestinationReservations([payload, ...saved]);
-
-    notify("Destination reservation created successfully.");
-    closeForm();
-    fetchReservations();
+    try {
+      setSaving(true);
+      await API.post("/admin/destinations/reservations", payload);
+      notify("Destination reservation created successfully.");
+      closeForm();
+      fetchReservations();
+    } catch (err) {
+      notify(err.response?.data?.error || "Unable to create destination reservation.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const editDestinationReservation = () => {
+  const editDestinationReservation = async () => {
     if (!selectedBooking) return;
 
     const payload = buildDestinationPayload();
-    const saved = getStoredDestinationReservations();
-
-    const nextList = saved.map((item) =>
-      String(item.id) === String(selectedBooking.id) ? payload : item
-    );
-
-    saveStoredDestinationReservations(nextList);
-
-    notify("Destination reservation updated successfully.");
-    closeForm();
-    fetchReservations();
+    try {
+      setSaving(true);
+      await API.put(
+        `/admin/destinations/reservations/${selectedBooking.id}`,
+        payload
+      );
+      notify("Destination reservation updated successfully.");
+      closeForm();
+      fetchReservations();
+    } catch (err) {
+      notify(err.response?.data?.error || "Unable to update destination reservation.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const createReservation = async () => {
@@ -713,7 +779,7 @@ export default function Reservations({ showSuccess }) {
     const isDestination = form.type === "destination";
 
     if (isDestination) {
-      createDestinationReservation();
+      await createDestinationReservation();
       return;
     }
 
@@ -744,7 +810,7 @@ export default function Reservations({ showSuccess }) {
     if (!validateForm()) return;
 
     if (selectedBooking.type === "destination") {
-      editDestinationReservation();
+      await editDestinationReservation();
       return;
     }
 
@@ -778,32 +844,7 @@ export default function Reservations({ showSuccess }) {
     }
   };
 
-  const updateDestinationReservationStatus = (booking, status) => {
-    const saved = getStoredDestinationReservations();
-
-    const nextList = saved.map((item) =>
-      String(item.id) === String(booking.id) ? { ...item, status } : item
-    );
-
-    saveStoredDestinationReservations(nextList);
-
-    setBookings((prev) =>
-      prev.map((item) =>
-        item.id === booking.id && item.type === "destination"
-          ? { ...item, status }
-          : item
-      )
-    );
-
-    notify("Destination reservation status updated.");
-  };
-
   const updateReservationStatus = async (booking, status) => {
-    if (booking.type === "destination") {
-      updateDestinationReservationStatus(booking, status);
-      return;
-    }
-
     const endpoint =
       booking.type === "hotel"
         ? `/admin/hotels/reservations/${booking.id}/status`
