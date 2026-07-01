@@ -55,6 +55,7 @@ const getHotelUniqueId = (hotel, index = 0) => {
   );
 };
 
+/* ✅ Top Hotels: 3 only */
 const selectTopHotelsByDestination = (hotelsData = []) => {
   const destinationsWanted = [
     {
@@ -68,10 +69,6 @@ const selectTopHotelsByDestination = (hotelsData = []) => {
     {
       label: "Hurghada",
       keywords: ["hurghada"],
-    },
-    {
-      label: "Dahab",
-      keywords: ["dahab"],
     },
   ];
 
@@ -102,18 +99,18 @@ const selectTopHotelsByDestination = (hotelsData = []) => {
     }
   });
 
-  if (selectedHotels.length < 4) {
+  if (selectedHotels.length < 3) {
     hotelsData.forEach((hotel, index) => {
       const hotelId = getHotelUniqueId(hotel, index);
 
-      if (!usedIds.has(hotelId) && selectedHotels.length < 4) {
+      if (!usedIds.has(hotelId) && selectedHotels.length < 3) {
         usedIds.add(hotelId);
         selectedHotels.push(hotel);
       }
     });
   }
 
-  return selectedHotels.slice(0, 4);
+  return selectedHotels.slice(0, 3);
 };
 
 const REVIEW_META = [
@@ -494,7 +491,10 @@ export default function Home() {
   ];
 
   const packageSliderItems = [...packages, ...packages, ...packages];
+
+  /* ✅ Because topHotels now has max 3, this slider will show only 3 real hotels */
   const topHotelSliderItems = [...topHotels, ...topHotels, ...topHotels];
+
   const featureSliderItems = [...featureCards, ...featureCards, ...featureCards];
 
   useEffect(() => {

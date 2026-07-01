@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, RuseState } from "react";
 
 const DESTINATION_RESERVATIONS_KEY = "egypt_holiday_destination_reservations";
 
