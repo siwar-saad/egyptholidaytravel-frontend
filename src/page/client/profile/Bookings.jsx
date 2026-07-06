@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-import { useEffect, RuseState } from "react";
-
-const DESTINATION_RESERVATIONS_KEY = "egypt_holiday_destination_reservations";
-=======
 import { useState } from "react";
->>>>>>> e38e285e3cbd769c496a2e66562669fe454fb54a
 
 const badTitles = [
   "package",
