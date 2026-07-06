@@ -11,11 +11,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: ' https://egyptholidaytravel.com/api',
+        target: ' https://egyptholidaytravel.com',
         changeOrigin: true
       },
       '/images': {
-        target: ' https://egyptholidaytravel.com/api',
+        target: ' https://egyptholidaytravel.com',
         changeOrigin: true
       }
     }
